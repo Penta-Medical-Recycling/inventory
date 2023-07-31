@@ -1,0 +1,21 @@
+#root {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 2rem;
+  text-align: center;
+}
+
+#cardDiv {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-evenly;
+}
+
+#cardDiv .card {
+  width: 300px;
+  margin: 20px
+}
+
+#penta-title {
+  margin: 150px auto 20px auto;
+}
