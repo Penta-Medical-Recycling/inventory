@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 
-const CardLister = () => {
+const CardLister = ({cartCount, setCartCount}) => {
   const [data, setData] = useState([]);
   const apiKey = "keyi3gjKvW7SaqhE4";
   const baseId = "appLiJPf3Iykl3Yui";
@@ -72,23 +72,25 @@ const CardLister = () => {
                   <p>STATUS:{item.fields["Shipment Status"]}</p>
                   {!localStorage.getItem([item.fields["Item ID"]]) && button ? (
                     <button
-                      className="button"
+                      className="button" style={{backgroundColor: '#78d3fb', color: 'white'}}
                       onClick={() => {
                         localStorage.setItem(
                           item.fields["Item ID"],
                           JSON.stringify(item.fields)
                         );
                         setButton(button + 1);
+                        setCartCount(cartCount + 1)
                       }}
                     >
                       Add to cart
                     </button>
                   ) : (
                     <button
-                      className="button"
+                      className="button" style={{backgroundColor: '#ff5c47', color: 'white'}}
                       onClick={() => {
                         localStorage.removeItem(item.fields["Item ID"]);
                         setButton(button + 1);
+                        setCartCount(cartCount - 1)
                       }}
                     >
                       Remove From Cart
