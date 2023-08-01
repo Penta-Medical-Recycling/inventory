@@ -1,12 +1,12 @@
 import CartLister from "../Components/CartLister";
 
-function Cart() {
+function Cart({cartCount, setCartCount}) {
   return (
     <>
       <div id="text-section">
         <h1>CART PAGE</h1>
       </div>
-      <CartLister />
+      <CartLister cartCount={cartCount} setCartCount={setCartCount}/>
     </>
   );
 }

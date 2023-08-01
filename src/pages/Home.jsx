@@ -1,6 +1,6 @@
 import CardLister from '../Components/CardLister'
 
-function Home() {
+function Home({cartCount, setCartCount}) {
 
   return (
     <>
@@ -22,7 +22,7 @@ function Home() {
         </div>
         <p className='my-6'>If you would like to download a copy of the current page click the icon to the right of the search bar.</p>
       </div>
-      <CardLister />
+      <CardLister cartCount={cartCount} setCartCount={setCartCount}/>
     </>
   )
 }

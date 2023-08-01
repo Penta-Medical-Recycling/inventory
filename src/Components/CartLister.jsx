@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 
-const CartLister = () => {
+const CartLister = ({cartCount, setCartCount}) => {
   const [button, setButton] = useState(1);
 
   return (
@@ -31,6 +31,7 @@ const CartLister = () => {
                     onClick={() => {
                       localStorage.removeItem(item["Item ID"]);
                       setButton(button + 1);
+                      setCartCount( cartCount - 1)
                     }}
                   >
                     Remove From Cart
