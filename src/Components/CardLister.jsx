@@ -38,20 +38,29 @@ const CardLister = () => {
     });
   }, []);
 
+  // const addToCart = (id) => {
+
+  // }
+  
   return (
     <div id='cardDiv'>
       {data.map((item) => (
-        <div className="card" key={item.id}>
+        item.fields.SKU && item.fields['Shipment Status'] === undefined &&
+        (<div className="card" key={item.id}>
           <div className="card-content">
             <div className="content">
               <p>ID: {item.fields['Item ID']}</p>
-              <p>Name: {item.fields['Description (from SKU)']}</p>
+              <p>Description: {item.fields['Description (from SKU)']}</p>
               {item.fields['Size']? <p>Size: {item.fields['Size']}</p>: <></>}
               {item.fields['Model/Type']? <p>Model: {item.fields['Model/Type']}</p>: <></>}
               {item.fields['Manufacturer']? <p>Manufacturer: {item.fields['Manufacturer']}</p>: <></>}
+              <p>STATUS:{item.fields['Shipment Status']}</p>
+              <button className='button' onClick={() => {
+                localStorage.setItem(item.fields['Item ID'], JSON.stringify(item.fields));
+                console.log(localStorage.getItem(item.fields['Item ID']))}}>Add to cart</button>
             </div>
-          </div>
-        </div>
+          </div>   
+        </div>)
       ))}
     </div>
   );
