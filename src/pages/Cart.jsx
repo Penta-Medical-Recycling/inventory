@@ -1,9 +1,14 @@
-const Cart = () => {
+import CartLister from "../Components/CartLister";
+
+function Cart() {
   return (
-    <div>
-      <h1>CART PAGE</h1>
-    </div>
-  )
+    <>
+      <div id="text-section">
+        <h1>CART PAGE</h1>
+      </div>
+      <CartLister />
+    </>
+  );
 }
 
-export default Cart
+export default Cart;
