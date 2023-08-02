@@ -8,9 +8,7 @@ const CartLister = ({ cartCount, setCartCount }) => {
 
   const handleSubmit = (event) => {
     event.preventDefault();
-    // const encodedTableName = encodeURIComponent(tableName);
     const url = `https://api.airtable.com/v0/${BaseID}/${tableName}`;
-    // const url = `https://api.airtable.com/v0/{baseId}/{tableIdOrName}`;
 
     const data = {
       records: [
