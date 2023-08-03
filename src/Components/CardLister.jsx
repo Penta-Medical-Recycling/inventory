@@ -15,23 +15,25 @@ const CardLister = ({ cartCount, setCartCount }) => {
   const skus = ["RF"]; // add SKUs from frontend
   const manufacturers = ["Ottobock"]; // add manufacturers from frontend
 
-  if (skus.length > 0 || manufacturers.length > 0) {
-    url += "?filterByFormula=OR(";
+  // if (skus.length > 0 || manufacturers.length > 0) {
+  //   url += "?filterByFormula=OR(";
 
-    if (skus.length > 0) {
-      url += `${skus.map((sku) => `{SKU}='${sku}'`).join(",")}`;
-      if (manufacturers.length !== 0) {
-        url += ",";
-      }
-    }
-    if (manufacturers.length > 0) {
-      url += `${manufacturers
-        .map((manufacturer) => `{Manufacturer}='${manufacturer}'`)
-        .join(",")}`;
-    }
-    url += ")";
-  }
-  console.log(url);
+  //   if (skus.length > 0) {
+  //     url += `${skus.map((sku) => `{SKU}='${sku}'`).join(",")}`;
+  //     if (manufacturers.length !== 0) {
+  //       url += ",";
+  //     }
+  //   }
+  //   if (manufacturers.length > 0) {
+  //     url += `${manufacturers
+  //       .map((manufacturer) => `{Manufacturer}='${manufacturer}'`)
+  //       .join(",")}`;
+  //   }
+  //   url += ")";
+  // }
+  // console.log(url);
+
+  //commenting out the query builder for now.
 
   async function fetchData() {
     try {
