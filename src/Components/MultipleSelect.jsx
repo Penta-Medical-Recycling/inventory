@@ -120,22 +120,13 @@ const options = [
 
 const MultipleSelect = () => {
   const [selected, setSelected] = useState([]);
-  const [selectedValues, setSelectedValues] = useState(new Set());
-
-  useEffect(() => {
-    const newSelectedValues = new Set(selected.map((option) => option.value));
-    setSelectedValues(newSelectedValues);
-  }, [selected])
-
-  useEffect(() => {
-    console.log(selectedValues);
-  }, [selectedValues]);
+  const selectedValues = selected.map((option) => option.value)
 
   return (
     <div style={{ width: '80%', margin: '0 10px' }}>
       <h1>Select Manufacturer</h1>
-      {/* <pre>{JSON.stringify(selected)}</pre>
-      <pre>{JSON.stringify(Array.from(selectedValues))}</pre> */}
+      {/* <pre>{JSON.stringify(selected)}</pre>*/
+      <pre>{JSON.stringify(selectedValues)}</pre> }
       <MultiSelect
         options={options}
         value={selected}
