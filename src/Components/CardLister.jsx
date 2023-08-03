@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 
-const CardLister = ({ cartCount, setCartCount }) => {
+const CardLister = ({ cartCount, setCartCount, selected, setSelected }) => {
   const [data, setData] = useState([]);
   const apiKey = "keyi3gjKvW7SaqhE4";
   const baseId = "appLiJPf3Iykl3Yui";
@@ -12,8 +12,8 @@ const CardLister = ({ cartCount, setCartCount }) => {
 
   let url = `https://api.airtable.com/v0/${baseId}/${encodedTableName}`;
 
-  const skus = ["RF"]; // add SKUs from frontend
-  const manufacturers = ["Ottobock"]; // add manufacturers from frontend
+  // const skus = []; // add SKUs from frontend
+  // const manufacturers = selected.map((option) => option.value); // add manufacturers from frontend
 
   // if (skus.length > 0 || manufacturers.length > 0) {
   //   url += "?filterByFormula=OR(";
@@ -31,11 +31,30 @@ const CardLister = ({ cartCount, setCartCount }) => {
   //   }
   //   url += ")";
   // }
-  // console.log(url);
-
-  //commenting out the query builder for now.
 
   async function fetchData() {
+    const skus = []; // add SKUs from frontend
+    const manufacturers = selected.map((option) => option.value); // add manufacturers from frontend
+
+    if (skus.length > 0 || manufacturers.length > 0) {
+      url += "?filterByFormula=OR(";
+
+      if (skus.length > 0) {
+        url += `${skus.map((sku) => `{SKU}='${sku}'`).join(",")}`;
+        if (manufacturers.length !== 0) {
+          url += ",";
+        }
+      }
+      if (manufacturers.length > 0) {
+        url += `${manufacturers
+          .map((manufacturer) => `{Manufacturer}='${manufacturer}'`)
+          .join(",")}`;
+      }
+      url += ")";
+    }
+
+    console.log(url);
+
     try {
       const response = await fetch(url, {
         headers: {
@@ -48,7 +67,6 @@ const CardLister = ({ cartCount, setCartCount }) => {
       }
 
       const data = await response.json();
-      // console.log(url);
       return data.records;
     } catch (error) {
       console.error("Error fetching data:", error);
@@ -61,7 +79,7 @@ const CardLister = ({ cartCount, setCartCount }) => {
       setData(records);
       console.log(records);
     });
-  }, []);
+  }, [selected]);
 
   return (
     <div id="cardDiv">

@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect } from "react";
 import { MultiSelect } from "react-multi-select-component";
 const options = [
   { label: "3M", value: "3M" },
@@ -6,7 +6,10 @@ const options = [
   { label: "Aircast", value: "Aircast" },
   { label: "Allard", value: "Allard" },
   { label: "Alps", value: "Alps" },
-  { label: "American Prosthetic Components", value: "American Prosthetic Components" },
+  {
+    label: "American Prosthetic Components",
+    value: "American Prosthetic Components",
+  },
   { label: "APC", value: "APC" },
   { label: "Aryse", value: "Aryse" },
   { label: "ASAP", value: "ASAP" },
@@ -48,7 +51,7 @@ const options = [
   { label: "Freeman", value: "Freeman" },
   { label: "GPF", value: "GPF" },
   { label: "Hanger", value: "Hanger" },
-  { label: "Hely & Weber", value: "Hely & Weber" },
+  { label: "Hely & Weber", value: "Hely %26 Weber" },
   { label: "Hosmer", value: "Hosmer" },
   { label: "IN Prosthetic Components", value: "In Prosthetic Components" },
   { label: "Jack Mart", value: "Jack Mart" },
@@ -95,12 +98,12 @@ const options = [
   { label: "Sketchers", value: "Sketchers" },
   { label: "Spalding", value: "Spalding" },
   { label: "SPS", value: "SPS" },
-  { label: "SRT P&O", value: "SRT P&O" },
-  { label: "ST&G", value: "ST&G" },
+  { label: "SRT P&O", value: "SRT P%26O" },
+  { label: "ST&G", value: "ST%26G" },
   { label: "Streifeneder", value: "Streifeneder" },
   { label: "Swede-O", value: "Swede-O" },
   { label: "Syncor", value: "Syncor" },
-  { label: "Teh Lin Pros. & Ortho.", value: "Teh Lin Pros. & Ortho." },
+  { label: "Teh Lin Pros. & Ortho.", value: "Teh Lin Pros. %26 Ortho." },
   { label: "Thuasne", value: "Thuasne" },
   { label: "TiMed", value: "TiMed" },
   { label: "Titan", value: "TItan" },
@@ -115,25 +118,31 @@ const options = [
   { label: "Various", value: "Various" },
   { label: "Willow Wood", value: "Willow Wood" },
   { label: "Win Walker", value: "Win Walker" },
-  { label: "Wright & Filipps", value: "Wright & Filipps" }
+  { label: "Wright & Filipps", value: "Wright %26 Filipps" },
 ];
 
-const MultipleSelect = () => {
-  const [selected, setSelected] = useState([]);
-  const selectedValues = selected.map((option) => option.value)
-
+const MultipleSelect = ({ selected, setSelected }) => {
   return (
-    <div style={{ width: '80%', margin: '0 10px' }}>
-      <h1>Select Manufacturer</h1>
-      {/* <pre>{JSON.stringify(selected)}</pre>*/
-      <pre>{JSON.stringify(selectedValues)}</pre> }
-      <MultiSelect
-        options={options}
-        value={selected}
-        onChange={setSelected}
-        labelledBy="Select"
-      />
-    </div>
+    <>
+      <div style={{ width: "80%", margin: "0 10px" }}>
+        <h1>Select Manufacturer</h1>
+        <MultiSelect
+          options={options}
+          value={selected}
+          onChange={setSelected}
+          labelledBy="Select"
+        />
+      </div>
+      <div style={{ width: "80%", margin: "0 10px" }}>
+        <h1>Select Manufacturer</h1>
+        <MultiSelect
+          options={options}
+          value={selected}
+          onChange={setSelected}
+          labelledBy="Select"
+        />
+      </div>
+    </>
   );
 };
 
