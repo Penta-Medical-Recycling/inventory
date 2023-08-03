@@ -3,7 +3,6 @@ const SideBar = ({isActive, setIsActive}) => {
   const activeToggle = () => {
     setIsActive(!isActive)
   };
-  const options = ['Option 1', 'Option 2', 'Option 3', 'Option 4'];
   return (
     <div id='side-bar' className={isActive? 'is-active': ''}>
       <div id='side-bar-top'>
