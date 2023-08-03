@@ -5,8 +5,8 @@ function Home({
   setCartCount,
   isActive,
   setIsActive,
-  selected,
-  setSelected,
+  selectedManufacturer,
+  setSelectedManufacturer,
 }) {
   const activeToggle = () => {
     setIsActive(!isActive);
@@ -81,8 +81,8 @@ function Home({
       <CardLister
         cartCount={cartCount}
         setCartCount={setCartCount}
-        selected={selected}
-        setSelected={setSelected}
+        selectedManufacturer={selectedManufacturer}
+        setSelectedManufacturer={setSelectedManufacturer}
       />
     </>
   );

@@ -1,6 +1,11 @@
 import React, { useState, useEffect } from "react";
 
-const CardLister = ({ cartCount, setCartCount, selected, setSelected }) => {
+const CardLister = ({
+  cartCount,
+  setCartCount,
+  selectedManufacturer,
+  setSelectedManufacturer,
+}) => {
   const [data, setData] = useState([]);
   const apiKey = "keyi3gjKvW7SaqhE4";
   const baseId = "appLiJPf3Iykl3Yui";
@@ -13,7 +18,7 @@ const CardLister = ({ cartCount, setCartCount, selected, setSelected }) => {
   let url = `https://api.airtable.com/v0/${baseId}/${encodedTableName}`;
 
   // const skus = []; // add SKUs from frontend
-  // const manufacturers = selected.map((option) => option.value); // add manufacturers from frontend
+  // const manufacturers = selectedManufacturer.map((option) => option.value); // add manufacturers from frontend
 
   // if (skus.length > 0 || manufacturers.length > 0) {
   //   url += "?filterByFormula=OR(";
@@ -34,7 +39,7 @@ const CardLister = ({ cartCount, setCartCount, selected, setSelected }) => {
 
   async function fetchData() {
     const skus = []; // add SKUs from frontend
-    const manufacturers = selected.map((option) => option.value); // add manufacturers from frontend
+    const manufacturers = selectedManufacturer.map((option) => option.value); // add manufacturers from frontend
 
     if (skus.length > 0 || manufacturers.length > 0) {
       url += "?filterByFormula=OR(";
@@ -79,7 +84,7 @@ const CardLister = ({ cartCount, setCartCount, selected, setSelected }) => {
       setData(records);
       console.log(records);
     });
-  }, [selected]);
+  }, [selectedManufacturer]);
 
   return (
     <div id="cardDiv">

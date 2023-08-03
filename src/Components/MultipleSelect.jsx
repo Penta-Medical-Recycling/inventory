@@ -121,15 +121,142 @@ const options = [
   { label: "Wright & Filipps", value: "Wright %26 Filipps" },
 ];
 
-const MultipleSelect = ({ selected, setSelected }) => {
+const options2 = [
+  { label: "AAFO", value: "AAFO" },
+  { label: "ADB", value: "ADB" },
+  { label: "ADU", value: "ADU" },
+  { label: "AFT", value: "AFT" },
+  { label: "AKA", value: "AKA" },
+  { label: "ANCH", value: "ANCH" },
+  { label: "ANK", value: "ANK" },
+  { label: "ANKBLK", value: "ANKBLK" },
+  { label: "ANKL", value: "ANKL" },
+  { label: "APD", value: "APD" },
+  { label: "ARA", value: "ARA" },
+  { label: "ARM", value: "ARM" },
+  { label: "ASA", value: "ASA" },
+  { label: "ASAP", value: "ASAP" },
+  { label: "ASC", value: "ASC" },
+  { label: "ATC", value: "ATC" },
+  { label: "ATST", value: "ATST" },
+  { label: "BB", value: "BB" },
+  { label: "BBALL", value: "BBALL" },
+  { label: "BKARD", value: "BKARD" },
+  { label: "BP", value: "BP" },
+  { label: "BRACE-F", value: "BRACE-F" },
+  { label: "BSUP", value: "BSUP" },
+  { label: "CASTL", value: "CASTL" },
+  { label: "CIRC", value: "CIRC" },
+  { label: "CL", value: "CL" },
+  { label: "COSCOV", value: "COSCOV" },
+  { label: "CROR", value: "CROR" },
+  { label: "CRUTCH", value: "CRUTCH" },
+  { label: "CTSB", value: "CTSB" },
+  { label: "EXP", value: "EXP" },
+  { label: "FER", value: "FER" },
+  { label: "GLS", value: "GLS" },
+  { label: "GSHEET", value: "GSHEET" },
+  { label: "HANDS-C", value: "HANDS-C" },
+  { label: "HIPP", value: "HIPP" },
+  { label: "HJ", value: "HJ" },
+  { label: "HPIL", value: "HPIL" },
+  { label: "INSOLE", value: "INSOLE" },
+  { label: "KB", value: "KB" },
+  { label: "KBL", value: "KBL" },
+  { label: "KBR", value: "KBR" },
+  { label: "KC", value: "KC" },
+  { label: "KCAP", value: "KCAP" },
+  { label: "KH", value: "KH" },
+  { label: "KIMB", value: "KIMB" },
+  { label: "KMAN", value: "KMAN" },
+  { label: "KMECH", value: "KMECH" },
+  { label: "KN", value: "KN" },
+  { label: "KP", value: "KP" },
+  { label: "KUID", value: "KUID" },
+  { label: "LAK", value: "LAK" },
+  { label: "LANY", value: "LANY" },
+  { label: "LB", value: "LB" },
+  { label: "LBK", value: "LBK" },
+  { label: "LBL", value: "LBL" },
+  { label: "LBR", value: "LBR" },
+  { label: "LDUM", value: "LDUM" },
+  { label: "Leg", value: "Storage Rack Leg Storage Rack" },
+  { label: "LF", value: "LF" },
+  { label: "LFP", value: "LFP" },
+  { label: "LFS", value: "LFS" },
+  { label: "LL", value: "LL" },
+  { label: "LSHELL", value: "LSHELL" },
+  { label: "LSHOE", value: "LSHOE" },
+  { label: "LSKT", value: "LSKT" },
+  { label: "LSP", value: "LSP" },
+  { label: "LUMB", value: "LUMB" },
+  { label: "MCL", value: "MCL" },
+  { label: "MISC", value: "MISC" },
+  { label: "MMED", value: "MMED" },
+  { label: "MOD", value: "MOD" },
+  { label: "NLS", value: "NLS" },
+  { label: "OBH", value: "OBH" },
+  { label: "OP", value: "OP" },
+  { label: "PIN", value: "PIN" },
+  { label: "PYAPD", value: "PYAPD" },
+  { label: "PYC", value: "PYC" },
+  { label: "PYIC", value: "PYIC" },
+  { label: "PYL", value: "PYL" },
+  { label: "PYS", value: "PYS" },
+  { label: "RAFO", value: "RAFO" },
+  { label: "RAK", value: "RAK" },
+  { label: "RBK", value: "RBK" },
+  { label: "RF", value: "RF" },
+  { label: "RFP", value: "RFP" },
+  { label: "RFS", value: "RFS" },
+  { label: "RH", value: "RH" },
+  { label: "RHC", value: "RHC" },
+  { label: "RNECK", value: "RNECK" },
+  { label: "RSHELL", value: "RSHELL" },
+  { label: "RSHOE", value: "RSHOE" },
+  { label: "RUN", value: "RUN" },
+  { label: "SBELT", value: "SBELT" },
+  { label: "SCON", value: "SCON" },
+  { label: "SCREW", value: "SCREW" },
+  { label: "SHOE", value: "SHOE" },
+  { label: "SIMB", value: "SIMB" },
+  { label: "SKSL", value: "SKSL" },
+  { label: "SKT", value: "SKT" },
+  { label: "SKT-C", value: "SKT-C" },
+  { label: "SL", value: "SL" },
+  { label: "SOCK", value: "SOCK" },
+  { label: "SP", value: "SP" },
+  { label: "SR", value: "SR" },
+  { label: "SRL", value: "SRL" },
+  { label: "SSG", value: "SSG" },
+  { label: "SSL", value: "SSL" },
+  { label: "SSN", value: "SSN" },
+  { label: "STSH", value: "STSH" },
+  { label: "TFR", value: "TFR" },
+  { label: "TOR", value: "TOR" },
+  { label: "TR", value: "TR" },
+  { label: "UAF", value: "UAF" },
+  { label: "UEL", value: "UEL" },
+  { label: "UF", value: "UF" },
+  { label: "UFP", value: "UFP" },
+  { label: "VAC", value: "VAC" },
+  { label: "VIP", value: "VIP" },
+  { label: "VLV", value: "VLV" },
+  { label: "VLVP", value: "VLVP" },
+  { label: "VOID", value: "VOID" },
+  { label: "WBOOT", value: "WBOOT" },
+  { label: "WRST", value: "WRST" },
+];
+
+const MultipleSelect = ({ selectedManufacturer, setSelectedManufacturer }) => {
   return (
     <>
       <div style={{ width: "80%", margin: "0 10px" }}>
         <h1>Select Manufacturer</h1>
         <MultiSelect
           options={options}
-          value={selected}
-          onChange={setSelected}
+          value={selectedManufacturer}
+          onChange={setSelectedManufacturer}
           labelledBy="Select"
         />
       </div>
@@ -137,8 +264,8 @@ const MultipleSelect = ({ selected, setSelected }) => {
         <h1>Select Manufacturer</h1>
         <MultiSelect
           options={options}
-          value={selected}
-          onChange={setSelected}
+          value={selectedManufacturer}
+          onChange={setSelectedManufacturer}
           labelledBy="Select"
         />
       </div>

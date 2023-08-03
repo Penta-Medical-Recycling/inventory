@@ -1,5 +1,10 @@
 import MultipleSelect from "./MultipleSelect";
-const SideBar = ({ isActive, setIsActive, selected, setSelected }) => {
+const SideBar = ({
+  isActive,
+  setIsActive,
+  selectedManufacturer,
+  setSelectedManufacturer,
+}) => {
   const activeToggle = () => {
     setIsActive(!isActive);
   };
@@ -12,7 +17,10 @@ const SideBar = ({ isActive, setIsActive, selected, setSelected }) => {
         </p>
       </div>
       <hr style={{ width: "80%", margin: "10px auto" }}></hr>
-      <MultipleSelect selected={selected} setSelected={setSelected} />
+      <MultipleSelect
+        selectedManufacturer={selectedManufacturer}
+        setSelectedManufacturer={setSelectedManufacturer}
+      />
     </div>
   );
 };

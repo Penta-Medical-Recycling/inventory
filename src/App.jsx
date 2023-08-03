@@ -8,14 +8,14 @@ import SideBar from "./Components/SideBar";
 function App() {
   const [cartCount, setCartCount] = useState(localStorage.length);
   const [isActive, setIsActive] = useState(false);
-  const [selected, setSelected] = useState([]);
+  const [selectedManufacturer, setSelectedManufacturer] = useState([]);
   return (
     <>
       <SideBar
         isActive={isActive}
         setIsActive={setIsActive}
-        selected={selected}
-        setSelected={setSelected}
+        selectedManufacturer={selectedManufacturer}
+        setSelectedManufacturer={setSelectedManufacturer}
       />
       <NavBar cartCount={cartCount} />
       <Routes>
@@ -27,8 +27,8 @@ function App() {
               setCartCount={setCartCount}
               isActive={isActive}
               setIsActive={setIsActive}
-              selected={selected}
-              setSelected={setSelected}
+              selectedManufacturer={selectedManufacturer}
+              setSelectedManufacturer={setSelectedManufacturer}
             />
           }
         ></Route>
