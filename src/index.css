@@ -99,7 +99,7 @@ body {
   z-index: 6;
 }
 
-.is-active {
+.is-filter-active {
   box-shadow: 0 0 0 99999px rgba(0, 0, 0, .5);
   margin-left: 50vw;
 }

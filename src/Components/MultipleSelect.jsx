@@ -180,7 +180,7 @@ const options2 = [
   { label: "LBL", value: "LBL" },
   { label: "LBR", value: "LBR" },
   { label: "LDUM", value: "LDUM" },
-  { label: "Leg", value: "Storage Rack Leg Storage Rack" },
+  { label: "Leg Storage Rack", value: "Leg Storage Rack" },
   { label: "LF", value: "LF" },
   { label: "LFP", value: "LFP" },
   { label: "LFS", value: "LFS" },
@@ -248,10 +248,10 @@ const options2 = [
   { label: "WRST", value: "WRST" },
 ];
 
-const MultipleSelect = ({ selectedManufacturer, setSelectedManufacturer }) => {
+const MultipleSelect = ({ selectedManufacturer, setSelectedManufacturer, selectedSKU, setSelectedSKU }) => {
   return (
     <>
-      <div style={{ width: "80%", margin: "0 10px" }}>
+      <div style={{ width: "80%", margin: "0 20px 20px 20px" }}>
         <h1>Select Manufacturer</h1>
         <MultiSelect
           options={options}
@@ -259,13 +259,13 @@ const MultipleSelect = ({ selectedManufacturer, setSelectedManufacturer }) => {
           onChange={setSelectedManufacturer}
           labelledBy="Select"
         />
-      </div>
-      <div style={{ width: "80%", margin: "0 10px" }}>
-        <h1>Select Manufacturer</h1>
+      </div> 
+      <div style={{ width: "80%", margin: "0 20px 20px 20px" }}>
+        <h1>Select SKU</h1>
         <MultiSelect
-          options={options}
-          value={selectedManufacturer}
-          onChange={setSelectedManufacturer}
+          options={options2}
+          value={selectedSKU}
+          onChange={setSelectedSKU}
           labelledBy="Select"
         />
       </div>
