@@ -7,6 +7,8 @@ function Home({
   setIsActive,
   selectedManufacturer,
   setSelectedManufacturer,
+  selectedSKU,
+  setSelectedSKU
 }) {
   const activeToggle = () => {
     setIsActive(!isActive);
@@ -83,6 +85,8 @@ function Home({
         setCartCount={setCartCount}
         selectedManufacturer={selectedManufacturer}
         setSelectedManufacturer={setSelectedManufacturer}
+        selectedSKU={selectedSKU}
+        setSelectedSKU={setSelectedSKU}
       />
     </>
   );

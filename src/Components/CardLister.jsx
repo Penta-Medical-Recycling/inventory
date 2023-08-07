@@ -5,6 +5,8 @@ const CardLister = ({
   setCartCount,
   selectedManufacturer,
   setSelectedManufacturer,
+  selectedSKU,
+  setSelectedSKU
 }) => {
   const [data, setData] = useState([]);
   const apiKey = "keyi3gjKvW7SaqhE4";
@@ -38,7 +40,7 @@ const CardLister = ({
   // }
 
   async function fetchData() {
-    const skus = []; // add SKUs from frontend
+    const skus = selectedSKU.map((option) => option.value); // add SKUs from frontend
     const manufacturers = selectedManufacturer.map((option) => option.value); // add manufacturers from frontend
 
     if (skus.length > 0 || manufacturers.length > 0) {
@@ -84,7 +86,7 @@ const CardLister = ({
       setData(records);
       console.log(records);
     });
-  }, [selectedManufacturer]);
+  }, [selectedManufacturer, selectedSKU]);
 
   return (
     <div id="cardDiv">
@@ -104,6 +106,7 @@ const CardLister = ({
                   {item.fields["Manufacturer"] && (
                     <p>Manufacturer: {item.fields["Manufacturer"]}</p>
                   )}
+                  <p>SKU: {item.fields["SKU"]}</p>
                   {/* <p>STATUS:{item.fields["Shipment Status"]}</p> */}
                   {!localStorage.getItem([item.fields["Item ID"]]) && button ? (
                     <button
