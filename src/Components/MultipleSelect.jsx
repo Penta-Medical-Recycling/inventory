@@ -180,7 +180,7 @@ const options2 = [
   { label: "LBL", value: "LBL" },
   { label: "LBR", value: "LBR" },
   { label: "LDUM", value: "LDUM" },
-  { label: "Leg", value: "Storage Rack Leg Storage Rack" },
+  { label: "Leg Storage Rack ", value: "Leg Storage Rack" },
   { label: "LF", value: "LF" },
   { label: "LFP", value: "LFP" },
   { label: "LFS", value: "LFS" },

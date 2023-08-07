@@ -12,49 +12,32 @@ const CardLister = ({
   const tableName = "Imported table";
   const [button, setButton] = useState(1);
 
-  // Encode the table name to make it URL-safe
   const encodedTableName = encodeURIComponent(tableName);
 
   let url = `https://api.airtable.com/v0/${baseId}/${encodedTableName}`;
-
-  // const skus = []; // add SKUs from frontend
-  // const manufacturers = selectedManufacturer.map((option) => option.value); // add manufacturers from frontend
-
-  // if (skus.length > 0 || manufacturers.length > 0) {
-  //   url += "?filterByFormula=OR(";
-
-  //   if (skus.length > 0) {
-  //     url += `${skus.map((sku) => `{SKU}='${sku}'`).join(",")}`;
-  //     if (manufacturers.length !== 0) {
-  //       url += ",";
-  //     }
-  //   }
-  //   if (manufacturers.length > 0) {
-  //     url += `${manufacturers
-  //       .map((manufacturer) => `{Manufacturer}='${manufacturer}'`)
-  //       .join(",")}`;
-  //   }
-  //   url += ")";
-  // }
+  //filterByFormula=AND(OR({SKU}='RF'),OR({Manufacturer}='Ottobock'))
 
   async function fetchData() {
     const skus = []; // add SKUs from frontend
     const manufacturers = selectedManufacturer.map((option) => option.value); // add manufacturers from frontend
 
     if (skus.length > 0 || manufacturers.length > 0) {
-      url += "?filterByFormula=OR(";
+      url += "?filterByFormula=AND(";
 
       if (skus.length > 0) {
-        url += `${skus.map((sku) => `{SKU}='${sku}'`).join(",")}`;
-        if (manufacturers.length !== 0) {
-          url += ",";
-        }
+        url += `OR(${skus.map((sku) => `{SKU}='${sku}'`).join(",")})`;
       }
       if (manufacturers.length > 0) {
-        url += `${manufacturers
+        url += skus.length > 0 ? "," : "";
+        url += `OR(${manufacturers
           .map((manufacturer) => `{Manufacturer}='${manufacturer}'`)
-          .join(",")}`;
+          .join(",")})`;
       }
+      //AND(
+      //OR({SKU}...)
+      //OR({SKU}...), OR({Manufacturer}...)
+      //OR({Manufacturer}...)
+      //AND(...)
       url += ")";
     }
 
