@@ -9,6 +9,7 @@ function App() {
   const [cartCount, setCartCount] = useState(localStorage.length);
   const [isActive, setIsActive] = useState(false);
   const [selectedManufacturer, setSelectedManufacturer] = useState([]);
+  const [selectedSKU, setSelectedSKU] = useState([]);
   return (
     <>
       <SideBar
@@ -16,6 +17,8 @@ function App() {
         setIsActive={setIsActive}
         selectedManufacturer={selectedManufacturer}
         setSelectedManufacturer={setSelectedManufacturer}
+        selectedSKU={selectedSKU}
+        setSelectedSKU={setSelectedSKU}
       />
       <NavBar cartCount={cartCount} />
       <Routes>
@@ -29,6 +32,8 @@ function App() {
               setIsActive={setIsActive}
               selectedManufacturer={selectedManufacturer}
               setSelectedManufacturer={setSelectedManufacturer}
+              selectedSKU={selectedSKU}
+              setSelectedSKU={setSelectedSKU}
             />
           }
         ></Route>
