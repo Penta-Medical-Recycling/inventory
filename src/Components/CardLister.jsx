@@ -6,12 +6,12 @@ const CardLister = ({
   selectedManufacturer,
   setSelectedManufacturer,
   selectedSKU,
-  setSelectedSKU
+  setSelectedSKU,
 }) => {
   const [data, setData] = useState([]);
   const apiKey = "keyi3gjKvW7SaqhE4";
-  const baseId = "appLiJPf3Iykl3Yui";
-  const tableName = "Imported table";
+  const baseId = "appnx8gtnlQx5b7nI";
+  const tableName = "Inventory";
   const [button, setButton] = useState(1);
 
   const encodedTableName = encodeURIComponent(tableName);
@@ -76,7 +76,7 @@ const CardLister = ({
       {data.map(
         (item) =>
           item.fields.SKU &&
-          item.fields["Shipment Status"] === undefined && (
+          item.fields["Requests"] === undefined && (
             <div className="card" key={item.id}>
               <div className="card-content">
                 <div className="content">

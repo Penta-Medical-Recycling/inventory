@@ -122,15 +122,15 @@ const options = [
 ];
 
 const options2 = [
-  { label: "AAFO", value: "AAFO" },
-  { label: "ADB", value: "ADB" },
-  { label: "ADU", value: "ADU" },
-  { label: "AFT", value: "AFT" },
+  { label: "AAFO - Articulated Ankle Foot Orthosis", value: "AAFO" },
+  { label: "ADB - Double Adapter", value: "ADB" },
+  { label: "ADU - Universal Adapter", value: "ADU" },
+  { label: "AFT - Foot Adapter", value: "AFT" },
   { label: "AKA", value: "AKA" },
   { label: "ANCH", value: "ANCH" },
   { label: "ANK", value: "ANK" },
   { label: "ANKBLK", value: "ANKBLK" },
-  { label: "ANKL", value: "ANKL" },
+  { label: "ANKL - Ankle", value: "ANKL" },
   { label: "APD", value: "APD" },
   { label: "ARA", value: "ARA" },
   { label: "ARM", value: "ARM" },
@@ -181,7 +181,7 @@ const options2 = [
   { label: "LBR", value: "LBR" },
   { label: "LDUM", value: "LDUM" },
   { label: "Leg Storage Rack", value: "Leg Storage Rack" },
-  { label: "LF", value: "LF" },
+  { label: "LF - Left Foot", value: "LF" },
   { label: "LFP", value: "LFP" },
   { label: "LFS", value: "LFS" },
   { label: "LL", value: "LL" },
@@ -206,7 +206,7 @@ const options2 = [
   { label: "RAFO", value: "RAFO" },
   { label: "RAK", value: "RAK" },
   { label: "RBK", value: "RBK" },
-  { label: "RF", value: "RF" },
+  { label: "RF - Right Foot", value: "RF" },
   { label: "RFP", value: "RFP" },
   { label: "RFS", value: "RFS" },
   { label: "RH", value: "RH" },
@@ -266,7 +266,7 @@ const MultipleSelect = ({
         />
       </div>
       <div style={{ width: "80%", margin: "0 20px 20px 20px" }}>
-        <h1>Select SKU</h1>
+        <h1>Select SKU or Description</h1>
         <MultiSelect
           options={options2}
           value={selectedSKU}
