@@ -20,28 +20,31 @@ function App() {
         selectedSKU={selectedSKU}
         setSelectedSKU={setSelectedSKU}
       />
+      <main>
       <NavBar cartCount={cartCount} />
-      <Routes>
-        <Route
-          path="/"
-          element={
-            <Home
-              cartCount={cartCount}
-              setCartCount={setCartCount}
-              isActive={isActive}
-              setIsActive={setIsActive}
-              selectedManufacturer={selectedManufacturer}
-              setSelectedManufacturer={setSelectedManufacturer}
-              selectedSKU={selectedSKU}
-              setSelectedSKU={setSelectedSKU}
-            />
-          }
-        ></Route>
-        <Route
-          path="/cart"
-          element={<Cart cartCount={cartCount} setCartCount={setCartCount} />}
-        ></Route>
-      </Routes>
+      
+        <Routes>
+          <Route
+            path="/"
+            element={
+              <Home
+                cartCount={cartCount}
+                setCartCount={setCartCount}
+                isActive={isActive}
+                setIsActive={setIsActive}
+                selectedManufacturer={selectedManufacturer}
+                setSelectedManufacturer={setSelectedManufacturer}
+                selectedSKU={selectedSKU}
+                setSelectedSKU={setSelectedSKU}
+              />
+            }
+          ></Route>
+          <Route
+            path="/cart"
+            element={<Cart cartCount={cartCount} setCartCount={setCartCount} />}
+          ></Route>
+        </Routes>
+      </main>
     </>
   );
 }
