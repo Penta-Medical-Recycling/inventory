@@ -81,7 +81,8 @@ const CardLister = ({
       {data.map(
         (item) =>
           item.fields.SKU &&
-          item.fields["Requests"] === undefined && (
+          item.fields["Shipment Status"] === undefined &&
+          item.fields["Requess="] === undefined && (
             <div className="card" key={item.id}>
               <div className="card-content">
                 <div className="content">

@@ -6,6 +6,11 @@ const CartLister = ({ cartCount, setCartCount }) => {
   const tableName = "Requests";
   const [button, setButton] = useState(1);
 
+  const items = [];
+  Object.values(localStorage).forEach((x) =>
+    items.push(JSON.parse(x)["Item ID"])
+  );
+
   const handleSubmit = (event) => {
     event.preventDefault();
     const url = `https://api.airtable.com/v0/${BaseID}/${tableName}`;
@@ -14,15 +19,19 @@ const CartLister = ({ cartCount, setCartCount }) => {
       records: [
         {
           fields: {
-            Name: "CFINS",
-            Partner: "CFINS",
-            "Additional Notes": "Nada",
-            "Items You Would Like": ["22-1926", "22-1937", "22-1944"],
+            Name: "Centrodsds de Protesis",
+            Partner: "Centrodsds de Protesis",
+            "Additional Notes":
+              "EXAMPLE Items requested will be used in our next prosthetic clinic for new patients as well as for replacing some parts from old devices.",
+            "Items You Would Like": items,
+            Created: "2021-12-10",
+            Status: "Filled",
           },
-          typecast: true,
         },
       ],
+      typecast: true,
     };
+
     fetch(url, {
       method: "POST",
       headers: {
