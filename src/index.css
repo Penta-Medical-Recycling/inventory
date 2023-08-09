@@ -159,3 +159,22 @@ body {
   display: flex;
   justify-content: center;
 }
+
+#partner-dropdown{
+  width: 80vw;
+  margin: auto;
+  display: flex;
+  justify-content: space-between;
+  border-radius: 50px;
+}
+
+#partner-content{
+  width: 100vw;
+  display: flex;
+  justify-content: center;
+}
+
+.partnerOption:hover{
+  cursor:pointer;
+  background-color: rgb(234, 234, 234);
+}
