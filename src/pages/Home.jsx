@@ -12,22 +12,22 @@ function Home({
   setSelectedSKU
 }) {
   const [selectedFilter, setSelectedFilters] = useState({
-    prothesis: false,
-    orthosis: false,
-    pediatric: false
+    Prosthesis: false,
+    Orthosis: false,
+    Pediatric: false
   })
   const activeToggle = () => {
     setIsActive(!isActive);
   };
 
   const filterClick = (key) => {
-    const newObj= {...selectedFilter}
+    const newObj = { ...selectedFilter }
     newObj[key] = !selectedFilter[key];
-    setSelectedFilters(newObj) 
+    setSelectedFilters(newObj)
   }
-  useEffect(()=>{
+  useEffect(() => {
     console.log(selectedFilter)
-  },[selectedFilter])
+  }, [selectedFilter])
 
   return (
     <>
@@ -81,9 +81,9 @@ function Home({
           </div>
         </div>
         <div id='filter-buttons'>
-          <div className={selectedFilter['prothesis']? 'filter-selected filter-3': 'filter-3'} onClick={() => filterClick('prothesis')}><p>Prothesis</p></div>
-          <div className={selectedFilter['orthosis']? 'filter-selected filter-3': 'filter-3'} onClick={() => filterClick('orthosis')}><p>Orthosis</p></div>
-          <div className={selectedFilter['pediatric']? 'filter-selected filter-3': 'filter-3'} onClick={() => filterClick('pediatric')}><p>Pediatric</p></div>
+          <div className={selectedFilter['Prosthesis'] ? 'filter-selected filter-3' : 'filter-3'} onClick={() => filterClick('Prosthesis')}><p>Prosthesis</p></div>
+          <div className={selectedFilter['Orthosis'] ? 'filter-selected filter-3' : 'filter-3'} onClick={() => filterClick('Orthosis')}><p>Orthosis</p></div>
+          <div className={selectedFilter['Pediatric'] ? 'filter-selected filter-3' : 'filter-3'} onClick={() => filterClick('Pediatric')}><p>Pediatric</p></div>
           <div id="filter-button" onClick={activeToggle}>
             <p>Filters</p>
             <svg
@@ -107,6 +107,7 @@ function Home({
         setSelectedManufacturer={setSelectedManufacturer}
         selectedSKU={selectedSKU}
         setSelectedSKU={setSelectedSKU}
+        selectedFilter={selectedFilter}
       />
     </>
   );
