@@ -7,6 +7,7 @@ const CardLister = ({
   setSelectedManufacturer,
   selectedSKU,
   setSelectedSKU,
+  selectedFilter
 }) => {
   const [data, setData] = useState([]);
   const apiKey = "keyi3gjKvW7SaqhE4";
@@ -20,10 +21,13 @@ const CardLister = ({
   //filterByFormula=AND(OR({SKU}='RF'),OR({Manufacturer}='Ottobock'))
 
   async function fetchData() {
-    const skus = selectedSKU.map((option) => option.value); // add SKUs from frontend
-    const manufacturers = selectedManufacturer.map((option) => option.value); // add manufacturers from frontend
+    const skus = selectedSKU.map((option) => option.value);
+    const manufacturers = selectedManufacturer.map((option) => option.value);
 
-    if (skus.length > 0 || manufacturers.length > 0) {
+    // Add selectedFilter logic
+    const selectedTags = Object.keys(selectedFilter).filter((key) => selectedFilter[key]);
+
+    if (skus.length > 0 || manufacturers.length > 0 || selectedTags.length > 0) {
       url += "?filterByFormula=AND(";
 
       if (skus.length > 0) {
@@ -35,11 +39,11 @@ const CardLister = ({
           .map((manufacturer) => `{Manufacturer}='${manufacturer}'`)
           .join(",")})`;
       }
-      //AND(
-      //OR({SKU}...)
-      //OR({SKU}...), OR({Manufacturer}...)
-      //OR({Manufacturer}...)
-      //AND(...)
+      if (selectedTags.length > 0) {
+        url += (skus.length > 0 || manufacturers.length > 0) ? "," : "";
+        url += `OR(${selectedTags.map((tag) => `{Tag}='${tag}'`).join(",")})`;
+      }
+
       url += ")";
     }
 
@@ -68,8 +72,9 @@ const CardLister = ({
     fetchData().then((records) => {
       setData(records);
       console.log(records);
+      console.log(url)
     });
-  }, [selectedManufacturer, selectedSKU]);
+  }, [selectedManufacturer, selectedSKU, selectedFilter]);
 
   return (
     <div id="cardDiv">
@@ -90,6 +95,7 @@ const CardLister = ({
                     <p>Manufacturer: {item.fields["Manufacturer"]}</p>
                   )}
                   <p>SKU: {item.fields["SKU"]}</p>
+                  <p>Tag: {item.fields["Tag"]}</p>
                   {/* <p>STATUS:{item.fields["Shipment Status"]}</p> */}
                   {!localStorage.getItem([item.fields["Item ID"]]) && button ? (
                     <button
