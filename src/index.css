@@ -2,6 +2,11 @@ body {
   background-color: #f7f7f9;
 }
 
+main{
+  min-height: 100vh;
+  padding-bottom: 50px;
+}
+
 #cardDiv {
   display: flex;
   flex-wrap: wrap;
