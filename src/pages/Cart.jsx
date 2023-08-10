@@ -1,11 +1,11 @@
 import React, { useEffect, useState } from "react";
 import CartLister from "../Components/CartLister";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 
-function Cart({ cartCount, setCartCount }) {
+function Cart({ cartCount, setCartCount, selectedPartner }) {
   const navigate = useNavigate()
   useEffect(()=>{
-    if(!localStorage.getItem('partner')) navigate('/partner')
+    if(!selectedPartner) navigate('/partner')
   },[])
   const [errorMessage, setErrorMessage] = useState();
   const [notes, setNotes] = useState("");
@@ -73,8 +73,12 @@ function Cart({ cartCount, setCartCount }) {
   return (
     <>
       <div id="text-section">
-        <h1 className="title has-text-centered my-6">CART</h1>
+        <h1 className="title has-text-centered mt-6">CART</h1>
       </div>
+      <h1 className="has-text-centered is-size-5 mt-5 mb-3">Hello, {selectedPartner} Member!</h1>
+      <Link to='/partner' className="is-flex is-justify-content-center">
+        <button className="button">Change Partner</button>
+      </Link>
 
       <CartLister cartCount={cartCount} setCartCount={setCartCount} />
 
