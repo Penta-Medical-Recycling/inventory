@@ -11,6 +11,7 @@ function App() {
   const [isActive, setIsActive] = useState(false);
   const [selectedManufacturer, setSelectedManufacturer] = useState([]);
   const [selectedSKU, setSelectedSKU] = useState([]);
+  const [selectedPartner, setSelectedPartner] = useState(localStorage['partner']? localStorage['partner']: '')
   return (
     <>
       <SideBar
@@ -22,7 +23,7 @@ function App() {
         setSelectedSKU={setSelectedSKU}
       />
       <main>
-      <NavBar cartCount={cartCount} />
+      <NavBar cartCount={cartCount} selectedPartner={selectedPartner}/>
         <Routes>
           <Route
             path="/"
@@ -41,9 +42,9 @@ function App() {
           ></Route>
           <Route
             path="/cart"
-            element={<Cart cartCount={cartCount} setCartCount={setCartCount} />}
+            element={<Cart cartCount={cartCount} setCartCount={setCartCount} selectedPartner={selectedPartner}/>}
           ></Route>
-          <Route path='/partner' element={<Partner />}></Route>
+          <Route path='/partner' element={<Partner setSelectedPartner={setSelectedPartner}/>}></Route>
         </Routes>
       </main>
     </>

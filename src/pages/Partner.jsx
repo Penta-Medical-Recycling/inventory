@@ -1,11 +1,13 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-const Partner = () => {
+const Partner = ({setSelectedPartner}) => {
     const [isActive, setIsActive] = useState(false);
     const [searchTerm, setSearchTerm] = useState("");
     const [partner, setPartner] = useState('');
+    const [finalPartner, setFinalPartner] = useState("");
+    const [dummy, setDummy] = useState(1)
     const navigate = useNavigate();
-    
+
     const options = [
         "Anera",
         "AROL PLUS",
@@ -68,7 +70,7 @@ const Partner = () => {
         "World Action Fund",
         "Центр протезування і реабілітації «РАЗАН» (RAZAN)",
     ];
-    
+
     const handleSearch = (event) => {
         setSearchTerm(event.target.value);
     };
@@ -89,13 +91,31 @@ const Partner = () => {
         event.stopPropagation();
     };
 
-    const submit = () => {
-        localStorage.setItem('partner', partner)
-        navigate('/cart');
-    }
+    const submit = async () => {
+        try {
+          // Update local storage
+          localStorage.setItem('partner', partner);
+      
+          // Wait for the local storage update to finish before navigating
+          await new Promise((resolve) => setTimeout(resolve, 0)); // This simulates an asynchronous delay
+        
+          // Now navigate to '/cart'
+          setSelectedPartner(partner)
+          navigate('/cart');
+        } catch (error) {
+          console.error('Error updating local storage:', error);
+        }
+      };
+      
 
+    // useEffect(() => {
+    //     // This effect will run when the 'partner' value in localStorage changes
+    //     if (localStorage['partner']) navigate('/cart');
+    // }, [localStorage]);
+
+    
     return (
-        <div className="is-flex is-flex-direction-column is-justify-content-center is-align-items-center" style={{height: '50vh'}}>
+        <div className="is-flex is-flex-direction-column is-justify-content-center is-align-items-center" style={{ height: '50vh' }}>
             <h1 className="is-size-4 has-text-weight-bold has-text-centered my-4">
                 Select Partner To View Cart
             </h1>
