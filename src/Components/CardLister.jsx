@@ -7,7 +7,11 @@ const CardLister = ({
   setSelectedManufacturer,
   selectedSKU,
   setSelectedSKU,
-  selectedFilter
+  selectedFilter,
+  offsetArray,
+  setOffsetArray,
+  setOffset,
+  offset,
 }) => {
   const [data, setData] = useState([]);
   const apiKey = "keyi3gjKvW7SaqhE4";
@@ -25,9 +29,15 @@ const CardLister = ({
     const manufacturers = selectedManufacturer.map((option) => option.value);
 
     // Add selectedFilter logic
-    const selectedTags = Object.keys(selectedFilter).filter((key) => selectedFilter[key]);
+    const selectedTags = Object.keys(selectedFilter).filter(
+      (key) => selectedFilter[key]
+    );
 
-    if (skus.length > 0 || manufacturers.length > 0 || selectedTags.length > 0) {
+    if (
+      skus.length > 0 ||
+      manufacturers.length > 0 ||
+      selectedTags.length > 0
+    ) {
       url += "?filterByFormula=AND(";
 
       if (skus.length > 0) {
@@ -40,7 +50,7 @@ const CardLister = ({
           .join(",")})`;
       }
       if (selectedTags.length > 0) {
-        url += (skus.length > 0 || manufacturers.length > 0) ? "," : "";
+        url += skus.length > 0 || manufacturers.length > 0 ? "," : "";
         url += `OR(${selectedTags.map((tag) => `{Tag}='${tag}'`).join(",")})`;
       }
 
@@ -61,20 +71,26 @@ const CardLister = ({
       }
 
       const data = await response.json();
+      if (data.offset) {
+        setOffsetArray([...offsetArray, data.offset]);
+        console.log(offsetArray);
+      }
       return data.records;
     } catch (error) {
       console.error("Error fetching data:", error);
       return [];
     }
   }
-
+  //? [|>]
+  //?offset=itrxjebm3fH25hPFu/rec16p7B2Gz0B3YrT [<|>]
+  //?offset=itrxjebm3fH25hPFu/rec28DK8emcVsaTtt [<|>]
+  //?offset=itrxjebm3fH25hPFu/rec36aARnW5Z1Yx8Z [<|]
   useEffect(() => {
     fetchData().then((records) => {
       setData(records);
-      console.log(records);
-      console.log(url)
+      console.log(offset);
     });
-  }, [selectedManufacturer, selectedSKU, selectedFilter]);
+  }, [selectedManufacturer, selectedSKU, selectedFilter, offset]);
 
   return (
     <div id="cardDiv">

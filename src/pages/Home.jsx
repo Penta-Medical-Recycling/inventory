@@ -9,26 +9,27 @@ function Home({
   selectedManufacturer,
   setSelectedManufacturer,
   selectedSKU,
-  setSelectedSKU
+  setSelectedSKU,
 }) {
   const [selectedFilter, setSelectedFilters] = useState({
     Prosthesis: false,
     Orthosis: false,
-    Pediatric: false
-  })
+    Pediatric: false,
+  });
   const [offset, setOffset] = useState(1);
+  const [offsetArray, setOffsetArray] = useState([]);
   const activeToggle = () => {
     setIsActive(!isActive);
   };
 
   const filterClick = (key) => {
-    const newObj = { ...selectedFilter }
+    const newObj = { ...selectedFilter };
     newObj[key] = !selectedFilter[key];
-    setSelectedFilters(newObj)
-  }
+    setSelectedFilters(newObj);
+  };
   useEffect(() => {
-    console.log(selectedFilter)
-  }, [selectedFilter])
+    console.log(selectedFilter);
+  }, [selectedFilter]);
 
   return (
     <>
@@ -81,10 +82,37 @@ function Home({
             </svg>
           </div>
         </div>
-        <div id='filter-buttons'>
-          <div className={selectedFilter['Prosthesis'] ? 'filter-selected filter-3' : 'filter-3'} onClick={() => filterClick('Prosthesis')}><p>Prosthesis</p></div>
-          <div className={selectedFilter['Orthosis'] ? 'filter-selected filter-3' : 'filter-3'} onClick={() => filterClick('Orthosis')}><p>Orthosis</p></div>
-          <div className={selectedFilter['Pediatric'] ? 'filter-selected filter-3' : 'filter-3'} onClick={() => filterClick('Pediatric')}><p>Pediatric</p></div>
+        <div id="filter-buttons">
+          <div
+            className={
+              selectedFilter["Prosthesis"]
+                ? "filter-selected filter-3"
+                : "filter-3"
+            }
+            onClick={() => filterClick("Prosthesis")}
+          >
+            <p>Prosthesis</p>
+          </div>
+          <div
+            className={
+              selectedFilter["Orthosis"]
+                ? "filter-selected filter-3"
+                : "filter-3"
+            }
+            onClick={() => filterClick("Orthosis")}
+          >
+            <p>Orthosis</p>
+          </div>
+          <div
+            className={
+              selectedFilter["Pediatric"]
+                ? "filter-selected filter-3"
+                : "filter-3"
+            }
+            onClick={() => filterClick("Pediatric")}
+          >
+            <p>Pediatric</p>
+          </div>
           <div id="filter-button" onClick={activeToggle}>
             <p>Filters</p>
             <svg
@@ -109,20 +137,44 @@ function Home({
         selectedSKU={selectedSKU}
         setSelectedSKU={setSelectedSKU}
         selectedFilter={selectedFilter}
+        offsetArray={offsetArray}
+        setOffsetArray={setOffsetArray}
+        offset={offset}
+        setOffset={setOffset}
       />
-      {offset ?
+      {offset ? (
         <div className="is-flex is-justify-content-center">
-          <nav className="pagination is-centered" role="navigation" aria-label="pagination">
-            <a className="pagination-previous" onClick={() => setOffset(offset - 1)}>Previous</a>
-            <a className="pagination-next" onClick={() => setOffset(offset + 1)}>Next page</a>
+          <nav
+            className="pagination is-centered"
+            role="navigation"
+            aria-label="pagination"
+          >
+            <a
+              className="pagination-previous"
+              onClick={() => setOffset(offset - 1)}
+            >
+              Previous
+            </a>
+            <a
+              className="pagination-next"
+              onClick={() => setOffset(offset + 1)}
+            >
+              Next page
+            </a>
           </nav>
         </div>
-        : <div className="is-flex is-justify-content-center">
+      ) : (
+        <div className="is-flex is-justify-content-center">
           <nav className="pagination" role="navigation" aria-label="pagination">
-            <a className="pagination-next" onClick={() => setOffset(offset + 1)}>Next page</a>
+            <a
+              className="pagination-next"
+              onClick={() => setOffset(offset + 1)}
+            >
+              Next page
+            </a>
           </nav>
         </div>
-      }
+      )}
     </>
   );
 }
