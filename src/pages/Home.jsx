@@ -16,6 +16,7 @@ function Home({
     Orthosis: false,
     Pediatric: false
   })
+  const [offset, setOffset] = useState(1);
   const activeToggle = () => {
     setIsActive(!isActive);
   };
@@ -109,6 +110,19 @@ function Home({
         setSelectedSKU={setSelectedSKU}
         selectedFilter={selectedFilter}
       />
+      {offset ?
+        <div className="is-flex is-justify-content-center">
+          <nav className="pagination is-centered" role="navigation" aria-label="pagination">
+            <a className="pagination-previous" onClick={() => setOffset(offset - 1)}>Previous</a>
+            <a className="pagination-next" onClick={() => setOffset(offset + 1)}>Next page</a>
+          </nav>
+        </div>
+        : <div className="is-flex is-justify-content-center">
+          <nav className="pagination" role="navigation" aria-label="pagination">
+            <a className="pagination-next" onClick={() => setOffset(offset + 1)}>Next page</a>
+          </nav>
+        </div>
+      }
     </>
   );
 }
