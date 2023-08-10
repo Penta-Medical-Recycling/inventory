@@ -140,6 +140,7 @@ function Cart({ cartCount, setCartCount }) {
       notes: "",
     });
     localStorage.clear();
+    // localStorage.setItem("partner", "Centro");
   };
 
   const handleSearchClick = (event) => {
@@ -147,19 +148,23 @@ function Cart({ cartCount, setCartCount }) {
   };
 
   const missingInfo = () => {
-    !cartInfo.selectedOption && !cartInfo.notes && !localStorage.length ?
-      setErrorMessage("Please select a partner, add additional notes, and add items to your cart") :
-      !cartInfo.selectedOption && !cartInfo.notes ?
-        setErrorMessage("Please select a partner and add additional notes") :
-        !cartInfo.selectedOption && !localStorage.length
-          ? setErrorMessage("Please select a partner and add items to your cart") :
-          !localStorage.length && !cartInfo.notes ?
-            setErrorMessage("Please add additional notes and add items to your cart") :
-            !cartInfo.selectedOption ?
-              setErrorMessage("Please select a partner") :
-              !cartInfo.notes ?
-                setErrorMessage("Please add additional notes") :
-                setErrorMessage("Please add items to your cart");
+    !cartInfo.selectedOption && !cartInfo.notes && !localStorage.length
+      ? setErrorMessage(
+          "Please select a partner, add additional notes, and add items to your cart"
+        )
+      : !cartInfo.selectedOption && !cartInfo.notes
+      ? setErrorMessage("Please select a partner and add additional notes")
+      : !cartInfo.selectedOption && !localStorage.length
+      ? setErrorMessage("Please select a partner and add items to your cart")
+      : !localStorage.length && !cartInfo.notes
+      ? setErrorMessage(
+          "Please add additional notes and add items to your cart"
+        )
+      : !cartInfo.selectedOption
+      ? setErrorMessage("Please select a partner")
+      : !cartInfo.notes
+      ? setErrorMessage("Please add additional notes")
+      : setErrorMessage("Please add items to your cart");
   };
 
   return (

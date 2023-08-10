@@ -1,4 +1,6 @@
 import CardLister from "../Components/CardLister";
+// import LoadingScreen from "../Components/LoadingScreen";
+
 import { useEffect, useState } from "react";
 
 function Home({
@@ -16,8 +18,10 @@ function Home({
     Orthosis: false,
     Pediatric: false,
   });
-  const [offset, setOffset] = useState(1);
-  const [offsetArray, setOffsetArray] = useState([]);
+  const [offset, setOffset] = useState(0);
+  const [offsetArray, setOffsetArray] = useState([""]);
+  const [page, setPage] = useState("Next");
+  // const [isLoading, setIsLoading] = useState(true);
   const activeToggle = () => {
     setIsActive(!isActive);
   };
@@ -27,9 +31,25 @@ function Home({
     newObj[key] = !selectedFilter[key];
     setSelectedFilters(newObj);
   };
+
   useEffect(() => {
-    console.log(selectedFilter);
-  }, [selectedFilter]);
+    if (offset === 0 && offsetArray.length > 1) {
+      setPage("Next");
+    } else if (
+      offsetArray[offset + 1] !== undefined &&
+      offsetArray[offset - 1] !== undefined
+    ) {
+      setPage("Next/Previous");
+    } else if (
+      offsetArray[offset - 1] !== undefined &&
+      offsetArray[offset + 1] === undefined
+    ) {
+      setPage("Previous");
+    } else {
+      setPage("None");
+    }
+    console.log(offset, offsetArray);
+  }, [offset, offsetArray]);
 
   return (
     <>
@@ -129,6 +149,52 @@ function Home({
           icon to the right of the search bar.
         </p>
       </div>
+      {page === "Next" ? (
+        <div className="is-flex is-justify-content-center">
+          <nav className="pagination" role="navigation" aria-label="pagination">
+            <a
+              className="pagination-next"
+              onClick={() => setOffset(offset + 1)}
+            >
+              Next ⊳
+            </a>
+          </nav>
+        </div>
+      ) : page === "Previous" ? (
+        <div className="is-flex is-justify-content-center">
+          <nav className="pagination" role="navigation" aria-label="pagination">
+            <a
+              className="pagination-previous"
+              onClick={() => setOffset(offset - 1)}
+            >
+              ⊲ Previous
+            </a>
+          </nav>
+        </div>
+      ) : page === "Next/Previous" ? (
+        <div className="is-flex is-justify-content-center">
+          <nav
+            className="pagination is-centered"
+            role="navigation"
+            aria-label="pagination"
+          >
+            <a
+              className="pagination-previous"
+              onClick={() => setOffset(offset - 1)}
+            >
+              ⊲ Previous
+            </a>
+            <a
+              className="pagination-next"
+              onClick={() => setOffset(offset + 1)}
+            >
+              Next ⊳
+            </a>
+          </nav>
+        </div>
+      ) : (
+        <></>
+      )}
       <CardLister
         cartCount={cartCount}
         setCartCount={setCartCount}
@@ -142,7 +208,29 @@ function Home({
         offset={offset}
         setOffset={setOffset}
       />
-      {offset ? (
+      {page === "Next" ? (
+        <div className="is-flex is-justify-content-center">
+          <nav className="pagination" role="navigation" aria-label="pagination">
+            <a
+              className="pagination-next"
+              onClick={() => setOffset(offset + 1)}
+            >
+              Next ⊳
+            </a>
+          </nav>
+        </div>
+      ) : page === "Previous" ? (
+        <div className="is-flex is-justify-content-center">
+          <nav className="pagination" role="navigation" aria-label="pagination">
+            <a
+              className="pagination-previous"
+              onClick={() => setOffset(offset - 1)}
+            >
+              ⊲ Previous
+            </a>
+          </nav>
+        </div>
+      ) : page === "Next/Previous" ? (
         <div className="is-flex is-justify-content-center">
           <nav
             className="pagination is-centered"
@@ -153,27 +241,18 @@ function Home({
               className="pagination-previous"
               onClick={() => setOffset(offset - 1)}
             >
-              Previous
+              ⊲ Previous
             </a>
             <a
               className="pagination-next"
               onClick={() => setOffset(offset + 1)}
             >
-              Next page
+              Next ⊳
             </a>
           </nav>
         </div>
       ) : (
-        <div className="is-flex is-justify-content-center">
-          <nav className="pagination" role="navigation" aria-label="pagination">
-            <a
-              className="pagination-next"
-              onClick={() => setOffset(offset + 1)}
-            >
-              Next page
-            </a>
-          </nav>
-        </div>
+        <></>
       )}
     </>
   );
