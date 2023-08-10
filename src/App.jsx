@@ -4,9 +4,10 @@ import Cart from "./pages/Cart";
 import NavBar from "./Components/NavBar";
 import { useState } from "react";
 import SideBar from "./Components/SideBar";
+import Partner from "./pages/Partner";
 
 function App() {
-  const [cartCount, setCartCount] = useState(localStorage.length);
+  const [cartCount, setCartCount] = useState('partner' in localStorage? localStorage.length - 1: localStorage.length);
   const [isActive, setIsActive] = useState(false);
   const [selectedManufacturer, setSelectedManufacturer] = useState([]);
   const [selectedSKU, setSelectedSKU] = useState([]);
@@ -22,7 +23,6 @@ function App() {
       />
       <main>
       <NavBar cartCount={cartCount} />
-      
         <Routes>
           <Route
             path="/"
@@ -43,6 +43,7 @@ function App() {
             path="/cart"
             element={<Cart cartCount={cartCount} setCartCount={setCartCount} />}
           ></Route>
+          <Route path='/partner' element={<Partner />}></Route>
         </Routes>
       </main>
     </>
