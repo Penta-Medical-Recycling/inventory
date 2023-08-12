@@ -51,8 +51,7 @@ const CardLister = ({
         url += `,OR(${selectedTags.map((tag) => `{Tag}='${tag}'`).join(",")})`;
       }
     }
-    url += ")";
-    url += "&offset=" + offsetArray[offset];
+    url += ")&offset=" + offsetArray[offset];
 
     try {
       const response = await fetch(url, {

@@ -4,14 +4,16 @@ import { useNavigate, Link } from "react-router-dom";
 
 function Cart({ cartCount, setCartCount, selectedPartner }) {
   const navigate = useNavigate();
+  const [errorMessage, setErrorMessage] = useState();
+  const [notes, setNotes] = useState(localStorage.getItem("notes") || "");
+
   useEffect(() => {
     if (!selectedPartner) navigate("/partner");
   }, []);
-  const [errorMessage, setErrorMessage] = useState();
-  const [notes, setNotes] = useState("");
 
   const handleNotesChange = (event) => {
     setNotes(event.target.value); // Update notes when changed
+    localStorage.setItem("notes", event.target.value); // Notes save across pages or reload
   };
 
   const requestButton = (event) => {
@@ -22,7 +24,8 @@ function Cart({ cartCount, setCartCount, selectedPartner }) {
     setErrorMessage("");
     const items = [];
     Object.entries(localStorage).forEach(([key, value]) => {
-      if (key !== "partner") items.push(JSON.parse(value)["Item ID"]);
+      if (key !== "partner" && key !== "notes")
+        items.push(JSON.parse(value)["Item ID"]);
     });
     const url = `https://api.airtable.com/v0/${BaseID}/${tableName}`;
     const data = {
@@ -67,11 +70,15 @@ function Cart({ cartCount, setCartCount, selectedPartner }) {
       });
 
     //items like 23-2086 are still appearing despite already having been in some orders?
-    //This is a problem for Mija, the data is dirty, we need to clean it up.
+    //This is a problem for Mija, the data seems dirty, we need to clean it up.
+    //also a message to show that the order was successful should show.
+    //Maybe should we send an automatic email notification? the message also includes the order number to look for in email.
   };
 
   const missingInfo = () => {
-    !notes && localStorage.length === 1
+    !notes &&
+    Object.keys(localStorage).filter((k) => k !== "partner" && k !== "notes")
+      .length === 0
       ? setErrorMessage(
           "Please add additional notes, and add items to your cart"
         )
@@ -107,7 +114,12 @@ function Cart({ cartCount, setCartCount, selectedPartner }) {
           className="button mb-1"
           type="button"
           onClick={
-            notes && localStorage.length > 1 ? requestButton : missingInfo
+            notes &&
+            Object.keys(localStorage).filter(
+              (k) => k !== "partner" && k !== "notes"
+            ).length >= 1
+              ? requestButton
+              : missingInfo
           }
         >
           Request Items

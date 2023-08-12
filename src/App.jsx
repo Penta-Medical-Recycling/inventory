@@ -7,11 +7,16 @@ import SideBar from "./Components/SideBar";
 import Partner from "./pages/Partner";
 
 function App() {
-  const [cartCount, setCartCount] = useState('partner' in localStorage? localStorage.length - 1: localStorage.length);
+  const [cartCount, setCartCount] = useState(
+    Object.keys(localStorage).filter((k) => k !== "partner" && k !== "notes")
+      .length
+  ); // can be simplified if we create a local storage array called items, and checked its length
   const [isActive, setIsActive] = useState(false);
   const [selectedManufacturer, setSelectedManufacturer] = useState([]);
   const [selectedSKU, setSelectedSKU] = useState([]);
-  const [selectedPartner, setSelectedPartner] = useState(localStorage['partner']? localStorage['partner']: '')
+  const [selectedPartner, setSelectedPartner] = useState(
+    localStorage.getItem("partner") || ""
+  );
   return (
     <>
       <SideBar
@@ -23,7 +28,7 @@ function App() {
         setSelectedSKU={setSelectedSKU}
       />
       <main>
-      <NavBar cartCount={cartCount} selectedPartner={selectedPartner}/>
+        <NavBar cartCount={cartCount} selectedPartner={selectedPartner} />
         <Routes>
           <Route
             path="/"
@@ -42,9 +47,18 @@ function App() {
           ></Route>
           <Route
             path="/cart"
-            element={<Cart cartCount={cartCount} setCartCount={setCartCount} selectedPartner={selectedPartner}/>}
+            element={
+              <Cart
+                cartCount={cartCount}
+                setCartCount={setCartCount}
+                selectedPartner={selectedPartner}
+              />
+            }
           ></Route>
-          <Route path='/partner' element={<Partner setSelectedPartner={setSelectedPartner}/>}></Route>
+          <Route
+            path="/partner"
+            element={<Partner setSelectedPartner={setSelectedPartner} />}
+          ></Route>
         </Routes>
       </main>
     </>

@@ -21,7 +21,6 @@ function Home({
   const [offset, setOffset] = useState(0);
   const [offsetArray, setOffsetArray] = useState([""]);
   const [page, setPage] = useState("Next");
-  // const [isLoading, setIsLoading] = useState(true);
   const activeToggle = () => {
     setIsActive(!isActive);
   };
@@ -48,7 +47,6 @@ function Home({
     } else {
       setPage("None");
     }
-    console.log(offset, offsetArray);
   }, [offset, offsetArray]);
 
   return (

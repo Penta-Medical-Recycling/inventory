@@ -2,17 +2,17 @@ import React, { useState, useEffect } from "react";
 
 const CartLister = ({ cartCount, setCartCount }) => {
   const [button, setButton] = useState(1);
-  
+
   return (
     <>
       <div id="cardDiv">
         {Object.entries(localStorage).map(([key, value]) => {
-          let item = '';
-          if (key !== 'partner') {
+          let item = "";
+          if (key !== "partner" && key !== "notes") {
             item = JSON.parse(value);
           }
-          return (
-            item ? <div className="card" key={item.id}>
+          return item ? (
+            <div className="card" key={item.id}>
               <div className="card-content">
                 <div className="content">
                   <p>ID: {item["Item ID"]}</p>
@@ -42,7 +42,9 @@ const CartLister = ({ cartCount, setCartCount }) => {
                   </button>
                 </div>
               </div>
-            </div>: <></>
+            </div>
+          ) : (
+            <></>
           );
         })}
       </div>
