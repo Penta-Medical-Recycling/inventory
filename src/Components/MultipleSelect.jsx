@@ -274,8 +274,11 @@ const MultipleSelect = ({
 }) => {
   return (
     <>
-      <div style={{ width: "80%", margin: "0 20px 20px 20px" }}>
-        <h1>Select Manufacturer</h1>
+      <div style={{ width: "80%", margin: "0 auto 20px auto" }}>
+        <h1 style={{
+          fontSize: '23px',
+          fontWeight: '600'
+        }}>Select Manufacturer</h1>
         <MultiSelect
           options={options}
           value={selectedManufacturer}
@@ -283,15 +286,18 @@ const MultipleSelect = ({
           labelledBy="Select"
         />
       </div>
-      <div style={{ width: "80%", margin: "0 20px 20px 20px" }}>
-        <h1>Select SKU or Description</h1>
+      <div style={{ width: "80%", margin: "0 auto 20px auto" }}>
+        <h1 style={{
+          fontSize: '23px',
+          fontWeight: '600'
+        }}>Select SKU or Description</h1>
         <MultiSelect
           options={options2}
           value={selectedSKU}
           onChange={setSelectedSKU}
           labelledBy="Select"
         />
-      </div>
+      </div >
     </>
   );
 };
