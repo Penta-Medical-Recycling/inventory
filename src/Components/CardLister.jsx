@@ -13,6 +13,7 @@ const CardLister = ({
   setOffsetArray,
   setOffset,
   offset,
+  setCsv,
 }) => {
   const [data, setData] = useState([]);
   const apiKey = "keyi3gjKvW7SaqhE4";
@@ -67,6 +68,20 @@ const CardLister = ({
       if (data.offset && !offsetArray[offset + 1]) {
         setOffsetArray([...offsetArray, data.offset]);
       }
+      let header = "ID,Description,Size,Model/Type,Manufacturer\n";
+      for (let i = 0; i < data.records.length; i++) {
+        let record = data.records[i].fields;
+        header += `"${record["Item ID"] || ""}","${
+          record["Description (from SKU)"] || ""
+        }","${record["Size"] || ""}","${record["Model/Type"] || ""}","${
+          record["Manufacturer"] || ""
+        }"\n`;
+      }
+      console.log(header);
+      //should only be trigger on button press, not on ever page load.
+      //also should it only download an csv based on the current filters? Or should it always be a download of EVERY item?
+      const blob = new Blob([header], { type: "text/csv" });
+      setCsv(URL.createObjectURL(blob));
       return data.records;
     } catch (error) {
       console.error("Error fetching data:", error);
