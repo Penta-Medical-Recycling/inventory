@@ -173,11 +173,11 @@ main{
   border-radius: 50px;
 }
 
-#partner-content{
+/* #partner-content{
   width: 100vw;
   display: flex;
   justify-content: center;
-}
+} */
 
 .partnerOption:hover{
   cursor:pointer;
