@@ -1,4 +1,5 @@
 import MultipleSelect from "./MultipleSelect";
+import SizeSlider from "./SizeSlider";
 const SideBar = ({
   isActive,
   setIsActive,
@@ -25,6 +26,7 @@ const SideBar = ({
         selectedSKU={selectedSKU}
         setSelectedSKU={setSelectedSKU}
       />
+      <SizeSlider />
     </div>
   );
 };
