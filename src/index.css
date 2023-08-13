@@ -119,16 +119,16 @@ main{
   border-top-right-radius: 30px;
   border-bottom-right-radius: 30px;
   background-color: white;
-  width: 50vw;
-  height: 100vh;
-  left: -50vw;
+  width: 350px;
+  height: 100%;
+  left: -350px;
   transition: all .3s ease-in;
   z-index: 6;
 }
 
 .is-filter-active {
   box-shadow: 0 0 0 99999px rgba(0, 0, 0, .5);
-  margin-left: 50vw;
+  margin-left: 350px;
 }
 
 #side-bar-top {
@@ -218,6 +218,7 @@ header p {
   width: 100%;
   height: 45px;
   align-items: center;
+  
 }
 
 .size-input .field .slider-input {
@@ -244,6 +245,10 @@ input[type="number"]::-webkit-inner-spin-button {
   font-size: 19px;
   align-items: center;
   justify-content: center;
+}
+
+.separator{
+  margin-top: -15px;
 }
 
 .slider {
@@ -325,4 +330,15 @@ input[type="range"]::-moz-range-thumb {
 .switch.on .circle {
   transform: translateX(30px);
   background-color: blue;
+}
+
+@media screen and (max-width: 600px) {
+  .filter-3{
+    width: 90px;
+  }
+}
+@media screen and (max-width: 400px) {
+  .filter-3{
+    width: 80px;
+  }
 }
