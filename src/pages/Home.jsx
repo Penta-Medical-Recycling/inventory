@@ -52,7 +52,7 @@ function Home({
   }, [offset, offsetArray]);
 
   return (
-    <>
+    <div className={isActive ? 'sidebar-active' : ''}>
       <div id="text-section">
         <h1
           className="is-size-2 has-text-weight-bold has-text-centered"
@@ -260,7 +260,7 @@ function Home({
       ) : (
         <></>
       )}
-    </>
+    </div>
   );
 }
 
