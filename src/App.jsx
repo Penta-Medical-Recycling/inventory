@@ -17,6 +17,9 @@ function App() {
   const [selectedPartner, setSelectedPartner] = useState(
     localStorage.getItem("partner") || ""
   );
+  const [minValue, setMinValue] = useState(5);
+  const [maxValue, setMaxValue] = useState(15);
+  const [isOn, setIsOn] = useState(false);
   return (
     <>
       <SideBar
@@ -26,6 +29,12 @@ function App() {
         setSelectedManufacturer={setSelectedManufacturer}
         selectedSKU={selectedSKU}
         setSelectedSKU={setSelectedSKU}
+        minValue={minValue}
+        setMinValue={setMinValue}
+        maxValue={maxValue}
+        setMaxValue={setMaxValue}
+        isOn={isOn}
+        setIsOn={setIsOn}
       />
       <main>
         <NavBar cartCount={cartCount} selectedPartner={selectedPartner} />
@@ -42,6 +51,9 @@ function App() {
                 setSelectedManufacturer={setSelectedManufacturer}
                 selectedSKU={selectedSKU}
                 setSelectedSKU={setSelectedSKU}
+                minValue={minValue}
+                maxValue={maxValue}
+                isOn={isOn}
               />
             }
           ></Route>

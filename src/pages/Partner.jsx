@@ -135,7 +135,7 @@ const Partner = ({ setSelectedPartner }) => {
             aria-controls="dropdown-menu"
             id="partner-dropdown"
           >
-            <span>{partner || "Select a Partner"}</span>
+            <span style={{overflow: 'hidden'}}>{partner || "Select a Partner"}</span>
             <span className="icon is-small">
               <i className="fas fa-angle-down" aria-hidden="true"></i>
             </span>

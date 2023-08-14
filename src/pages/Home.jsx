@@ -10,6 +10,9 @@ function Home({
   setSelectedManufacturer,
   selectedSKU,
   setSelectedSKU,
+  minValue,
+  maxValue,
+  isOn
 }) {
   const [selectedFilter, setSelectedFilters] = useState({
     Prosthesis: false,
@@ -207,6 +210,9 @@ function Home({
         offset={offset}
         setOffset={setOffset}
         setCsv={setCsv}
+        minValue={minValue}
+        maxValue={maxValue}
+        isOn={isOn}
       />
       {page === "Next" ? (
         <div className="is-flex is-justify-content-center">

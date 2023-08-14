@@ -2,10 +2,16 @@
 
 import { useState } from 'react';
 
-const SizeSlider = () => {
-    const [minValue, setMinValue] = useState(5);
-    const [maxValue, setMaxValue] = useState(15);
-    const [isOn, setIsOn] = useState(false);
+const SizeSlider = ({
+    minValue,
+    setMinValue,
+    maxValue,
+    setMaxValue,
+    isOn,
+    setIsOn }) => {
+    // const [minValue, setMinValue] = useState(5);
+    // const [maxValue, setMaxValue] = useState(15);
+    // const [isOn, setIsOn] = useState(false);
 
     const toggleSwitch = () => {
         setIsOn(prevState => !prevState);
@@ -20,7 +26,7 @@ const SizeSlider = () => {
 
     const handleMaxChange = (event) => {
         const newMaxValue = parseInt(event.target.value);
-        if (newMaxValue > minValue && newMaxValue <= 20) {
+        if (newMaxValue > minValue && newMaxValue <= 55) {
             setMaxValue(newMaxValue);
         }
     };
@@ -34,7 +40,7 @@ const SizeSlider = () => {
 
     const handleMaxSliderChange = (event) => {
         const newMaxValue = parseInt(event.target.value);
-        if (newMaxValue > minValue && newMaxValue <= 20) {
+        if (newMaxValue > minValue && newMaxValue <= 55) {
             setMaxValue(newMaxValue);
         }
     };
@@ -59,7 +65,7 @@ const SizeSlider = () => {
                         value={minValue}
                         onChange={handleMinChange}
                         min="1"
-                        max="20" // Added max attribute
+                        max="55" // Added max attribute
                     />
                 </div>
                 <div className="separator">-</div>
@@ -71,7 +77,7 @@ const SizeSlider = () => {
                         value={maxValue}
                         onChange={handleMaxChange}
                         min="1"
-                        max="20" // Added max attribute
+                        max="55" // Added max attribute
                     />
                 </div>
             </div>
@@ -79,8 +85,8 @@ const SizeSlider = () => {
                 <div
                     className="progress"
                     style={{
-                        left: `${((minValue - 1) / (20 - 1)) * 100}%`,
-                        width: `${((maxValue - minValue) / (20 - 1)) * 100}%`,
+                        left: `${((minValue - 1) / (55 - 1)) * 100}%`,
+                        width: `${((maxValue - minValue) / (55 - 1)) * 100}%`,
                     }}
                 ></div>
             </div>
@@ -89,7 +95,7 @@ const SizeSlider = () => {
                     type="range"
                     className="range-min"
                     min="1"
-                    max="20"
+                    max="55" // Update max attribute
                     value={minValue}
                     step="1"
                     onChange={handleMinSliderChange}
@@ -98,7 +104,7 @@ const SizeSlider = () => {
                     type="range"
                     className="range-max"
                     min="1"
-                    max="20"
+                    max="55" // Update max attribute
                     value={maxValue}
                     step="1"
                     onChange={handleMaxSliderChange}
