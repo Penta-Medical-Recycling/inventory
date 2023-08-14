@@ -30,8 +30,10 @@ const CardLister = ({
 
   useEffect(() => {
     const debounceTimeout = setTimeout(() => {
-      setDebouncedMinValue(minValue);
-      setDebouncedMaxValue(maxValue);
+      if (isOn) {
+        setDebouncedMinValue(minValue);
+        setDebouncedMaxValue(maxValue)
+      };
     }, 1000);
 
     return () => {
