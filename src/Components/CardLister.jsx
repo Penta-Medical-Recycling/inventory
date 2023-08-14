@@ -32,7 +32,7 @@ const CardLister = ({
     const debounceTimeout = setTimeout(() => {
       if (isOn) {
         setDebouncedMinValue(minValue);
-        setDebouncedMaxValue(maxValue)
+        setDebouncedMaxValue(maxValue);
       };
     }, 1000);
 

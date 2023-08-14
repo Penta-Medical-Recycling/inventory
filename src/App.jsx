@@ -37,7 +37,7 @@ function App() {
         setIsOn={setIsOn}
       />
       <main>
-        <NavBar cartCount={cartCount} selectedPartner={selectedPartner} />
+        <NavBar cartCount={cartCount} selectedPartner={selectedPartner} isActive={isActive}/>
         <Routes>
           <Route
             path="/"
