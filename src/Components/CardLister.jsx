@@ -14,6 +14,9 @@ const CardLister = ({
   setOffset,
   offset,
   setCsv,
+  minValue,
+  maxValue,
+  isOn
 }) => {
   const [data, setData] = useState([]);
   const apiKey = "keyi3gjKvW7SaqhE4";
@@ -21,6 +24,20 @@ const CardLister = ({
   const tableName = "Inventory";
   const [button, setButton] = useState(1);
   const [isLoading, setIsLoading] = useState(true);
+
+  const [debouncedMinValue, setDebouncedMinValue] = useState(minValue);
+  const [debouncedMaxValue, setDebouncedMaxValue] = useState(maxValue);
+
+  useEffect(() => {
+    const debounceTimeout = setTimeout(() => {
+      setDebouncedMinValue(minValue);
+      setDebouncedMaxValue(maxValue);
+    }, 1000);
+
+    return () => {
+      clearTimeout(debounceTimeout);
+    };
+  }, [minValue, maxValue]);
 
   const encodedTableName = encodeURIComponent(tableName);
 
@@ -38,7 +55,7 @@ const CardLister = ({
     if (
       skus.length > 0 ||
       manufacturers.length > 0 ||
-      selectedTags.length > 0
+      selectedTags.length > 0 || isOn
     ) {
       if (skus.length > 0) {
         url += `,OR(${skus.map((sku) => `{SKU}='${sku}'`).join(",")})`;
@@ -50,6 +67,9 @@ const CardLister = ({
       }
       if (selectedTags.length > 0) {
         url += `,OR(${selectedTags.map((tag) => `{Tag}='${tag}'`).join(",")})`;
+      }
+      if (isOn) {
+        url += `,AND({Size} >= ${minValue}, {Size} <= ${maxValue})`;
       }
     }
     url += ")&offset=" + offsetArray[offset];
@@ -71,11 +91,9 @@ const CardLister = ({
       let header = "ID,Description,Size,Model/Type,Manufacturer\n";
       for (let i = 0; i < data.records.length; i++) {
         let record = data.records[i].fields;
-        header += `"${record["Item ID"] || ""}","${
-          record["Description (from SKU)"] || ""
-        }","${record["Size"] || ""}","${record["Model/Type"] || ""}","${
-          record["Manufacturer"] || ""
-        }"\n`;
+        header += `"${record["Item ID"] || ""}","${record["Description (from SKU)"] || ""
+          }","${record["Size"] || ""}","${record["Model/Type"] || ""}","${record["Manufacturer"] || ""
+          }"\n`;
       }
       console.log(header);
       //should only be trigger on button press, not on ever page load.
@@ -93,12 +111,12 @@ const CardLister = ({
       setData(records);
       setIsLoading(false);
     });
-  }, [selectedManufacturer, selectedSKU, selectedFilter, offset]);
+  }, [selectedManufacturer, selectedSKU, selectedFilter, offset, isOn, debouncedMinValue, debouncedMaxValue]);
 
   useEffect(() => {
     setOffset(0);
     setOffsetArray([""]);
-  }, [selectedManufacturer, selectedSKU, selectedFilter]);
+  }, [selectedManufacturer, selectedSKU, selectedFilter, isOn, debouncedMinValue, debouncedMaxValue]);
 
   return (
     <>
@@ -128,7 +146,7 @@ const CardLister = ({
                       <p>SKU: {item.fields["SKU"]}</p>
                       <p>Tag: {item.fields["Tag"]}</p>
                       {!localStorage.getItem([item.fields["Item ID"]]) &&
-                      button ? (
+                        button ? (
                         <button
                           className="button"
                           style={{ backgroundColor: "#78d3fb", color: "white" }}
