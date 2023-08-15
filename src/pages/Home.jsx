@@ -135,7 +135,7 @@ function Home({
           >
             <p>Pediatric</p>
           </div>
-          <div id="filter-button" onClick={activeToggle}>
+          <div id="filter-button" onClick={activeToggle} className={isOn || selectedManufacturer.length || selectedSKU.length ? 'filter-button-active' : ''}>
             <p>Filters</p>
             <svg
               xmlns="http://www.w3.org/2000/svg"
