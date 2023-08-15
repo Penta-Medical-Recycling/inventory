@@ -344,6 +344,10 @@ input[type="range"]::-moz-range-thumb {
   background-color: blue;
 }
 
+.size-off{
+  display: none;
+}
+
 @media screen and (max-width: 600px) {
   .filter-3{
     width: 90px;
