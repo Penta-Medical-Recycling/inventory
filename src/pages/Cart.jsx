@@ -19,7 +19,8 @@ function Cart({ cartCount, setCartCount, selectedPartner }) {
   const requestButton = (event) => {
     event.preventDefault();
     const BaseID = "appBrTbPbyamI0H6Z";
-    const APIKey = config.SECRET_API_KEY;
+    // const APIKey = config.SECRET_API_KEY;
+    const APIKey = import.meta.env.VITE_REACT_APP_API_KEY;
     const tableName = "Requests";
     setErrorMessage("");
     const items = [];

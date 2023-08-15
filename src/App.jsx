@@ -17,8 +17,8 @@ function App() {
   const [selectedPartner, setSelectedPartner] = useState(
     localStorage.getItem("partner") || ""
   );
-  const [minValue, setMinValue] = useState(5);
-  const [maxValue, setMaxValue] = useState(15);
+  const [minValue, setMinValue] = useState(1);
+  const [maxValue, setMaxValue] = useState(55);
   const [isOn, setIsOn] = useState(false);
   return (
     <>
