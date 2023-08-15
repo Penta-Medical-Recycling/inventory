@@ -93,6 +93,12 @@ main{
   margin-top: -2.5px;
 }
 
+#filter-button.filter-button-active{
+  background-color: #474747;
+  color: white;
+  fill: #ffffff;
+}
+
 .filter-3 {
   display: flex;
   align-items: center;
