@@ -19,7 +19,7 @@ const CardLister = ({
   isOn
 }) => {
   const [data, setData] = useState([]);
-  const apiKey = "keyi3gjKvW7SaqhE4";
+  const apiKey = config.SECRET_API_KEY;
   const baseId = "appnx8gtnlQx5b7nI";
   const tableName = "Inventory";
   const [button, setButton] = useState(1);
