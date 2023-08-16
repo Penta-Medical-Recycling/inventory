@@ -16,14 +16,14 @@ const CardLister = ({
   setCsv,
   minValue,
   maxValue,
-  isOn
+  isOn,
 }) => {
   const [data, setData] = useState([]);
   // const apiKey = config.SECRET_API_KEY;
   const apiKey = import.meta.env.VITE_REACT_APP_API_KEY;
-  useEffect(()=> {
-    console.log(import.meta.env)
-  },[])
+  useEffect(() => {
+    console.log(import.meta.env);
+  }, []);
   const baseId = "appnx8gtnlQx5b7nI";
   const tableName = "Inventory";
   const [button, setButton] = useState(1);
@@ -37,7 +37,7 @@ const CardLister = ({
       if (isOn) {
         setDebouncedMinValue(minValue);
         setDebouncedMaxValue(maxValue);
-      };
+      }
     }, 1000);
 
     return () => {
@@ -61,7 +61,8 @@ const CardLister = ({
     if (
       skus.length > 0 ||
       manufacturers.length > 0 ||
-      selectedTags.length > 0 || isOn
+      selectedTags.length > 0 ||
+      isOn
     ) {
       if (skus.length > 0) {
         url += `,OR(${skus.map((sku) => `{SKU}='${sku}'`).join(",")})`;
@@ -94,18 +95,6 @@ const CardLister = ({
       if (data.offset && !offsetArray[offset + 1]) {
         setOffsetArray([...offsetArray, data.offset]);
       }
-      let header = "ID,Description,Size,Model/Type,Manufacturer\n";
-      for (let i = 0; i < data.records.length; i++) {
-        let record = data.records[i].fields;
-        header += `"${record["Item ID"] || ""}","${record["Description (from SKU)"] || ""
-          }","${record["Size"] || ""}","${record["Model/Type"] || ""}","${record["Manufacturer"] || ""
-          }"\n`;
-      }
-      console.log(header);
-      //should only be trigger on button press, not on ever page load.
-      //also should it only download an csv based on the current filters? Or should it always be a download of EVERY item?
-      const blob = new Blob([header], { type: "text/csv" });
-      setCsv(URL.createObjectURL(blob));
       return data.records;
     } catch (error) {
       console.error("Error fetching data:", error);
@@ -117,12 +106,27 @@ const CardLister = ({
       setData(records);
       setIsLoading(false);
     });
-  }, [selectedManufacturer, selectedSKU, selectedFilter, offset, isOn, debouncedMinValue, debouncedMaxValue]);
+  }, [
+    selectedManufacturer,
+    selectedSKU,
+    selectedFilter,
+    offset,
+    isOn,
+    debouncedMinValue,
+    debouncedMaxValue,
+  ]);
 
   useEffect(() => {
     setOffset(0);
     setOffsetArray([""]);
-  }, [selectedManufacturer, selectedSKU, selectedFilter, isOn, debouncedMinValue, debouncedMaxValue]);
+  }, [
+    selectedManufacturer,
+    selectedSKU,
+    selectedFilter,
+    isOn,
+    debouncedMinValue,
+    debouncedMaxValue,
+  ]);
 
   return (
     <>
@@ -152,7 +156,7 @@ const CardLister = ({
                       <p>SKU: {item.fields["SKU"]}</p>
                       <p>Tag: {item.fields["Tag"]}</p>
                       {!localStorage.getItem([item.fields["Item ID"]]) &&
-                        button ? (
+                      button ? (
                         <button
                           className="button"
                           style={{ backgroundColor: "#78d3fb", color: "white" }}
