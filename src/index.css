@@ -348,6 +348,14 @@ input[type="range"]::-moz-range-thumb {
   display: none;
 }
 
+#search-clear{
+  pointer-events: initial
+}
+
+#search-clear:hover{
+  cursor: pointer;
+}
+
 @media screen and (max-width: 600px) {
   .filter-3{
     width: 90px;
