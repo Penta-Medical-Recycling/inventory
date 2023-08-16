@@ -90,8 +90,11 @@ const CardLister = ({
         url += `,AND({Size} >= ${minValue}, {Size} <= ${maxValue})`;
       }
       if (debouncedSearchValue) {
-        url += `,SEARCH("${debouncedSearchValue.toLowerCase()}", {Concat2})`;
+        const searchTerms = debouncedSearchValue.toLowerCase().split(" ");
+        const searchConditions = searchTerms.map(term => `SEARCH("${term}", {Concat2})`);
+        url += `,AND(${searchConditions.join(",")})`;
       }
+
     }
     url += ")&offset=" + offsetArray[offset];
 
