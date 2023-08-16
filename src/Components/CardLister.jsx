@@ -19,7 +19,11 @@ const CardLister = ({
   isOn
 }) => {
   const [data, setData] = useState([]);
-  const apiKey = "keyi3gjKvW7SaqhE4";
+  // const apiKey = config.SECRET_API_KEY;
+  const apiKey = import.meta.env.VITE_REACT_APP_API_KEY;
+  useEffect(()=> {
+    console.log(import.meta.env)
+  },[])
   const baseId = "appnx8gtnlQx5b7nI";
   const tableName = "Inventory";
   const [button, setButton] = useState(1);

@@ -19,7 +19,8 @@ function Cart({ cartCount, setCartCount, selectedPartner }) {
   const requestButton = (event) => {
     event.preventDefault();
     const BaseID = "appBrTbPbyamI0H6Z";
-    const APIKey = "keyi3gjKvW7SaqhE4";
+    // const APIKey = config.SECRET_API_KEY;
+    const APIKey = import.meta.env.VITE_REACT_APP_API_KEY;
     const tableName = "Requests";
     setErrorMessage("");
     const items = [];
@@ -77,14 +78,14 @@ function Cart({ cartCount, setCartCount, selectedPartner }) {
 
   const missingInfo = () => {
     !notes &&
-    Object.keys(localStorage).filter((k) => k !== "partner" && k !== "notes")
-      .length === 0
+      Object.keys(localStorage).filter((k) => k !== "partner" && k !== "notes")
+        .length === 0
       ? setErrorMessage(
-          "Please add additional notes, and add items to your cart"
-        )
+        "Please add additional notes, and add items to your cart"
+      )
       : !notes
-      ? setErrorMessage("Please add additional notes")
-      : setErrorMessage("Please add items to your cart");
+        ? setErrorMessage("Please add additional notes")
+        : setErrorMessage("Please add items to your cart");
   };
 
   return (
@@ -115,9 +116,9 @@ function Cart({ cartCount, setCartCount, selectedPartner }) {
           type="button"
           onClick={
             notes &&
-            Object.keys(localStorage).filter(
-              (k) => k !== "partner" && k !== "notes"
-            ).length >= 1
+              Object.keys(localStorage).filter(
+                (k) => k !== "partner" && k !== "notes"
+              ).length >= 1
               ? requestButton
               : missingInfo
           }

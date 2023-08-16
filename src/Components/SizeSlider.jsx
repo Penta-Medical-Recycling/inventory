@@ -54,9 +54,9 @@ const SizeSlider = ({
                         <div className="circle" />
                     </div>
                 </div>
-                <p>Use slider or enter min and max size</p>
+                <p>Use slider to enter min and max size</p>
             </header>
-            <div className="size-input">
+            <div className={isOn ? "size-input": "size-off size-input"}>
                 <div className="field">
                     <span>Min</span>
                     <input
@@ -81,7 +81,7 @@ const SizeSlider = ({
                     />
                 </div>
             </div>
-            <div className="slider">
+            <div className={isOn ? "slider": "size-off slider"}>
                 <div
                     className="progress"
                     style={{
@@ -90,7 +90,7 @@ const SizeSlider = ({
                     }}
                 ></div>
             </div>
-            <div className="range-input">
+            <div className={isOn ? "range-input": "size-off range-input"}>
                 <input
                     type="range"
                     className="range-min"
