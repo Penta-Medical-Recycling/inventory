@@ -147,7 +147,7 @@ const CardLister = ({
     <>
       {isLoading ? (
         <LoadingScreen />
-      ) : (
+      ) : data.length? (
         <div id="cardDiv">
           {data.map(
             (item) =>
@@ -205,7 +205,7 @@ const CardLister = ({
               )
           )}
         </div>
-      )}
+      ) : (<p className="is-size-4 has-text-weight-bold has-text-centered">No Results Found</p>)}
     </>
   );
 };

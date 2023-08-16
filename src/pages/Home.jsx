@@ -27,6 +27,9 @@ function Home({
   const onSearchChange = (e) => {
     setSearchInput(e.target.value)
   }
+  const clearSearchInput = () => {
+    setSearchInput("");
+  };
   const [page, setPage] = useState("Next");
   const activeToggle = () => {
     setIsActive(!isActive);
@@ -109,11 +112,9 @@ function Home({
         data = await response.json();
         for (let i = 0; i < data.records.length; i++) {
           let record = data.records[i].fields;
-          header += `"${record["Item ID"] || ""}","${
-            record["Description (from SKU)"] || ""
-          }","${record["Size"] || ""}","${record["Model/Type"] || ""}","${
-            record["Manufacturer"] || ""
-          }"\n`;
+          header += `"${record["Item ID"] || ""}","${record["Description (from SKU)"] || ""
+            }","${record["Size"] || ""}","${record["Model/Type"] || ""}","${record["Manufacturer"] || ""
+            }"\n`;
         }
         if (data.offset) {
           break;
@@ -163,17 +164,23 @@ function Home({
           <div id="search-form">
             <form>
               <div className="field">
-                <div className="control has-icons-left">
+                <div className="control has-icons-left has-icons-right">
                   <input
                     className="input"
                     type="text"
                     placeholder="Search by description, size, or model/type"
+                    value={searchInput}
                     onChange={onSearchChange}
                     style={{ width: "80vw" }}
-                  ></input>
+                  />
                   <span className="icon is-small is-left">
                     <i className="fas fa-search"></i>
                   </span>
+                  {searchInput && ( // Conditionally render clear button
+                    <span className="icon is-small is-right" onClick={clearSearchInput} id='search-clear'>
+                      <i className="fas fa-times"></i>
+                    </span>
+                  )}
                 </div>
               </div>
             </form>
