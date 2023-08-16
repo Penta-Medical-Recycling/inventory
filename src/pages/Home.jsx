@@ -23,6 +23,10 @@ function Home({
   const [next, setNext] = useState("");
   const [offset, setOffset] = useState(0);
   const [offsetArray, setOffsetArray] = useState([""]);
+  const [searchInput, setSearchInput] = useState('');
+  const onSearchChange = (e) => {
+    setSearchInput(e.target.value)
+  }
   const [page, setPage] = useState("Next");
   const activeToggle = () => {
     setIsActive(!isActive);
@@ -164,6 +168,7 @@ function Home({
                     className="input"
                     type="text"
                     placeholder="Search by description, size, or model/type"
+                    onChange={onSearchChange}
                     style={{ width: "80vw" }}
                   ></input>
                   <span className="icon is-small is-left">
@@ -316,6 +321,7 @@ function Home({
         minValue={minValue}
         maxValue={maxValue}
         isOn={isOn}
+        searchInput={searchInput}
       />
       {page === "Next" ? (
         <div className="is-flex is-justify-content-center">

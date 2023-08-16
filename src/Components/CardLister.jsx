@@ -17,13 +17,14 @@ const CardLister = ({
   minValue,
   maxValue,
   isOn,
+  searchInput
 }) => {
   const [data, setData] = useState([]);
   // const apiKey = config.SECRET_API_KEY;
   const apiKey = import.meta.env.VITE_REACT_APP_API_KEY;
   useEffect(() => {
-    console.log(import.meta.env);
-  }, []);
+    console.log(import.meta.env)
+  }, [])
   const baseId = "appnx8gtnlQx5b7nI";
   const tableName = "Inventory";
   const [button, setButton] = useState(1);
@@ -31,19 +32,30 @@ const CardLister = ({
 
   const [debouncedMinValue, setDebouncedMinValue] = useState(minValue);
   const [debouncedMaxValue, setDebouncedMaxValue] = useState(maxValue);
+  const [debouncedSearchValue, setDebouncedSearchValue] = useState(searchInput)
 
   useEffect(() => {
     const debounceTimeout = setTimeout(() => {
       if (isOn) {
         setDebouncedMinValue(minValue);
         setDebouncedMaxValue(maxValue);
-      }
+      };
     }, 1000);
 
     return () => {
       clearTimeout(debounceTimeout);
     };
   }, [minValue, maxValue]);
+
+  useEffect(() => {
+    const debounceTimeout = setTimeout(() => {
+      setDebouncedSearchValue(searchInput)
+    }, 1000);
+
+    return () => {
+      clearTimeout(debounceTimeout);
+    };
+  }, [searchInput]);
 
   const encodedTableName = encodeURIComponent(tableName);
 
@@ -61,8 +73,7 @@ const CardLister = ({
     if (
       skus.length > 0 ||
       manufacturers.length > 0 ||
-      selectedTags.length > 0 ||
-      isOn
+      selectedTags.length > 0 || isOn || debouncedSearchValue
     ) {
       if (skus.length > 0) {
         url += `,OR(${skus.map((sku) => `{SKU}='${sku}'`).join(",")})`;
@@ -77,6 +88,9 @@ const CardLister = ({
       }
       if (isOn) {
         url += `,AND({Size} >= ${minValue}, {Size} <= ${maxValue})`;
+      }
+      if (debouncedSearchValue) {
+        url += `,SEARCH("${debouncedSearchValue.toLowerCase()}", {Concat2})`;
       }
     }
     url += ")&offset=" + offsetArray[offset];
@@ -95,6 +109,18 @@ const CardLister = ({
       if (data.offset && !offsetArray[offset + 1]) {
         setOffsetArray([...offsetArray, data.offset]);
       }
+      let header = "ID,Description,Size,Model/Type,Manufacturer\n";
+      for (let i = 0; i < data.records.length; i++) {
+        let record = data.records[i].fields;
+        header += `"${record["Item ID"] || ""}","${record["Description (from SKU)"] || ""
+          }","${record["Size"] || ""}","${record["Model/Type"] || ""}","${record["Manufacturer"] || ""
+          }"\n`;
+      }
+      console.log(header);
+      //should only be trigger on button press, not on ever page load.
+      //also should it only download an csv based on the current filters? Or should it always be a download of EVERY item?
+      const blob = new Blob([header], { type: "text/csv" });
+      setCsv(URL.createObjectURL(blob));
       return data.records;
     } catch (error) {
       console.error("Error fetching data:", error);
@@ -102,31 +128,17 @@ const CardLister = ({
     }
   }
   useEffect(() => {
+    setIsLoading(true)
     fetchData().then((records) => {
       setData(records);
       setIsLoading(false);
     });
-  }, [
-    selectedManufacturer,
-    selectedSKU,
-    selectedFilter,
-    offset,
-    isOn,
-    debouncedMinValue,
-    debouncedMaxValue,
-  ]);
+  }, [selectedManufacturer, selectedSKU, selectedFilter, offset, isOn, debouncedMinValue, debouncedMaxValue, debouncedSearchValue]);
 
   useEffect(() => {
     setOffset(0);
     setOffsetArray([""]);
-  }, [
-    selectedManufacturer,
-    selectedSKU,
-    selectedFilter,
-    isOn,
-    debouncedMinValue,
-    debouncedMaxValue,
-  ]);
+  }, [selectedManufacturer, selectedSKU, selectedFilter, isOn, debouncedMinValue, debouncedMaxValue, debouncedSearchValue]);
 
   return (
     <>
@@ -156,7 +168,7 @@ const CardLister = ({
                       <p>SKU: {item.fields["SKU"]}</p>
                       <p>Tag: {item.fields["Tag"]}</p>
                       {!localStorage.getItem([item.fields["Item ID"]]) &&
-                      button ? (
+                        button ? (
                         <button
                           className="button"
                           style={{ backgroundColor: "#78d3fb", color: "white" }}
