@@ -16,14 +16,15 @@ const CardLister = ({
   setCsv,
   minValue,
   maxValue,
-  isOn
+  isOn,
+  searchInput
 }) => {
   const [data, setData] = useState([]);
   // const apiKey = config.SECRET_API_KEY;
   const apiKey = import.meta.env.VITE_REACT_APP_API_KEY;
-  useEffect(()=> {
+  useEffect(() => {
     console.log(import.meta.env)
-  },[])
+  }, [])
   const baseId = "appnx8gtnlQx5b7nI";
   const tableName = "Inventory";
   const [button, setButton] = useState(1);
@@ -31,6 +32,7 @@ const CardLister = ({
 
   const [debouncedMinValue, setDebouncedMinValue] = useState(minValue);
   const [debouncedMaxValue, setDebouncedMaxValue] = useState(maxValue);
+  const [debouncedSearchValue, setDebouncedSearchValue] = useState(searchInput)
 
   useEffect(() => {
     const debounceTimeout = setTimeout(() => {
@@ -44,6 +46,16 @@ const CardLister = ({
       clearTimeout(debounceTimeout);
     };
   }, [minValue, maxValue]);
+
+  useEffect(() => {
+    const debounceTimeout = setTimeout(() => {
+      setDebouncedSearchValue(searchInput)
+    }, 1000);
+
+    return () => {
+      clearTimeout(debounceTimeout);
+    };
+  }, [searchInput]);
 
   const encodedTableName = encodeURIComponent(tableName);
 
@@ -61,7 +73,7 @@ const CardLister = ({
     if (
       skus.length > 0 ||
       manufacturers.length > 0 ||
-      selectedTags.length > 0 || isOn
+      selectedTags.length > 0 || isOn || debouncedSearchValue
     ) {
       if (skus.length > 0) {
         url += `,OR(${skus.map((sku) => `{SKU}='${sku}'`).join(",")})`;
@@ -76,6 +88,9 @@ const CardLister = ({
       }
       if (isOn) {
         url += `,AND({Size} >= ${minValue}, {Size} <= ${maxValue})`;
+      }
+      if (debouncedSearchValue) {
+        url += `,SEARCH("${debouncedSearchValue.toLowerCase()}", {Concat2})`;
       }
     }
     url += ")&offset=" + offsetArray[offset];
@@ -113,16 +128,17 @@ const CardLister = ({
     }
   }
   useEffect(() => {
+    setIsLoading(true)
     fetchData().then((records) => {
       setData(records);
       setIsLoading(false);
     });
-  }, [selectedManufacturer, selectedSKU, selectedFilter, offset, isOn, debouncedMinValue, debouncedMaxValue]);
+  }, [selectedManufacturer, selectedSKU, selectedFilter, offset, isOn, debouncedMinValue, debouncedMaxValue, debouncedSearchValue]);
 
   useEffect(() => {
     setOffset(0);
     setOffsetArray([""]);
-  }, [selectedManufacturer, selectedSKU, selectedFilter, isOn, debouncedMinValue, debouncedMaxValue]);
+  }, [selectedManufacturer, selectedSKU, selectedFilter, isOn, debouncedMinValue, debouncedMaxValue, debouncedSearchValue]);
 
   return (
     <>
