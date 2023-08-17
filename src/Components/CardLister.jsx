@@ -147,60 +147,82 @@ const CardLister = ({
     <>
       {isLoading ? (
         <LoadingScreen />
-      ) : data.length? (
+      ) : data.length ? (
         <div id="cardDiv">
           {data.map(
             (item) =>
               item.fields.SKU && (
                 <div className="card" key={item.id}>
-                  <div className="card-content">
-                    <div className="content">
-                      <p>ID: {item.fields["Item ID"]}</p>
-                      <p>
-                        Description: {item.fields["Description (from SKU)"]}
-                      </p>
+                  <div>
+                    <header class="card-header">
+                      <div className="has-text-centered" style={{width: '100%'}}>
+                        <p className="has-text-weight-bold ml-3 my-3" style={{ fontSize: '18px' }}>
+                          {item.fields["Description (from SKU)"]}
+                        </p>
+                        {/* <p className="has-text-grey ml-3 mb-3">ID: {item.fields["Item ID"]}</p> */}
+                      </div>
+                    </header>
+                    <div className="">
+                      <p className="has-text-weight-bold has-text-centered mt-4" style={{ fontSize: '18px' }}>{item.fields["Tag"]}</p>
+                      <hr className="mb-4 mt-3" style={{ margin: '0 auto', width: '80%' }}></hr>
+                    </div>
+                    <div className="content mx-5 mb-5">
+
+                      {item.fields["Manufacturer"] && (
+                        <div className="mb-4 has-text-centered" style={{ width: '50%' }}>
+                          <p className="has-text-weight-bold" style={{ margin: '0' }}>Manufacturer</p>
+                          <p>{item.fields["Manufacturer"]}</p>
+                        </div>
+                      )}
                       {item.fields["Size"] && (
-                        <p>Size: {item.fields["Size"]}</p>
+                        <div className="has-text-centered" style={{ width: '50%' }}>
+                          <p className="has-text-weight-bold has-text-centered" style={{ margin: '0' }}>Size</p>
+                          <p>{item.fields["Size"]}</p>
+                        </div>
                       )}
                       {item.fields["Model/Type"] && (
-                        <p>Model: {item.fields["Model/Type"]}</p>
+                        <div className="has-text-centered" style={{ width: '50%' }}>
+                          <p className="has-text-weight-bold has-text-centered" style={{ margin: '0' }}>Model</p>
+                          <p>{item.fields["Model/Type"]}</p>
+                        </div>
                       )}
-                      {item.fields["Manufacturer"] && (
-                        <p>Manufacturer: {item.fields["Manufacturer"]}</p>
-                      )}
-                      <p>SKU: {item.fields["SKU"]}</p>
-                      <p>Tag: {item.fields["Tag"]}</p>
-                      {!localStorage.getItem([item.fields["Item ID"]]) &&
-                        button ? (
-                        <button
-                          className="button"
-                          style={{ backgroundColor: "#78d3fb", color: "white" }}
-                          onClick={() => {
-                            localStorage.setItem(
-                              item.fields["Item ID"],
-                              JSON.stringify(item.fields)
-                            );
-                            setButton(button + 1);
-                            setCartCount(cartCount + 1);
-                          }}
-                        >
-                          Add to cart
-                        </button>
-                      ) : (
-                        <button
-                          className="button"
-                          style={{ backgroundColor: "#ff5c47", color: "white" }}
-                          onClick={() => {
-                            localStorage.removeItem(item.fields["Item ID"]);
-                            setButton(button + 1);
-                            setCartCount(cartCount - 1);
-                          }}
-                        >
-                          Remove From Cart
-                        </button>
-                      )}
+
+
                     </div>
                   </div>
+                  <footer className='card-footer'>
+                    {!localStorage.getItem([item.fields["Item ID"]]) &&
+                      button ? (
+                      <button
+                        className="button card-footer-item"
+                        style={{ backgroundColor: "#78d3fb", color: "white" }}
+                        onClick={() => {
+                          localStorage.setItem(
+                            item.fields["Item ID"],
+                            JSON.stringify(item.fields)
+                          );
+                          setButton(button + 1);
+                          setCartCount(cartCount + 1);
+                        }}
+                      >
+                        Add to cart
+                      </button>
+                    ) : (
+                      <button
+                        className="button card-footer-item"
+                        style={{ backgroundColor: "#ff5c47", color: "white" }}
+                        onClick={() => {
+                          localStorage.removeItem(item.fields["Item ID"]);
+                          setButton(button + 1);
+                          setCartCount(cartCount - 1);
+                        }}
+                      >
+                        Remove From Cart
+                      </button>
+                    )}
+                  </footer>
+
+
                 </div>
               )
           )}
