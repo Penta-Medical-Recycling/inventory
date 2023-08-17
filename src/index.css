@@ -14,8 +14,22 @@ main{
 }
 
 #cardDiv .card {
+  display:flex;
+  flex-direction: column;
+  justify-content: space-between;
   width: 300px;
   margin: 20px
+}
+
+.content{
+  /* display:flex;
+  flex-direction: column;
+  justify-content: flex-start; */
+  /* display:grid;
+  grid-template-columns: 1fr 1fr; */
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
 }
 
 #penta-title {
