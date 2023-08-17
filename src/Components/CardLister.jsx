@@ -164,7 +164,7 @@ const CardLister = ({
               item.fields.SKU && (
                 <div className="card" key={item.id}>
                   <div>
-                    <header class="card-header">
+                    <header className="card-header">
                       <div
                         className="has-text-centered"
                         style={{ width: "100%" }}
