@@ -93,10 +93,10 @@ function Cart({ cartCount, setCartCount, selectedPartner }) {
       <div id="text-section">
         <h1 className="title has-text-centered mt-6">CART</h1>
       </div>
-      <h1 className="has-text-centered is-size-5 mt-5 mb-3">
+      <h1 className="has-text-centered is-size-5 my-4">
         Hello, {selectedPartner} Member!
       </h1>
-      <Link to="/partner" className="is-flex is-justify-content-center">
+      <Link to="/partner" className="is-flex is-justify-content-center my-3">
         <button className="button">Change Partner</button>
       </Link>
 
