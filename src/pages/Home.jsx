@@ -23,19 +23,19 @@ function Home({
   const [next, setNext] = useState("");
   const [offset, setOffset] = useState(0);
   const [offsetArray, setOffsetArray] = useState([""]);
-  const [searchInput, setSearchInput] = useState('');
+  const [searchInput, setSearchInput] = useState("");
   const onSearchChange = (e) => {
-    setSearchInput(e.target.value)
-  }
+    setSearchInput(e.target.value);
+  };
   const clearSearchInput = () => {
     setSearchInput("");
   };
-  const [page, setPage] = useState("Next");
+  const [page, setPage] = useState("");
   const activeToggle = () => {
     setIsActive(!isActive);
   };
   const [loading, setLoading] = useState(false);
-  const [csv, setCsv] = useState("");
+  const [debouncedSearchValue, setDebouncedSearchValue] = useState(searchInput);
 
   const filterClick = (key) => {
     const newObj = { ...selectedFilter };
@@ -62,6 +62,7 @@ function Home({
   }, [offset, offsetArray]);
 
   async function createBlob() {
+    console.log(true);
     setLoading(true);
     const apiKey = import.meta.env.VITE_REACT_APP_API_KEY;
     const baseId = "appnx8gtnlQx5b7nI";
@@ -80,7 +81,8 @@ function Home({
       skus.length > 0 ||
       manufacturers.length > 0 ||
       selectedTags.length > 0 ||
-      isOn
+      isOn ||
+      debouncedSearchValue
     ) {
       if (skus.length > 0) {
         url += `,OR(${skus.map((sku) => `{SKU}='${sku}'`).join(",")})`;
@@ -96,6 +98,14 @@ function Home({
       if (isOn) {
         url += `,AND({Size} >= ${minValue}, {Size} <= ${maxValue})`;
       }
+      if (debouncedSearchValue) {
+        const searchTerms = debouncedSearchValue.toLowerCase().split(" ");
+        const searchConditions = searchTerms.map(
+          (term) => `SEARCH("${term}", {Concat2})`
+        );
+        url += `,AND(${searchConditions.join(",")})`;
+      }
+      console.log(url);
     }
     url += ")&offset=";
 
@@ -112,9 +122,11 @@ function Home({
         data = await response.json();
         for (let i = 0; i < data.records.length; i++) {
           let record = data.records[i].fields;
-          header += `"${record["Item ID"] || ""}","${record["Description (from SKU)"] || ""
-            }","${record["Size"] || ""}","${record["Model/Type"] || ""}","${record["Manufacturer"] || ""
-            }"\n`;
+          header += `"${record["Item ID"] || ""}","${
+            record["Description (from SKU)"] || ""
+          }","${record["Size"] || ""}","${record["Model/Type"] || ""}","${
+            record["Manufacturer"] || ""
+          }"\n`;
         }
         if (data.offset) {
           break;
@@ -177,27 +189,20 @@ function Home({
                     <i className="fas fa-search"></i>
                   </span>
                   {searchInput && ( // Conditionally render clear button
-                    <span className="icon is-small is-right" onClick={clearSearchInput} id='search-clear'>
+                    <span
+                      className="icon is-small is-right"
+                      onClick={clearSearchInput}
+                      id="search-clear"
+                    >
                       <i className="fas fa-times"></i>
                     </span>
                   )}
                 </div>
               </div>
             </form>
-            {/* <a download="data.csv" href={csv}>
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                height="1.5em"
-                viewBox="0 0 512 512"
-                id="download-button"
-              >
-                <path d="M288 32c0-17.7-14.3-32-32-32s-32 14.3-32 32V274.7l-73.4-73.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3l128 128c12.5 12.5 32.8 12.5 45.3 0l128-128c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L288 274.7V32zM64 352c-35.3 0-64 28.7-64 64v32c0 35.3 28.7 64 64 64H448c35.3 0 64-28.7 64-64V416c0-35.3-28.7-64-64-64H346.5l-45.3 45.3c-25 25-65.5 25-90.5 0L165.5 352H64zm368 56a24 24 0 1 1 0 48 24 24 0 1 1 0-48z" />
-              </svg> 
-              </a>*/}
             {loading ? (
               <LoadingSpinner />
             ) : (
-              // <a>
               <a onClick={createBlob}>
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
@@ -324,11 +329,13 @@ function Home({
         setOffsetArray={setOffsetArray}
         offset={offset}
         setOffset={setOffset}
-        setCsv={setCsv}
+        // setCsv={setCsv}
         minValue={minValue}
         maxValue={maxValue}
         isOn={isOn}
         searchInput={searchInput}
+        debouncedSearchValue={debouncedSearchValue}
+        setDebouncedSearchValue={setDebouncedSearchValue}
       />
       {page === "Next" ? (
         <div className="is-flex is-justify-content-center">
