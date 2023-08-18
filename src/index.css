@@ -108,7 +108,7 @@ main{
 }
 
 #filter-button.filter-button-active{
-  background-color: #474747;
+  background-color: #78d3fb;
   color: white;
   fill: #ffffff;
 }
@@ -132,7 +132,7 @@ main{
 }
 
 .filter-selected{
-  background-color: #474747;
+  background-color: #78d3fb;
   color: white;
 }
 
