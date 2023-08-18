@@ -212,7 +212,7 @@ main{
 
 ::selection {
   color: #fff;
-  background: #35b0fb;
+  background: #78d3fb;
 }
 
 .wrapper {
@@ -289,7 +289,7 @@ input[type="number"]::-webkit-inner-spin-button {
   height: 100%;
   position: absolute;
   border-radius: 5px;
-  background: #35b0fb;
+  background: #78d3fb;
   left: 0;
   right: 0;
 }
@@ -313,7 +313,7 @@ input[type="range"]::-webkit-slider-thumb {
   height: 17px;
   width: 17px;
   border-radius: 50%;
-  background: #35b0fb;
+  background: #78d3fb;
   pointer-events: auto;
   -webkit-appearance: none;
   box-shadow: 0 0 6px rgba(0, 0, 0, 0.05);
@@ -324,7 +324,7 @@ input[type="range"]::-moz-range-thumb {
   width: 17px;
   border: none;
   border-radius: 50%;
-  background: #35b0fb;
+  background: #78d3fb;
   pointer-events: auto;
   -moz-appearance: none;
   box-shadow: 0 0 6px rgba(0, 0, 0, 0.05);
@@ -355,7 +355,7 @@ input[type="range"]::-moz-range-thumb {
 
 .switch.on .circle {
   transform: translateX(30px);
-  background-color: #35b0fb;
+  background-color: #78d3fb;
 }
 
 .size-off{

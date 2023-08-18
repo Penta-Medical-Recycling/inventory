@@ -1,5 +1,7 @@
 import CardLister from "../Components/CardLister";
 import LoadingSpinner from "../Components/LoadingSpinner";
+import * as Papa from "papaparse";
+import * as XLSX from "xlsx/xlsx.mjs";
 import { useEffect, useState } from "react";
 
 function Home({
@@ -61,8 +63,15 @@ function Home({
     }
   }, [offset, offsetArray]);
 
-  async function createBlob() {
-    console.log(true);
+  const [isDropActive, setIsDropActive] = useState(false);
+
+  const toggleDropdown = (event) => {
+    event.stopPropagation();
+    setIsDropActive(!isDropActive);
+  };
+
+  async function createBlob(fileType) {
+    console.log(fileType);
     setLoading(true);
     const apiKey = import.meta.env.VITE_REACT_APP_API_KEY;
     const baseId = "appnx8gtnlQx5b7nI";
@@ -105,7 +114,6 @@ function Home({
         );
         url += `,AND(${searchConditions.join(",")})`;
       }
-      console.log(url);
     }
     url += ")&offset=";
 
@@ -130,16 +138,44 @@ function Home({
         }
         if (data.offset) {
           break;
-          // setNext(data.offset);
-          // we need to figure out how to download all the CSV data without an offset
-          // right now its only the csv of up until the first 100.
+          //   // setNext(data.offset);
+          //   // we need to figure out how to download all the CSV data without an offset
+          //   // right now its only the csv of up until the first 100.
         }
       } while (data.offset);
-      const blob = new Blob([header], { type: "text/csv" });
-      const link = document.createElement("a");
-      link.href = URL.createObjectURL(blob);
-      link.download = "Inventory Data";
-      link.click();
+
+      if (fileType === "csv") {
+        const blob = new Blob([header], { type: "text/csv" });
+        const link = document.createElement("a");
+        link.href = URL.createObjectURL(blob);
+        link.download = "Inventory Data";
+        link.click();
+      } else {
+        const { data: rows } = Papa.parse(header, { skipEmptyLines: true });
+        const workbook = XLSX.utils.book_new();
+        const sheetData = XLSX.utils.aoa_to_sheet(rows);
+        XLSX.utils.book_append_sheet(workbook, sheetData, "Sheet1");
+        const wopts = { bookType: "xlsx", bookSST: false, type: "binary" };
+        const wbout = XLSX.write(workbook, wopts);
+
+        const s2ab = (s) => {
+          const buf = new ArrayBuffer(s.length);
+          const view = new Uint8Array(buf);
+          for (let i = 0; i < s.length; i++) {
+            view[i] = s.charCodeAt(i) & 0xff;
+          }
+          return buf;
+        };
+
+        const blob = new Blob([s2ab(wbout)], {
+          type: "application/octet-stream",
+        });
+
+        const link = document.createElement("a");
+        link.href = URL.createObjectURL(blob);
+        link.download = "Inventory Data.xlsx";
+        link.click();
+      }
       setLoading(false);
       return data.records;
     } catch (error) {
@@ -200,20 +236,49 @@ function Home({
                 </div>
               </div>
             </form>
-            {loading ? (
-              <LoadingSpinner />
-            ) : (
-              <a onClick={createBlob}>
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  height="1.5em"
-                  viewBox="0 0 512 512"
-                  id="download-button"
+            <div className={`dropdown ${isDropActive ? "is-active" : ""}`}>
+              <div className="dropdown-trigger">
+                <button
+                  className="button"
+                  aria-haspopup="true"
+                  aria-controls="dropdown-menu3"
+                  onClick={toggleDropdown}
                 >
-                  <path d="M288 32c0-17.7-14.3-32-32-32s-32 14.3-32 32V274.7l-73.4-73.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3l128 128c12.5 12.5 32.8 12.5 45.3 0l128-128c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L288 274.7V32zM64 352c-35.3 0-64 28.7-64 64v32c0 35.3 28.7 64 64 64H448c35.3 0 64-28.7 64-64V416c0-35.3-28.7-64-64-64H346.5l-45.3 45.3c-25 25-65.5 25-90.5 0L165.5 352H64zm368 56a24 24 0 1 1 0 48 24 24 0 1 1 0-48z" />
-                </svg>
-              </a>
-            )}
+                  {loading ? (
+                    <LoadingSpinner />
+                  ) : (
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      height="1.5em"
+                      viewBox="0 0 512 512"
+                      id="download-button"
+                    >
+                      <path d="M288 32c0-17.7-14.3-32-32-32s-32 14.3-32 32V274.7l-73.4-73.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3l128 128c12.5 12.5 32.8 12.5 45.3 0l128-128c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L288 274.7V32zM64 352c-35.3 0-64 28.7-64 64v32c0 35.3 28.7 64 64 64H448c35.3 0 64-28.7 64-64V416c0-35.3-28.7-64-64-64H346.5l-45.3 45.3c-25 25-65.5 25-90.5 0L165.5 352H64zm368 56a24 24 0 1 1 0 48 24 24 0 1 1 0-48z" />
+                    </svg>
+                  )}
+                  <span className="icon is-small">
+                    <i className="fas fa-angle-down" aria-hidden="true"></i>
+                  </span>
+                </button>
+              </div>
+              <div className="dropdown-menu" id="dropdown-menu3" role="menu">
+                <div className="dropdown-content">
+                  <a
+                    className="dropdown-item"
+                    onClick={() => createBlob("csv")}
+                  >
+                    .csv
+                  </a>
+                  <a
+                    href="#"
+                    className="dropdown-item"
+                    onClick={() => createBlob("xlsx")}
+                  >
+                    .xlsx
+                  </a>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
         <div id="filter-buttons">
