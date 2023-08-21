@@ -1,11 +1,13 @@
 import React, { useEffect, useState } from "react";
 import CartLister from "../Components/CartLister";
 import { useNavigate, Link } from "react-router-dom";
+import LoadingScreen from "../Components/LoadingScreen";
 
 function Cart({ cartCount, setCartCount, selectedPartner }) {
   const navigate = useNavigate();
   const [errorMessage, setErrorMessage] = useState();
   const [notes, setNotes] = useState(localStorage.getItem("notes") || "");
+  const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
     if (!selectedPartner) navigate("/partner");
@@ -18,6 +20,7 @@ function Cart({ cartCount, setCartCount, selectedPartner }) {
 
   const requestButton = (event) => {
     event.preventDefault();
+    setIsLoading(true)
     const BaseID = "appBrTbPbyamI0H6Z";
     // const APIKey = config.SECRET_API_KEY;
     const APIKey = import.meta.env.VITE_REACT_APP_API_KEY;
@@ -63,7 +66,9 @@ function Cart({ cartCount, setCartCount, selectedPartner }) {
           const partner = localStorage["partner"];
           localStorage.clear();
           localStorage.setItem("partner", partner);
+          setIsLoading(false)
         }
+        
       })
       .catch((error) => {
         console.error("Error:", error);
@@ -100,7 +105,7 @@ function Cart({ cartCount, setCartCount, selectedPartner }) {
         <button className="button">Change Partner</button>
       </Link>
 
-      <CartLister cartCount={cartCount} setCartCount={setCartCount} />
+      {isLoading? <LoadingScreen />: <CartLister cartCount={cartCount} setCartCount={setCartCount} />}
 
       <div style={{ width: "60vw", margin: "auto" }}>
         <textarea
