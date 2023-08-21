@@ -219,7 +219,7 @@ function Home({
                     placeholder="Search by description, size, or model/type"
                     value={searchInput}
                     onChange={onSearchChange}
-                    style={{ width: "80vw" }}
+                    style={{ width: "75vw" }}
                   />
                   <span className="icon is-small is-left">
                     <i className="fas fa-search"></i>
@@ -261,7 +261,7 @@ function Home({
                   </span>
                 </button>
               </div>
-              <div className="dropdown-menu" id="dropdown-menu3" role="menu">
+              <div className="dropdown-menu" id="dropdown-menu3" role="menu" style={{minWidth: '87px'}}>
                 <div className="dropdown-content">
                   <a
                     className="dropdown-item"
