@@ -19,28 +19,28 @@ const SizeSlider = ({
 
     const handleMinChange = (event) => {
         const newMinValue = parseInt(event.target.value);
-        if (newMinValue < maxValue && newMinValue >= 1) {
+        if (newMinValue <= maxValue && newMinValue >= 1) {
             setMinValue(newMinValue);
         }
     };
 
     const handleMaxChange = (event) => {
         const newMaxValue = parseInt(event.target.value);
-        if (newMaxValue > minValue && newMaxValue <= 55) {
+        if (newMaxValue >= minValue && newMaxValue <= 55) {
             setMaxValue(newMaxValue);
         }
     };
 
     const handleMinSliderChange = (event) => {
         const newMinValue = parseInt(event.target.value);
-        if (newMinValue < maxValue && newMinValue >= 1) {
+        if (newMinValue <= maxValue && newMinValue >= 1) {
             setMinValue(newMinValue);
         }
     };
 
     const handleMaxSliderChange = (event) => {
         const newMaxValue = parseInt(event.target.value);
-        if (newMaxValue > minValue && newMaxValue <= 55) {
+        if (newMaxValue >= minValue && newMaxValue <= 55) {
             setMaxValue(newMaxValue);
         }
     };
