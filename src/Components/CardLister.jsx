@@ -126,20 +126,16 @@ const CardLister = ({
       setData(records);
       setIsLoading(false);
     });
-  }, [
-    selectedManufacturer,
-    selectedSKU,
-    selectedFilter,
-    offset,
-    isOn,
-    debouncedMinValue,
-    debouncedMaxValue,
-    debouncedSearchValue,
-  ]);
+  }, [offset, offsetArray]);
 
   useEffect(() => {
     setOffset(0);
     setOffsetArray([""]);
+    setIsLoading(true);
+    fetchData().then((records) => {
+      setData(records);
+      setIsLoading(false);
+    });
   }, [
     selectedManufacturer,
     selectedSKU,
