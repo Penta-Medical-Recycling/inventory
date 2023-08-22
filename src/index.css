@@ -2,7 +2,7 @@ body {
   background-color: #f7f7f9;
 }
 
-main{
+main {
   min-height: 100vh;
   padding-bottom: 50px;
 }
@@ -14,14 +14,14 @@ main{
 }
 
 #cardDiv .card {
-  display:flex;
+  display: flex;
   flex-direction: column;
   justify-content: space-between;
   width: 300px;
   margin: 20px
 }
 
-.content{
+.content {
   /* display:flex;
   flex-direction: column;
   justify-content: flex-start; */
@@ -109,7 +109,7 @@ main{
   margin-top: -2.5px;
 }
 
-#filter-button.filter-button-active{
+#filter-button.filter-button-active {
   background-color: #78d3fb;
   color: white;
   fill: #ffffff;
@@ -129,11 +129,11 @@ main{
   user-select: none;
 }
 
-.filter-3:hover{
+.filter-3:hover {
   cursor: pointer;
 }
 
-.filter-selected{
+.filter-selected {
   background-color: #78d3fb;
   color: white;
 }
@@ -193,7 +193,7 @@ main{
   justify-content: center;
 }
 
-#partner-dropdown{
+#partner-dropdown {
   width: 80vw;
   margin: auto;
   display: flex;
@@ -207,8 +207,8 @@ main{
   justify-content: center;
 } */
 
-.partnerOption:hover{
-  cursor:pointer;
+.partnerOption:hover {
+  cursor: pointer;
   background-color: rgb(234, 234, 234);
 }
 
@@ -246,7 +246,7 @@ header p {
   width: 100%;
   height: 45px;
   align-items: center;
-  
+
 }
 
 .size-input .field .slider-input {
@@ -275,7 +275,7 @@ input[type="number"]::-webkit-inner-spin-button {
   justify-content: center;
 }
 
-.separator{
+.separator {
   margin-top: -15px;
 }
 
@@ -284,7 +284,8 @@ input[type="number"]::-webkit-inner-spin-button {
   position: relative;
   background: #ddd;
   border-radius: 5px;
-  overflow: hidden; /* Added this line to hide overflow */
+  overflow: hidden;
+  /* Added this line to hide overflow */
 }
 
 .slider .progress {
@@ -360,25 +361,34 @@ input[type="range"]::-moz-range-thumb {
   background-color: #78d3fb;
 }
 
-.size-off{
+.size-off {
   display: none;
 }
 
-#search-clear{
+#search-clear {
   pointer-events: initial
 }
 
-#search-clear:hover{
+#search-clear:hover {
   cursor: pointer;
 }
 
+.num-pag {
+  width: 40px;
+  height: 40px;
+  border-radius: 50px;
+  background-color: #78d3fb;
+  color: white
+}
+
 @media screen and (max-width: 600px) {
-  .filter-3{
+  .filter-3 {
     width: 90px;
   }
 }
+
 @media screen and (max-width: 400px) {
-  .filter-3{
+  .filter-3 {
     width: 80px;
   }
 }

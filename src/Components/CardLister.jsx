@@ -20,6 +20,9 @@ const CardLister = ({
   searchInput,
   debouncedSearchValue,
   setDebouncedSearchValue,
+  isLoading,
+  setIsLoading,
+  
 }) => {
   const [data, setData] = useState([]);
   // const apiKey = config.SECRET_API_KEY;
@@ -27,7 +30,7 @@ const CardLister = ({
   const baseId = "appnx8gtnlQx5b7nI";
   const tableName = "Inventory";
   const [button, setButton] = useState(1);
-  const [isLoading, setIsLoading] = useState(true);
+  // const [isLoading, setIsLoading] = useState(true);
 
   const [debouncedMinValue, setDebouncedMinValue] = useState(minValue);
   const [debouncedMaxValue, setDebouncedMaxValue] = useState(maxValue);
