@@ -286,6 +286,7 @@ const MultipleSelect = ({
           labelledBy="Select"
         />
       </div>
+      <hr style={{ width: "80%", margin: "10px auto" }}></hr>
       <div style={{ width: "80%", margin: "0 auto 20px auto" }}>
         <h1 style={{
           fontSize: '23px',
