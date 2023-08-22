@@ -37,6 +37,7 @@ function Home({
     setIsActive(!isActive);
   };
   const [loading, setLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   const [debouncedSearchValue, setDebouncedSearchValue] = useState(searchInput);
 
   const filterClick = (key) => {
@@ -130,11 +131,9 @@ function Home({
         data = await response.json();
         for (let i = 0; i < data.records.length; i++) {
           let record = data.records[i].fields;
-          header += `"${record["Item ID"] || ""}","${
-            record["Description (from SKU)"] || ""
-          }","${record["Size"] || ""}","${record["Model/Type"] || ""}","${
-            record["Manufacturer"] || ""
-          }"\n`;
+          header += `"${record["Item ID"] || ""}","${record["Description (from SKU)"] || ""
+            }","${record["Size"] || ""}","${record["Model/Type"] || ""}","${record["Manufacturer"] || ""
+            }"\n`;
         }
         if (data.offset) {
           break;
@@ -261,7 +260,7 @@ function Home({
                   </span>
                 </button>
               </div>
-              <div className="dropdown-menu" id="dropdown-menu3" role="menu" style={{minWidth: '87px'}}>
+              <div className="dropdown-menu" id="dropdown-menu3" role="menu" style={{ minWidth: '87px' }}>
                 <div className="dropdown-content">
                   <a
                     className="dropdown-item"
@@ -337,51 +336,71 @@ function Home({
         </p>
       </div>
       {page === "Next" ? (
-        <div className="is-flex is-justify-content-center">
-          <nav className="pagination" role="navigation" aria-label="pagination">
-            <a
-              className="pagination-next"
-              onClick={() => setOffset(offset + 1)}
-            >
-              Next ⊳
-            </a>
-          </nav>
+        // <div className="is-flex is-justify-content-center">
+        //   <nav className="pagination" role="navigation" aria-label="pagination">
+        //     <a
+        //       className="pagination-next"
+        //       onClick={() => setOffset(offset + 1)}
+        //     >
+        //       Next ⊳
+        //     </a>
+        //   </nav>
+        // </div>
+        <div className="is-flex is-justify-content-center is-align-items-center">
+          <div style={{marginLeft: '33px' }} className='is-flex is-justify-content-center is-align-items-center has-text-weight-bold is-size-5 num-pag'>
+            <p>{offset + 1}</p>
+          </div>
+          <p className="is-size-4 ml-3 is-text-weight-bold" style={{ cursor: 'pointer' }} onClick={() => setOffset(offset + 1)}><i className="fas fas fa-angle-double-right"></i></p>
         </div>
       ) : page === "Previous" ? (
-        <div className="is-flex is-justify-content-center">
-          <nav className="pagination" role="navigation" aria-label="pagination">
-            <a
-              className="pagination-previous"
-              onClick={() => setOffset(offset - 1)}
-            >
-              ⊲ Previous
-            </a>
-          </nav>
+        // <div className="is-flex is-justify-content-center">
+        //   <nav className="pagination" role="navigation" aria-label="pagination">
+        //     <a
+        //       className="pagination-previous"
+        //       onClick={() => setOffset(offset - 1)}
+        //     >
+        //       ⊲ Previous
+        //     </a>
+        //   </nav>
+        // </div>
+        <div className="is-flex is-justify-content-center is-align-items-center">
+          <p className="is-size-4 mr-3 is-text-weight-bold" style={{ cursor: 'pointer' }} onClick={() => setOffset(offset - 1)}><i className="fas fas fa-angle-double-left"></i></p>
+          <div style={{ marginRight: '25px' }} className='is-flex is-justify-content-center is-align-items-center has-text-weight-bold is-size-5 num-pag'>
+            <p>{offset + 1}</p>
+          </div>
         </div>
       ) : page === "Next/Previous" ? (
-        <div className="is-flex is-justify-content-center">
-          <nav
-            className="pagination is-centered"
-            role="navigation"
-            aria-label="pagination"
-          >
-            <a
-              className="pagination-previous"
-              onClick={() => setOffset(offset - 1)}
-            >
-              ⊲ Previous
-            </a>
-            <a
-              className="pagination-next"
-              onClick={() => setOffset(offset + 1)}
-            >
-              Next ⊳
-            </a>
-          </nav>
+        // <div className="is-flex is-justify-content-center">
+        //   <nav
+        //     className="pagination is-centered"
+        //     role="navigation"
+        //     aria-label="pagination"
+        //   >
+        //     <a
+        //       className="pagination-previous"
+        //       onClick={() => setOffset(offset - 1)}
+        //     >
+        //       ⊲ Previous
+        //     </a>
+        //     <a
+        //       className="pagination-next"
+        //       onClick={() => setOffset(offset + 1)}
+        //     >
+        //       Next ⊳
+        //     </a>
+        //   </nav>
+        // </div>
+        <div className="is-flex is-justify-content-center is-align-items-center">
+          <p className="is-size-4 mr-3 is-text-weight-bold" style={{ cursor: 'pointer' }} onClick={() => setOffset(offset - 1)}><i className="fas fas fa-angle-double-left"></i></p>
+          <div className='is-flex is-justify-content-center is-align-items-center has-text-weight-bold is-size-5 num-pag'>
+            <p>{offset + 1}</p>
+          </div>
+          <p className="is-size-4 ml-3 is-text-weight-bold" style={{ cursor: 'pointer' }} onClick={() => setOffset(offset + 1)}><i className="fas fas fa-angle-double-right"></i></p>
         </div>
       ) : (
         <></>
-      )}
+      )
+      }
       <CardLister
         cartCount={cartCount}
         setCartCount={setCartCount}
@@ -401,54 +420,76 @@ function Home({
         searchInput={searchInput}
         debouncedSearchValue={debouncedSearchValue}
         setDebouncedSearchValue={setDebouncedSearchValue}
+        isLoading={isLoading}
+        setIsLoading={setIsLoading}
       />
       {page === "Next" ? (
-        <div className="is-flex is-justify-content-center">
-          <nav className="pagination" role="navigation" aria-label="pagination">
-            <a
-              className="pagination-next"
-              onClick={() => setOffset(offset + 1)}
-            >
-              Next ⊳
-            </a>
-          </nav>
+        // <div className="is-flex is-justify-content-center">
+        //   <nav className="pagination" role="navigation" aria-label="pagination">
+        //     <a
+        //       className="pagination-next"
+        //       onClick={() => setOffset(offset + 1)}
+        //     >
+        //       Next ⊳
+        //     </a>
+        //   </nav>
+        // </div>
+        <div className="is-flex is-justify-content-center is-align-items-center">
+          <div style={{ marginLeft: '25px' }} className='is-flex is-justify-content-center is-align-items-center has-text-weight-bold  is-size-5 num-pag'>
+            <p>{offset + 1}</p>
+          </div>
+          <p className="is-size-4 ml-3 is-text-weight-bold" style={{ cursor: 'pointer' }} onClick={() => setOffset(offset + 1)}><i className="fas fas fa-angle-double-right"></i></p>
         </div>
       ) : page === "Previous" ? (
-        <div className="is-flex is-justify-content-center">
-          <nav className="pagination" role="navigation" aria-label="pagination">
-            <a
-              className="pagination-previous"
-              onClick={() => setOffset(offset - 1)}
-            >
-              ⊲ Previous
-            </a>
-          </nav>
+        // <div className="is-flex is-justify-content-center">
+        //   <nav className="pagination" role="navigation" aria-label="pagination">
+        //     <a
+        //       className="pagination-previous"
+        //       onClick={() => setOffset(offset - 1)}
+        //     >
+        //       ⊲ Previous
+        //     </a>
+        //   </nav>
+        // </div>
+        <div className="is-flex is-justify-content-center is-align-items-center">
+          <p className="is-size-4 mr-3 is-text-weight-bold" style={{ cursor: 'pointer' }} onClick={() => setOffset(offset - 1)}><i className="fas fas fa-angle-double-left"></i></p>
+          <div style={{ marginRight: '25px' }} className='is-flex is-justify-content-center is-align-items-center has-text-weight-bold is-size-5 num-pag'>
+            <p>{offset + 1}</p>
+          </div>
         </div>
       ) : page === "Next/Previous" ? (
-        <div className="is-flex is-justify-content-center">
-          <nav
-            className="pagination is-centered"
-            role="navigation"
-            aria-label="pagination"
-          >
-            <a
-              className="pagination-previous"
-              onClick={() => setOffset(offset - 1)}
-            >
-              ⊲ Previous
-            </a>
-            <a
-              className="pagination-next"
-              onClick={() => setOffset(offset + 1)}
-            >
-              Next ⊳
-            </a>
-          </nav>
+        // <div className="is-flex is-justify-content-center">
+        //   <nav
+        //     className="pagination is-centered"
+        //     role="navigation"
+        //     aria-label="pagination"
+        //   >
+        //     <a
+        //       className="pagination-previous"
+        //       onClick={() => setOffset(offset - 1)}
+        //     >
+        //       ⊲ Previous
+        //     </a>
+        //     <a
+        //       className="pagination-next"
+        //       onClick={() => setOffset(offset + 1)}
+        //     >
+        //       Next ⊳
+        //     </a>
+        //   </nav>
+        // </div>
+        <div className="is-flex is-justify-content-center is-align-items-center">
+          <p className="is-size-4 mr-3 is-text-weight-bold" style={{ cursor: 'pointer' }} onClick={() => setOffset(offset - 1)}><i className="fas fas fa-angle-double-left"></i></p>
+          <div className='is-flex is-justify-content-center is-align-items-center has-text-weight-bold is-size-5 num-pag'>
+            <p>{offset + 1}</p>
+          </div>
+          <p className="is-size-4 ml-3 is-text-weight-bold" style={{ cursor: 'pointer' }} onClick={() => setOffset(offset + 1)}><i className="fas fas fa-angle-double-right"></i></p>
         </div>
       ) : (
         <></>
-      )}
-    </div>
+      )
+      }
+    </div >
   );
 }
 
