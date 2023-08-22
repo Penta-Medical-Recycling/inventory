@@ -23,7 +23,7 @@ const CardLister = ({
 }) => {
   const [data, setData] = useState([]);
   // const apiKey = config.SECRET_API_KEY;
-  const apiKey = import.meta.env.VITE_REACT_APP_API_KEY;
+  const patKey = import.meta.env.VITE_REACT_APP_API_KEY;
   const baseId = "appnx8gtnlQx5b7nI";
   const tableName = "Inventory";
   const [button, setButton] = useState(1);
@@ -91,7 +91,7 @@ const CardLister = ({
         url += `,AND({Size} >= ${minValue}, {Size} <= ${maxValue})`;
       }
       if (debouncedSearchValue) {
-        const searchTerms = debouncedSearchValue.toLowerCase().split(" ");
+        const searchTerms = debouncedSearchValue.toLowerCase().split(" ").filter(a => a !== 'size')
         const searchConditions = searchTerms.map(
           (term) => `SEARCH("${term}", {Concat2})`
         );
@@ -103,7 +103,7 @@ const CardLister = ({
     try {
       const response = await fetch(url, {
         headers: {
-          Authorization: `Bearer ${apiKey}`,
+          Authorization: `Bearer ${patKey}`,
         },
       });
 
