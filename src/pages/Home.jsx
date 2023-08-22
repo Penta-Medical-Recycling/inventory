@@ -365,7 +365,7 @@ function Home({
         // </div>
         <div className="is-flex is-justify-content-center is-align-items-center">
           <p className="is-size-4 mr-3 is-text-weight-bold" style={{ cursor: 'pointer' }} onClick={() => setOffset(offset - 1)}><i className="fas fas fa-angle-double-left"></i></p>
-          <div style={{ marginRight: '25px' }} className='is-flex is-justify-content-center is-align-items-center has-text-weight-bold is-size-5 num-pag'>
+          <div style={{ marginRight: '33px' }} className='is-flex is-justify-content-center is-align-items-center has-text-weight-bold is-size-5 num-pag'>
             <p>{offset + 1}</p>
           </div>
         </div>
@@ -453,7 +453,7 @@ function Home({
         // </div>
         <div className="is-flex is-justify-content-center is-align-items-center">
           <p className="is-size-4 mr-3 is-text-weight-bold" style={{ cursor: 'pointer' }} onClick={() => setOffset(offset - 1)}><i className="fas fas fa-angle-double-left"></i></p>
-          <div style={{ marginRight: '25px' }} className='is-flex is-justify-content-center is-align-items-center has-text-weight-bold is-size-5 num-pag'>
+          <div style={{ marginRight: '33px' }} className='is-flex is-justify-content-center is-align-items-center has-text-weight-bold is-size-5 num-pag'>
             <p>{offset + 1}</p>
           </div>
         </div>
