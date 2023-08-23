@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import CartLister from "../Components/CartLister";
 import { useNavigate, Link } from "react-router-dom";
 import LoadingScreen from "../Components/LoadingScreen";
+import Toast from "../Components/Toast";
 
 function Cart({ cartCount, setCartCount, selectedPartner }) {
   const navigate = useNavigate();
@@ -67,6 +68,7 @@ function Cart({ cartCount, setCartCount, selectedPartner }) {
           localStorage.clear();
           localStorage.setItem("partner", partner);
           setIsLoading(false)
+          Toast({ message: 'Thank you for working with us, we will get back to you as soon as possible!' });
         }
         
       })
@@ -98,14 +100,15 @@ function Cart({ cartCount, setCartCount, selectedPartner }) {
       <div id="text-section">
         <h1 className="title has-text-centered mt-6">CART</h1>
       </div>
-      <h1 className="has-text-centered is-size-5 my-4">
+      {isLoading? <LoadingScreen />: (<>
+        <h1 className="has-text-centered is-size-5 my-4">
         Hello, {selectedPartner} Member!
       </h1>
       <Link to="/partner" className="is-flex is-justify-content-center my-3">
         <button className="button">Change Partner</button>
       </Link>
 
-      {isLoading? <LoadingScreen />: <CartLister cartCount={cartCount} setCartCount={setCartCount} />}
+      <CartLister cartCount={cartCount} setCartCount={setCartCount} />
 
       <div style={{ width: "60vw", margin: "auto" }}>
         <textarea
@@ -132,6 +135,7 @@ function Cart({ cartCount, setCartCount, selectedPartner }) {
         </button>
       </div>
       <p className="has-text-centered has-text-danger mb-4">{errorMessage}</p>
+      </>)}
     </>
   );
 }
