@@ -11,6 +11,7 @@
     "deploy": "gh-pages -d dist"
   },
   "dependencies": {
+    "bulma-toast": "^2.4.3",
     "file-saver": "^2.0.5",
     "gh-pages": "^6.0.0",
     "json2csv": "^6.0.0-alpha.2",
