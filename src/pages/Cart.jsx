@@ -68,7 +68,7 @@ function Cart({ cartCount, setCartCount, selectedPartner }) {
           localStorage.clear();
           localStorage.setItem("partner", partner);
           setIsLoading(false)
-          Toast({ message: 'Thank you for working with us, we will get back to you as soon as possible!' });
+          Toast({ message: 'Thank you for your time, we will get back to you as soon as possible!' });
         }
         
       })

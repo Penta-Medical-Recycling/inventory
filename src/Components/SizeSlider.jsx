@@ -8,7 +8,8 @@ const SizeSlider = ({
     maxValue,
     setMaxValue,
     isOn,
-    setIsOn }) => {
+    setIsOn,
+    largestSize }) => {
     // const [minValue, setMinValue] = useState(5);
     // const [maxValue, setMaxValue] = useState(15);
     // const [isOn, setIsOn] = useState(false);
@@ -26,7 +27,7 @@ const SizeSlider = ({
 
     const handleMaxChange = (event) => {
         const newMaxValue = parseInt(event.target.value);
-        if (newMaxValue >= minValue && newMaxValue <= 55) {
+        if (newMaxValue >= minValue && newMaxValue <= largestSize) {
             setMaxValue(newMaxValue);
         }
     };
@@ -40,7 +41,7 @@ const SizeSlider = ({
 
     const handleMaxSliderChange = (event) => {
         const newMaxValue = parseInt(event.target.value);
-        if (newMaxValue >= minValue && newMaxValue <= 55) {
+        if (newMaxValue >= minValue && newMaxValue <= largestSize) {
             setMaxValue(newMaxValue);
         }
     };
@@ -56,46 +57,69 @@ const SizeSlider = ({
                 </div>
                 <p>Use slider to enter min and max size</p>
             </header>
-            <div className={isOn ? "size-input": "size-off size-input"}>
+            <div className={isOn ? "size-input" : "size-off size-input"}>
                 <div className="field">
-                    <span>Min</span>
                     <input
                         type="number"
                         className="input-min slider-input" // Specific class added
                         value={minValue}
                         onChange={handleMinChange}
                         min="1"
-                        max="55" // Added max attribute
+                        max={maxValue} // Added max attribute
+                    // style={{height: '100%'}}
                     />
+                    <div className='is-flex is-justify-content-space-evenly' style={{ userSelect: 'none', width: '100%', cursor: 'pointer' }}>
+                        <div className='crease-click' onClick={() => {
+                            if (minValue > 1) setMinValue(minValue - 1)
+                        }}>
+                            <p>-</p>
+                        </div>
+                        <div className='crease-click' onClick={() => {
+                            if (minValue < maxValue) setMinValue(minValue + 1)
+                        }}>
+                            <p>+</p>
+                        </div>
+                    </div>
                 </div>
-                <div className="separator">-</div>
+                <div className="separator">⇄</div>
                 <div className="field">
-                    <span>Max</span>
                     <input
                         type="number"
                         className="input-max slider-input" // Specific class added
                         value={maxValue}
                         onChange={handleMaxChange}
                         min="1"
-                        max="55" // Added max attribute
+                        max={maxValue} // Added max attribute
                     />
+                    <div className='is-flex is-justify-content-space-evenly' style={{ userSelect: 'none', width: '100%', cursor: 'pointer' }}>
+                        <div className='crease-click' onClick={() => {
+                            if (maxValue > minValue) setMaxValue(maxValue - 1)
+                        }}>
+                            <p>-</p>
+                        </div>
+                        <div className='crease-click' onClick={() => {
+                            if (maxValue < largestSize) setMaxValue(maxValue + 1)
+                        }}>
+                            <p>+</p>
+                        </div>
+                    </div>
                 </div>
             </div>
-            <div className={isOn ? "slider": "size-off slider"}>
+            <div className={isOn ? "slider" : "size-off slider"}>
                 <div
                     className="progress"
                     style={{
-                        left: `${((minValue - 1) / (55 - 1)) * 100}%`,
-                        width: `${((maxValue - minValue) / (55 - 1)) * 100}%`,
+                        left: `${((minValue - 1) / (largestSize - 1)) * 100}%`,
+                        width: `${((maxValue - minValue) / (largestSize - 1)) * 100}%`,
                     }}
                 ></div>
             </div>
-            <div className={isOn ? "range-input": "size-off range-input"}>
+            <div className={isOn ? "range-input" : "size-off range-input"}>
                 <input
                     type="range"
                     className="range-min"
                     min="1"
-                    max="55" // Update max attribute
+                    max={largestSize} // Update max attribute
                     value={minValue}
                     step="1"
                     onChange={handleMinSliderChange}
@@ -104,7 +128,7 @@ const SizeSlider = ({
                     type="range"
                     className="range-max"
                     min="1"
-                    max="55" // Update max attribute
+                    max={largestSize} // Update max attribute
                     value={maxValue}
                     step="1"
                     onChange={handleMaxSliderChange}
