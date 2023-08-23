@@ -12,7 +12,8 @@ const SideBar = ({
   maxValue,
   setMaxValue,
   isOn,
-  setIsOn
+  setIsOn,
+  largestSize
 }) => {
   const activeToggle = () => {
     setIsActive(!isActive);
@@ -39,7 +40,8 @@ const SideBar = ({
         maxValue={maxValue}
         setMaxValue={setMaxValue}
         isOn={isOn}
-        setIsOn={setIsOn} />
+        setIsOn={setIsOn}
+        largestSize={largestSize} />
     </div>
   );
 };
