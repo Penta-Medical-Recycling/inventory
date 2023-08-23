@@ -171,7 +171,7 @@ const CardLister = ({
                         >
                           {item.fields["Description (from SKU)"]}
                         </p>
-                        <p style={{marginTop:'-12px'}}className="has-text-grey ml-3 mb-3">{item.fields["Item ID"]}</p>
+                        <p style={{ marginTop: '-12px' }} className="has-text-grey ml-3 mb-3">{item.fields["Item ID"]}</p>
                       </div>
                     </header>
                     <div className="">
@@ -233,12 +233,13 @@ const CardLister = ({
                     </div>
                   </div>
                   <footer className="card-footer">
-                    <a className="button card-footer-item" href='https://www.google.com/search?sca_esv=559191296&rlz=1C1GCEJ_enUS1024US1024&sxsrf=AB5stBjeSttP6lnymxUKO_Biv2SakBD2kw:1692741243457&q=finn+the+human&tbm=isch&source=lnms&sa=X&ved=2ahUKEwjO6IzEoPGAAxUMEFkFHYQtA7wQ0pQJegQIDRAB' target='_blank' style={{borderRadius: '0', border:'0'}}>Images</a>
+                    <a className="button card-footer-item" href={`https://www.google.com/search?q=${encodeURIComponent(
+                      item.fields.StringSearch)}&tbm=isch`} target='_blank' style={{ borderRadius: '0', border: '0' }}>Images</a>
                     {!localStorage.getItem([item.fields["Item ID"]]) &&
                       button ? (
                       <button
                         className="button card-footer-item"
-                        style={{ backgroundColor: "#78d3fb", color: "white", border:'0', borderRadius:'0' }}
+                        style={{ backgroundColor: "#78d3fb", color: "white", border: '0', borderRadius: '0' }}
                         onClick={() => {
                           localStorage.setItem(
                             item.fields["Item ID"],

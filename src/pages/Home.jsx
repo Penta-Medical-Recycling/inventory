@@ -183,6 +183,8 @@ function Home({
     }
   }
 
+  
+
   return (
     <div className={isActive ? "sidebar-active" : ""}>
       <div id="text-section">
