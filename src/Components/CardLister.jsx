@@ -22,10 +22,8 @@ const CardLister = ({
   setDebouncedSearchValue,
   isLoading,
   setIsLoading,
-
 }) => {
   const [data, setData] = useState([]);
-  // const apiKey = config.SECRET_API_KEY;
   const patKey = import.meta.env.VITE_REACT_APP_API_KEY;
   const baseId = "appnx8gtnlQx5b7nI";
   const tableName = "Inventory";
@@ -61,9 +59,8 @@ const CardLister = ({
 
   const encodedTableName = encodeURIComponent(tableName);
 
-  let url = `https://api.airtable.com/v0/${baseId}/${encodedTableName}?pageSize=36&filterByFormula=AND(`;
-
   async function fetchData() {
+    let url = `https://api.airtable.com/v0/${baseId}/${encodedTableName}?pageSize=36&filterByFormula=AND(`;
     const skus = selectedSKU.map((option) => option.value);
     const manufacturers = selectedManufacturer.map((option) => option.value);
     const selectedTags = Object.keys(selectedFilter).filter(
@@ -94,7 +91,10 @@ const CardLister = ({
         url += `,AND({Size} >= ${minValue}, {Size} <= ${maxValue})`;
       }
       if (debouncedSearchValue) {
-        const searchTerms = debouncedSearchValue.toLowerCase().split(" ").filter(a => a !== 'size')
+        const searchTerms = debouncedSearchValue
+          .toLowerCase()
+          .split(" ")
+          .filter((a) => a !== "size");
         const searchConditions = searchTerms.map(
           (term) => `SEARCH("${term}", {Concat2})`
         );
@@ -171,7 +171,12 @@ const CardLister = ({
                         >
                           {item.fields["Description (from SKU)"]}
                         </p>
-                        <p style={{ marginTop: '-12px' }} className="has-text-grey ml-3 mb-3">{item.fields["Item ID"]}</p>
+                        <p
+                          style={{ marginTop: "-12px" }}
+                          className="has-text-grey ml-3 mb-3"
+                        >
+                          {item.fields["Item ID"]}
+                        </p>
                       </div>
                     </header>
                     <div className="">
@@ -229,17 +234,29 @@ const CardLister = ({
                           <p>{item.fields["Model/Type"]}</p>
                         </div>
                       )}
-
                     </div>
                   </div>
                   <footer className="card-footer">
-                    <a className="button card-footer-item" href={`https://www.google.com/search?q=${encodeURIComponent(
-                      item.fields.StringSearch)}&tbm=isch`} target='_blank' style={{ borderRadius: '0', border: '0' }}>Images</a>
+                    <a
+                      className="button card-footer-item"
+                      href={`https://www.google.com/search?q=${encodeURIComponent(
+                        item.fields.StringSearch
+                      )}&tbm=isch`}
+                      target="_blank"
+                      style={{ borderRadius: "0", border: "0" }}
+                    >
+                      Images
+                    </a>
                     {!localStorage.getItem([item.fields["Item ID"]]) &&
-                      button ? (
+                    button ? (
                       <button
                         className="button card-footer-item"
-                        style={{ backgroundColor: "#78d3fb", color: "white", border: '0', borderRadius: '0' }}
+                        style={{
+                          backgroundColor: "#78d3fb",
+                          color: "white",
+                          border: "0",
+                          borderRadius: "0",
+                        }}
                         onClick={() => {
                           localStorage.setItem(
                             item.fields["Item ID"],

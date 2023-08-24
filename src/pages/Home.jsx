@@ -70,9 +70,7 @@ function Home({
     event.stopPropagation();
     setIsDropActive(!isDropActive);
   };
-
   async function createBlob(fileType) {
-    console.log(fileType);
     setLoading(true);
     const apiKey = import.meta.env.VITE_REACT_APP_API_KEY;
     const baseId = "appnx8gtnlQx5b7nI";
@@ -84,7 +82,7 @@ function Home({
       (key) => selectedFilter[key]
     );
 
-    let url = `https://api.airtable.com/v0/${baseId}/${encodedTableName}?pageSize=99&filterByFormula=AND(`;
+    let url = `https://api.airtable.com/v0/${baseId}/${encodedTableName}?filterByFormula=AND(`;
     url += 'AND({Requests}=BLANK(),{Shipment Status}=BLANK()),NOT({SKU}="")';
 
     if (
@@ -116,32 +114,46 @@ function Home({
         url += `,AND(${searchConditions.join(",")})`;
       }
     }
-    url += ")&offset=";
 
-    try {
-      let header = "ID,Description,Size,Model/Type,Manufacturer\n";
-      let data;
+    async function fetchTableRecords(offset = null) {
+      const newUrl = url + `)&offset=${offset || ""}`;
+
+      const response = await fetch(newUrl, {
+        headers: {
+          Authorization: `Bearer ${apiKey}`,
+        },
+      });
+
+      const data = await response.json();
+      const records = data.records;
+
+      return {
+        records,
+        offset: data.offset || undefined,
+      };
+    }
+
+    let header;
+
+    (async () => {
+      let allRecords = [];
+      let offset = null;
+
       do {
-        let newUrl = url + next;
-        const response = await fetch(newUrl, {
-          headers: {
-            Authorization: `Bearer ${apiKey}`,
-          },
-        });
-        data = await response.json();
-        for (let i = 0; i < data.records.length; i++) {
-          let record = data.records[i].fields;
-          header += `"${record["Item ID"] || ""}","${record["Description (from SKU)"] || ""
-            }","${record["Size"] || ""}","${record["Model/Type"] || ""}","${record["Manufacturer"] || ""
-            }"\n`;
-        }
-        if (data.offset) {
-          break;
-          //   // setNext(data.offset);
-          //   // we need to figure out how to download all the CSV data without an offset
-          //   // right now its only the csv of up until the first 100.
-        }
-      } while (data.offset);
+        const { records, offset: newOffset } = await fetchTableRecords(offset);
+        allRecords = allRecords.concat(records);
+        offset = newOffset;
+      } while (offset);
+
+      let header = "ID,Description,Size,Model/Type,Manufacturer\n";
+
+      allRecords.forEach((e) => {
+        header += `"${e.fields["Item ID"] || ""}","${
+          e.fields["Description (from SKU)"] || ""
+        }","${e.fields["Size"] || ""}","${e.fields["Model/Type"] || ""}","${
+          e.fields["Manufacturer"] || ""
+        }"\n`;
+      });
 
       if (fileType === "csv") {
         const blob = new Blob([header], { type: "text/csv" });
@@ -176,14 +188,8 @@ function Home({
         link.click();
       }
       setLoading(false);
-      return data.records;
-    } catch (error) {
-      console.error("Error fetching data:", error);
-      return [];
-    }
+    })();
   }
-
-  
 
   return (
     <div className={isActive ? "sidebar-active" : ""}>
@@ -262,7 +268,12 @@ function Home({
                   </span>
                 </button>
               </div>
-              <div className="dropdown-menu" id="dropdown-menu3" role="menu" style={{ minWidth: '87px' }}>
+              <div
+                className="dropdown-menu"
+                id="dropdown-menu3"
+                role="menu"
+                style={{ minWidth: "87px" }}
+              >
                 <div className="dropdown-content">
                   <a
                     className="dropdown-item"
@@ -349,60 +360,59 @@ function Home({
         //   </nav>
         // </div>
         <div className="is-flex is-justify-content-center is-align-items-center">
-          <div style={{marginLeft: '33px' }} className='is-flex is-justify-content-center is-align-items-center has-text-weight-bold is-size-5 num-pag'>
+          <div
+            style={{ marginLeft: "33px" }}
+            className="is-flex is-justify-content-center is-align-items-center has-text-weight-bold is-size-5 num-pag"
+          >
             <p>{offset + 1}</p>
           </div>
-          <p className="is-size-4 ml-3 is-text-weight-bold" style={{ cursor: 'pointer' }} onClick={() => setOffset(offset + 1)}><i className="fas fas fa-angle-double-right"></i></p>
+          <p
+            className="is-size-4 ml-3 is-text-weight-bold"
+            style={{ cursor: "pointer" }}
+            onClick={() => setOffset(offset + 1)}
+          >
+            <i className="fas fas fa-angle-double-right"></i>
+          </p>
         </div>
       ) : page === "Previous" ? (
-        // <div className="is-flex is-justify-content-center">
-        //   <nav className="pagination" role="navigation" aria-label="pagination">
-        //     <a
-        //       className="pagination-previous"
-        //       onClick={() => setOffset(offset - 1)}
-        //     >
-        //       ⊲ Previous
-        //     </a>
-        //   </nav>
-        // </div>
         <div className="is-flex is-justify-content-center is-align-items-center">
-          <p className="is-size-4 mr-3 is-text-weight-bold" style={{ cursor: 'pointer' }} onClick={() => setOffset(offset - 1)}><i className="fas fas fa-angle-double-left"></i></p>
-          <div style={{ marginRight: '33px' }} className='is-flex is-justify-content-center is-align-items-center has-text-weight-bold is-size-5 num-pag'>
+          <p
+            className="is-size-4 mr-3 is-text-weight-bold"
+            style={{ cursor: "pointer" }}
+            onClick={() => setOffset(offset - 1)}
+          >
+            <i className="fas fas fa-angle-double-left"></i>
+          </p>
+          <div
+            style={{ marginRight: "33px" }}
+            className="is-flex is-justify-content-center is-align-items-center has-text-weight-bold is-size-5 num-pag"
+          >
             <p>{offset + 1}</p>
           </div>
         </div>
       ) : page === "Next/Previous" ? (
-        // <div className="is-flex is-justify-content-center">
-        //   <nav
-        //     className="pagination is-centered"
-        //     role="navigation"
-        //     aria-label="pagination"
-        //   >
-        //     <a
-        //       className="pagination-previous"
-        //       onClick={() => setOffset(offset - 1)}
-        //     >
-        //       ⊲ Previous
-        //     </a>
-        //     <a
-        //       className="pagination-next"
-        //       onClick={() => setOffset(offset + 1)}
-        //     >
-        //       Next ⊳
-        //     </a>
-        //   </nav>
-        // </div>
         <div className="is-flex is-justify-content-center is-align-items-center">
-          <p className="is-size-4 mr-3 is-text-weight-bold" style={{ cursor: 'pointer' }} onClick={() => setOffset(offset - 1)}><i className="fas fas fa-angle-double-left"></i></p>
-          <div className='is-flex is-justify-content-center is-align-items-center has-text-weight-bold is-size-5 num-pag'>
+          <p
+            className="is-size-4 mr-3 is-text-weight-bold"
+            style={{ cursor: "pointer" }}
+            onClick={() => setOffset(offset - 1)}
+          >
+            <i className="fas fas fa-angle-double-left"></i>
+          </p>
+          <div className="is-flex is-justify-content-center is-align-items-center has-text-weight-bold is-size-5 num-pag">
             <p>{offset + 1}</p>
           </div>
-          <p className="is-size-4 ml-3 is-text-weight-bold" style={{ cursor: 'pointer' }} onClick={() => setOffset(offset + 1)}><i className="fas fas fa-angle-double-right"></i></p>
+          <p
+            className="is-size-4 ml-3 is-text-weight-bold"
+            style={{ cursor: "pointer" }}
+            onClick={() => setOffset(offset + 1)}
+          >
+            <i className="fas fas fa-angle-double-right"></i>
+          </p>
         </div>
       ) : (
         <></>
-      )
-      }
+      )}
       <CardLister
         cartCount={cartCount}
         setCartCount={setCartCount}
@@ -426,72 +436,61 @@ function Home({
         setIsLoading={setIsLoading}
       />
       {page === "Next" ? (
-        // <div className="is-flex is-justify-content-center">
-        //   <nav className="pagination" role="navigation" aria-label="pagination">
-        //     <a
-        //       className="pagination-next"
-        //       onClick={() => setOffset(offset + 1)}
-        //     >
-        //       Next ⊳
-        //     </a>
-        //   </nav>
-        // </div>
         <div className="is-flex is-justify-content-center is-align-items-center">
-          <div style={{ marginLeft: '25px' }} className='is-flex is-justify-content-center is-align-items-center has-text-weight-bold  is-size-5 num-pag'>
+          <div
+            style={{ marginLeft: "25px" }}
+            className="is-flex is-justify-content-center is-align-items-center has-text-weight-bold  is-size-5 num-pag"
+          >
             <p>{offset + 1}</p>
           </div>
-          <p className="is-size-4 ml-3 is-text-weight-bold" style={{ cursor: 'pointer' }} onClick={() => setOffset(offset + 1)}><i className="fas fas fa-angle-double-right"></i></p>
+          <p
+            className="is-size-4 ml-3 is-text-weight-bold"
+            style={{ cursor: "pointer" }}
+            onClick={() => setOffset(offset + 1)}
+          >
+            <i className="fas fas fa-angle-double-right"></i>
+          </p>
         </div>
       ) : page === "Previous" ? (
-        // <div className="is-flex is-justify-content-center">
-        //   <nav className="pagination" role="navigation" aria-label="pagination">
-        //     <a
-        //       className="pagination-previous"
-        //       onClick={() => setOffset(offset - 1)}
-        //     >
-        //       ⊲ Previous
-        //     </a>
-        //   </nav>
-        // </div>
         <div className="is-flex is-justify-content-center is-align-items-center">
-          <p className="is-size-4 mr-3 is-text-weight-bold" style={{ cursor: 'pointer' }} onClick={() => setOffset(offset - 1)}><i className="fas fas fa-angle-double-left"></i></p>
-          <div style={{ marginRight: '33px' }} className='is-flex is-justify-content-center is-align-items-center has-text-weight-bold is-size-5 num-pag'>
+          <p
+            className="is-size-4 mr-3 is-text-weight-bold"
+            style={{ cursor: "pointer" }}
+            onClick={() => setOffset(offset - 1)}
+          >
+            <i className="fas fas fa-angle-double-left"></i>
+          </p>
+          <div
+            style={{ marginRight: "33px" }}
+            className="is-flex is-justify-content-center is-align-items-center has-text-weight-bold is-size-5 num-pag"
+          >
             <p>{offset + 1}</p>
           </div>
         </div>
       ) : page === "Next/Previous" ? (
-        // <div className="is-flex is-justify-content-center">
-        //   <nav
-        //     className="pagination is-centered"
-        //     role="navigation"
-        //     aria-label="pagination"
-        //   >
-        //     <a
-        //       className="pagination-previous"
-        //       onClick={() => setOffset(offset - 1)}
-        //     >
-        //       ⊲ Previous
-        //     </a>
-        //     <a
-        //       className="pagination-next"
-        //       onClick={() => setOffset(offset + 1)}
-        //     >
-        //       Next ⊳
-        //     </a>
-        //   </nav>
-        // </div>
         <div className="is-flex is-justify-content-center is-align-items-center">
-          <p className="is-size-4 mr-3 is-text-weight-bold" style={{ cursor: 'pointer' }} onClick={() => setOffset(offset - 1)}><i className="fas fas fa-angle-double-left"></i></p>
-          <div className='is-flex is-justify-content-center is-align-items-center has-text-weight-bold is-size-5 num-pag'>
+          <p
+            className="is-size-4 mr-3 is-text-weight-bold"
+            style={{ cursor: "pointer" }}
+            onClick={() => setOffset(offset - 1)}
+          >
+            <i className="fas fas fa-angle-double-left"></i>
+          </p>
+          <div className="is-flex is-justify-content-center is-align-items-center has-text-weight-bold is-size-5 num-pag">
             <p>{offset + 1}</p>
           </div>
-          <p className="is-size-4 ml-3 is-text-weight-bold" style={{ cursor: 'pointer' }} onClick={() => setOffset(offset + 1)}><i className="fas fas fa-angle-double-right"></i></p>
+          <p
+            className="is-size-4 ml-3 is-text-weight-bold"
+            style={{ cursor: "pointer" }}
+            onClick={() => setOffset(offset + 1)}
+          >
+            <i className="fas fas fa-angle-double-right"></i>
+          </p>
         </div>
       ) : (
         <></>
-      )
-      }
-    </div >
+      )}
+    </div>
   );
 }
 

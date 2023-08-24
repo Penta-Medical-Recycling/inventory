@@ -1,270 +1,5 @@
 import { useState, useEffect } from "react";
 import { MultiSelect } from "react-multi-select-component";
-const options = [
-  { label: "3M", value: "3M" },
-  { label: "Ability Dynamics", value: "Ability Dynamics" },
-  { label: "Aircast", value: "Aircast" },
-  { label: "Allard", value: "Allard" },
-  { label: "Alps", value: "Alps" },
-  {
-    label: "American Prosthetic Components",
-    value: "American Prosthetic Components",
-  },
-  { label: "APC", value: "APC" },
-  { label: "Aryse", value: "Aryse" },
-  { label: "ASAP", value: "ASAP" },
-  { label: "Aspen", value: "Aspen" },
-  { label: "Athletic", value: "Athletic" },
-  { label: "Avalon", value: "Avalon" },
-  { label: "Axtion", value: "Axtion" },
-  { label: "Becker", value: "Becker" },
-  { label: "BioQuest", value: "BioQuest" },
-  { label: "BioSkin", value: "BioSkin" },
-  { label: "Blatchford", value: "Blatchford" },
-  { label: "BraceSox", value: "BraceSox" },
-  { label: "Breg", value: "Breg" },
-  { label: "Bulldog", value: "Bulldog" },
-  { label: "Catech Inc", value: "Catech Inc" },
-  { label: "Century Innovations", value: "Century Innovations" },
-  { label: "College Park", value: "College Park" },
-  { label: "Comfort Products", value: "Comfort Products" },
-  { label: "Comfortland", value: "Comfortland" },
-  { label: "CPI", value: "CPI" },
-  { label: "Cypress Adaptive", value: "Cypress Adaptive " },
-  { label: "DAW", value: "DAW" },
-  { label: "DeRoyal", value: "DeRoyal" },
-  { label: "DJO", value: "DJO" },
-  { label: "Donjoy", value: "Donjoy" },
-  { label: "Dr Comfort", value: "Dr Comfort" },
-  { label: "Dr Scholls", value: "Dr Scholls" },
-  { label: "Drive", value: "Drive" },
-  { label: "Durasleeve", value: "Durasleeve" },
-  { label: "Elan", value: "Elan" },
-  { label: "Encore", value: "Encore" },
-  { label: "Endolite", value: "Endolite" },
-  { label: "ESP", value: "ESP" },
-  { label: "Evolution Industries", value: "Evolution Industries" },
-  { label: "Fabtech", value: "Fabtech" },
-  { label: "Fillauer", value: "Fillauer" },
-  { label: "Flex Foot", value: "Flex Foot" },
-  { label: "Freedom Innovation", value: "Freedom Innovation" },
-  { label: "Freeman", value: "Freeman" },
-  { label: "GPF", value: "GPF" },
-  { label: "Hanger", value: "Hanger" },
-  { label: "Hely & Weber", value: "Hely %26 Weber" },
-  { label: "Hosmer", value: "Hosmer" },
-  { label: "IN Prosthetic Components", value: "In Prosthetic Components" },
-  { label: "Jack Mart", value: "Jack Mart" },
-  { label: "Juzo", value: "Juzo" },
-  { label: "Kingsley", value: "Kingsley" },
-  { label: "Kintera", value: "Kintera" },
-  { label: "KISS", value: "KISS" },
-  { label: "Knit-rite", value: "Knit-rite" },
-  { label: "Leg Works", value: "Leg Works" },
-  { label: "MAKstride", value: "MAKstride" },
-  { label: "Mauch", value: "Mauch" },
-  { label: "Maverick", value: "Maverick" },
-  { label: "MedChoice", value: "MedChoice" },
-  { label: "Medex", value: "Medex" },
-  { label: "Medi", value: "Medi" },
-  { label: "Merrell", value: "Merrell" },
-  { label: "Mica", value: "Mica" },
-  { label: "Molnlycke", value: "Molnlycke" },
-  { label: "New Options Sports", value: "New Options Sports" },
-  { label: "no Adapter", value: "no Adapter" },
-  { label: "NY Rehab", value: "NY Rehab" },
-  { label: "Operation Namaste", value: "Operation Namaste" },
-  { label: "Optimus", value: "Optimus" },
-  { label: "Orion", value: "Orion" },
-  { label: "Ortho Europe LTD", value: "Ortho Europe LTD" },
-  { label: "Orthomerica", value: "Orthomerica" },
-  { label: "Ossur", value: "Ossur" },
-  { label: "Ottobock", value: "Ottobock" },
-  { label: "OWW", value: "OWW" },
-  { label: "Paceline", value: "Paceline" },
-  { label: "PMT", value: "PMT" },
-  { label: "Procare", value: "Procare" },
-  { label: "Progressive Orthotics", value: "Progressive Orthotics" },
-  { label: "Promenade", value: "Promenade" },
-  { label: "Promogran", value: "Promogran" },
-  { label: "Proteor", value: "Proteor" },
-  { label: "Rampro", value: "Rampro" },
-  { label: "RCAI", value: "RCAI" },
-  { label: "Rooke", value: "Rooke" },
-  { label: "Royale Flush", value: "Royal Flush" },
-  { label: "Royale Knit", value: "Royale Knit" },
-  { label: "Saucony", value: "Saucony" },
-  { label: "Silipos", value: "Silipos" },
-  { label: "Sketchers", value: "Sketchers" },
-  { label: "Spalding", value: "Spalding" },
-  { label: "SPS", value: "SPS" },
-  { label: "SRT P&O", value: "SRT P%26O" },
-  { label: "ST&G", value: "ST%26G" },
-  { label: "Streifeneder", value: "Streifeneder" },
-  { label: "Swede-O", value: "Swede-O" },
-  { label: "Syncor", value: "Syncor" },
-  { label: "Teh Lin Pros. & Ortho.", value: "Teh Lin Pros. %26 Ortho." },
-  { label: "Thuasne", value: "Thuasne" },
-  { label: "TiMed", value: "TiMed" },
-  { label: "Titan", value: "TItan" },
-  { label: "Townsend", value: "Townsend" },
-  { label: "Trail Blazer", value: "Trail Blazer" },
-  { label: "Trulife", value: "Trulife" },
-  { label: "TruVue", value: "TruVue" },
-  { label: "Uni Roch.", value: "Uni Roch." },
-  { label: "UNIPROX", value: "UNIPROX" },
-  { label: "United Ortho", value: "United Ortho" },
-  { label: "US Orthotics", value: "US Orthotics" },
-  { label: "Various", value: "Various" },
-  { label: "Willow Wood", value: "Willow Wood" },
-  { label: "Win Walker", value: "Win Walker" },
-  { label: "Wright & Filipps", value: "Wright %26 Filipps" },
-];
-
-const options2 = [
-  { label: "AAFO - Articulated Ankle Foot Orthosis", value: "AAFO" },
-  { label: "ABL - Arm Brace, Left", value: "ABL" },
-  { label: "ABR - Arm Brace, Right", value: "ABR" },
-  { label: "ADB - Double Adapter", value: "ADB" },
-  { label: "ADU - Universal Adapter", value: "ADU" },
-  { label: "AFT - Foot Adapter (Pyramid)", value: "AFT" },
-  { label: "AKA - Knee Adapter", value: "AKA" },
-  { label: "ALMT - Alignment Device", value: "ALMT" },
-  { label: "ANCH - Socket Anchor", value: "ANCH" },
-  { label: "ANK - Ankle", value: "ANK" },
-  { label: "ANKBLK - Energy Ankle Block", value: "ANKBLK" },
-  { label: "ANKL - Ankle Brace", value: "ANKL" },
-  { label: "APD - Pyramid Adapter", value: "APD" },
-  { label: "APD - Adapter Plate", value: "APD" },
-  { label: "ARA - Rotatable Adapter", value: "ARA" },
-  { label: "ARM - Upper Extremity Mechanical Arm", value: "ARM" },
-  { label: "ASA - Socket Adapter", value: "ASA" },
-  { label: "ASAP - Socket Adapter, Pronged", value: "ASAP" },
-  { label: "ASC - Adapter Slide Clamp", value: "ASC" },
-  { label: "ATC - Tube Clamp", value: "ATC" },
-  { label: "ATST - Threaded Screw Top Adapter", value: "ATST" },
-  { label: "BB - Back Brace", value: "BB" },
-  { label: "BBALL - Basketball", value: "BBALL" },
-  { label: "BKARD - BKA Rigid Dressing", value: "BKARD" },
-  { label: "BP - Base Plate", value: "BP" },
-  { label: "BRACE-F -Foot Brace", value: "BRACE-F" },
-  { label: "BSUP - Back Support", value: "BSUP" },
-  { label: "BUMP - Bumper", value: "BUMP" },
-  { label: "CASTL - Casting Liner", value: "CASTL" },
-  { label: "CIRC - Circulation Enhancer", value: "CIRC" },
-  { label: "CL - Cushion Liner", value: "CL" },
-  { label: "COSCOV - Prosthetic Cosmetic Cover", value: "COSCOV" },
-  { label: "CROR - Cranial Orthotic", value: "CROR" },
-  { label: "CRUTCH - Crutch(es)", value: "CRUTCH" },
-  { label: "CTSB - Cervical Thoracic Spine Brace", value: "CTSB" },
-  { label: "EXP - Expulsion Plate", value: "EXP" },
-  { label: "FER - Ferrier Coupler", value: "FER" },
-  { label: "GLS - Gel Liner (Sheath)", value: "GLS" },
-  { label: "GSHEET - Silopad Soft Shear Gel Sheeting", value: "GSHEET" },
-  { label: "HANDS - Pair of hands", value: "HANDS" },
-  { label: "HANDS-C - Pair of Hands, Computerized", value: "HANDS-C" },
-  { label: "HIPP - Hip Pillow", value: "HIPP" },
-  { label: "HJ - Hip Joint, general", value: "HJ" },
-  { label: "HJB - Hip Joint, with Pelvic Band", value: "HJB" },
-  { label: "HJP - Hip Joint, Pediatric", value: "HJP" },
-  { label: "HPIL - Heel Pillow", value: "HPIL" },
-  { label: "INSOLE - Insole", value: "INSOLE" },
-  { label: "KB - Knee Brace (universal)", value: "KB" },
-  { label: "KBL - Knee Brace, Left", value: "KBL" },
-  { label: "KBR - Knee Brace, Right", value: "KBR" },
-  { label: "KC - Knee, computerized", value: "KC" },
-  { label: "KCAP - Knee Cap", value: "KCAP" },
-  { label: "KD - Knee, D-Rev", value: "KD" },
-  { label: "KH - Knee, Hydraulic", value: "KH" },
-  { label: "KIMB - Knee Immobilizer", value: "KIMB" },
-  { label: "KMAN - Knee, Manual-locking", value: "KMAN" },
-  { label: "KMECH - Knee, Mechanical", value: "KMECH" },
-  { label: "KN - Knee, Pneumatic", value: "KN" },
-  { label: "KP - Knee, Pediatric", value: "KP" },
-  { label: "KUID - Knee, Unidentified", value: "KUID" },
-  { label: "LAK - Left Above Knee Full Leg", value: "LAK" },
-  { label: "LANY - Liner Lanyard", value: "LANY" },
-  { label: "LB - Leg Brace", value: "LB" },
-  { label: "LBK - Left Below Knee full leg", value: "LBK" },
-  { label: "LBL - Leg Brace, Left", value: "LBL" },
-  { label: "LBR - Leg Brace, Right", value: "LBR" },
-  { label: "LDUM - Lamination Dummy", value: "LDUM" },
-  { label: "Leg - Storage Rack,Leg Storage Rack", value: "Leg Storage Rack" },
-  { label: "LF - Left Foot", value: "LF" },
-  { label: "LFP - Left Foot Powered Ankle", value: "LFP" },
-  { label: "LFS - Left Foot, SACH", value: "LFS" },
-  { label: "LH - Left Hand", value: "LH" },
-  { label: "LHC - Left Hand, Computerized", value: "LHC" },
-  { label: "LL - Locking Liner", value: "LL" },
-  { label: "LSHELL - Left Foot Shell", value: "LSHELL" },
-  { label: "LSHOE - Shoe, Left", value: "LSHOE" },
-  { label: "LSKT - Socket, Left leg", value: "LSKT" },
-  { label: "LSP - Lanyard Strap Plate", value: "LSP" },
-  { label: "LUMB - Lumbar Belt", value: "LUMB" },
-  { label: "MCL - Modular Clutch Lock", value: "MCL" },
-  { label: "MISC - Miscellaneous small parts", value: "MISC" },
-  { label: "MMED - Miscellaneous medical supplies", value: "MMED" },
-  { label: "MOD - Misc. Orthotic Device", value: "MOD" },
-  { label: "NLS - Nylon Liner (Sheath)", value: "NLS" },
-  { label: "OBH - Orthotic Brace Hardware", value: "OBH" },
-  { label: "OP - Offset Flexion Plate", value: "OP" },
-  { label: "PDS - Universal Pyramid Slide", value: "PDS" },
-  { label: "PIN - Pin lock System", value: "PIN" },
-  { label: "PYAPD - Pylon to Pyramid Adapter", value: "PYAPD" },
-  { label: "PYC - Pylon, Computerized Leg", value: "PYC" },
-  { label: "PYIC - Pylon, with Integrated Tube Clamp", value: "PYIC" },
-  { label: "PYIP - Pylon, with Integrated Pyramid", value: "PYIP" },
-  { label: "PYL - Pylon", value: "PYL" },
-  { label: "PYP - Pylon, Pediatric", value: "PYP" },
-  { label: "PYS - Pylon, Shock & Torsion Adapter", value: "PYS" },
-  { label: "RAFO - Rigid Ankle Foot Orthosis", value: "RAFO" },
-  { label: "RAK - Right Above Knee Full Leg", value: "RAK" },
-  { label: "RBK - Right Below Knee full leg", value: "RBK" },
-  { label: "RF - Right Foot", value: "RF" },
-  { label: "RFP - Right Foot Powered Ankle", value: "RFP" },
-  { label: "RFS - Right Foot, SACH", value: "RFS" },
-  { label: "RH - Right Hand", value: "RH" },
-  { label: "RHC - Right Hand, Computerized", value: "RHC" },
-  { label: "RNECK - Neck Support, Rigid", value: "RNECK" },
-  { label: "RSHELL - Right Foot Shell", value: "RSHELL" },
-  { label: "RSHOE - Shoe, Right", value: "RSHOE" },
-  { label: "RSKT - Socket, Right leg", value: "RSKT" },
-  { label: "RUN - Running Foot - Standard", value: "RUN" },
-  { label: "SBELT - Suspension Belt", value: "SBELT" },
-  { label: "SCON - Socket Connector", value: "SCON" },
-  { label: "SCREW - Miscellaneous screws", value: "SCREW" },
-  { label: "SHOE - Pair of shoes", value: "SHOE" },
-  { label: "SIMB - Shoulder Immobilizer", value: "SIMB" },
-  { label: "SKSL - Sock Slider", value: "SKSL" },
-  { label: "SKT - Socket", value: "SKT" },
-  { label: "SKT-C - Socket w/ attached adapter", value: "SKT-C" },
-  { label: "SL - Suction Liner", value: "SL" },
-  { label: "SNECK - Neck Support, Soft", value: "SNECK" },
-  { label: "SOCK - Socks", value: "SOCK" },
-  { label: "SP - Spacer Plate", value: "SP" },
-  { label: "SR - Sealing Ring", value: "SR" },
-  { label: "SRL - Sealing Ring Liner", value: "SRL" },
-  { label: "SS - Suspension Sleeve, Pediatric", value: "SS" },
-  { label: "SSG - Suspension Sleeve, Gel", value: "SSG" },
-  { label: "SSL - Suspension Sleeve, Lycra", value: "SSL" },
-  { label: "SSN - Suspension Sleeve, Neoprene", value: "SSN" },
-  { label: "STAND - Liner Stand", value: "STAND" },
-  { label: "STSH - Stump Shrinker", value: "STSH" },
-  { label: "TFR - TF Rotator", value: "TFR" },
-  { label: "TOR - Torsion Adapter", value: "TOR" },
-  { label: "TR - Shell Tread", value: "TR" },
-  { label: "UAF - Universal Ambulatory Foot", value: "UAF" },
-  { label: "UEL - Upper Extremity Liner", value: "UEL" },
-  { label: "UF - Universal Foot", value: "UF" },
-  { label: "UFP - Universal Foot, Powered Ankle", value: "UFP" },
-  { label: "VAC - Vacuum System", value: "VAC" },
-  { label: "VIP - Valve Integrated Pump", value: "VIP" },
-  { label: "VLV - Suction Valve", value: "VLV" },
-  { label: "VLVP - Valve Plate", value: "VLVP" },
-  { label: "VOID - ", value: "VOID" },
-  { label: "WBOOT - Walking Boot (Cast)", value: "WBOOT" },
-  { label: "WRST - Wrist Brace", value: "WRST" },
-];
 
 const MultipleSelect = ({
   selectedManufacturer,
@@ -272,15 +7,101 @@ const MultipleSelect = ({
   selectedSKU,
   setSelectedSKU,
 }) => {
+  const [manuOptions, setManu] = useState([]);
+  const [SKUOptions, setSKUs] = useState([]);
+
+  useEffect(() => {
+    const apiKey = import.meta.env.VITE_REACT_APP_API_KEY;
+    const baseId = "appBrTbPbyamI0H6Z";
+
+    async function fetchTableRecords(offset = null, tableName) {
+      const url = `https://api.airtable.com/v0/${baseId}/${tableName}?${
+        offset ? `offset=${offset}` : ""
+      }`;
+
+      const response = await fetch(url, {
+        headers: {
+          Authorization: `Bearer ${apiKey}`,
+        },
+      });
+
+      const data = await response.json();
+      const records = data.records;
+
+      return {
+        records,
+        offset: data.offset || undefined,
+      };
+    }
+
+    (async () => {
+      let allSKUs = [];
+      let SKUSoffset = null;
+
+      do {
+        const { records, offset: newOffset } = await fetchTableRecords(
+          SKUSoffset,
+          "SKUs"
+        );
+        allSKUs = allSKUs.concat(records);
+        SKUSoffset = newOffset;
+      } while (SKUSoffset);
+
+      setSKUs(
+        allSKUs
+          .map((e) => {
+            return {
+              label: `${e.fields.Name.trimStart()} - ${e.fields.Description.trimStart()}`,
+              value: encodeURIComponent(e.fields.Name.trimStart()),
+            };
+          })
+          .sort((a, b) => {
+            return a.label.localeCompare(b.label);
+          })
+      );
+    })();
+
+    (async () => {
+      let allManu = [];
+      let Manuoffset = null;
+
+      do {
+        const { records, offset: newOffset } = await fetchTableRecords(
+          Manuoffset,
+          "Manufacturers"
+        );
+        allManu = allManu.concat(records);
+        Manuoffset = newOffset;
+      } while (Manuoffset);
+
+      setManu(
+        allManu
+          .map((e) => {
+            return {
+              label: e.fields.Name.trimStart(),
+              value: encodeURIComponent(e.fields.Name.trimStart()),
+            };
+          })
+          .sort((a, b) => {
+            return a.label.localeCompare(b.label);
+          })
+      );
+    })();
+  }, []);
+
   return (
     <>
       <div style={{ width: "80%", margin: "0 auto 20px auto" }}>
-        <h1 style={{
-          fontSize: '23px',
-          fontWeight: '600'
-        }}>Select Manufacturer</h1>
+        <h1
+          style={{
+            fontSize: "23px",
+            fontWeight: "600",
+          }}
+        >
+          Select Manufacturer
+        </h1>
         <MultiSelect
-          options={options}
+          options={manuOptions}
           value={selectedManufacturer}
           onChange={setSelectedManufacturer}
           labelledBy="Select"
@@ -288,17 +109,21 @@ const MultipleSelect = ({
       </div>
       <hr style={{ width: "80%", margin: "10px auto" }}></hr>
       <div style={{ width: "80%", margin: "0 auto 20px auto" }}>
-        <h1 style={{
-          fontSize: '23px',
-          fontWeight: '600'
-        }}>Select SKU or Description</h1>
+        <h1
+          style={{
+            fontSize: "23px",
+            fontWeight: "600",
+          }}
+        >
+          Select SKU or Description
+        </h1>
         <MultiSelect
-          options={options2}
+          options={SKUOptions}
           value={selectedSKU}
           onChange={setSelectedSKU}
           labelledBy="Select"
         />
-      </div >
+      </div>
     </>
   );
 };

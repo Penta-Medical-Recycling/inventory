@@ -4,72 +4,51 @@ const Partner = ({ setSelectedPartner }) => {
   const [isActive, setIsActive] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const [partner, setPartner] = useState("");
-  // const [finalPartner, setFinalPartner] = useState("");
-  // const [dummy, setDummy] = useState(1)
   const navigate = useNavigate();
+  const [data, setData] = useState([]);
 
-  const options = [
-    "Anera",
-    "AROL PLUS",
-    "Bestojis Orthopaedic and Rehabilitation Foundation",
-    "Centro de Protesis",
-    "CFINS",
-    "Chosen/ KCMC",
-    "Clive - Brace Orthopedic",
-    "CMC Vellore",
-    "Courage Ukraine",
-    "CREE/ Rotary - México",
-    "Cure Hospital (KENYA)",
-    "CyborgBase",
-    "Dreaming and Working Together",
-    "DT Care",
-    "Elizabeth's Legacy of Hope/ DOORIS",
-    "ENAM",
-    "Fauji Foundation",
-    "Foot Care - Jaipur",
-    "Fun Pro Bo",
-    "Green Pasture Hospital",
-    "Group AMH",
-    "Haiti REH-Care",
-    "Halal Foundation",
-    "Henry Gizamba - Mbale City",
-    "HPRS",
-    "HRDC",
-    "Ishk Tolaram Foundation",
-    "Kind Deeds",
-    "Lanka Fundamental Rights Organization",
-    "Life & Limb",
-    "Limb Care Foundation Inc.",
-    "Limb Kind Foundation",
-    "Limbs For Life",
-    "Loma Linda P&O",
-    "MedShare",
-    "Mindy Foundation",
-    "Nova Pro Foundation",
-    "OADCPH",
-    "OMAPEHIV",
-    "Ortopedia Petrona",
-    "Palestine Children's Relief Fund (PCRF)",
-    "Partners for World Health",
-    "PIPOS",
-    "Polus Timbiqui",
-    "PrOPhy Care",
-    "Protesis Imbabura",
-    "Protez Foundation",
-    "Ptolemy Reid Rehabilitation Center",
-    "Range of Motion Project",
-    "Rotary Choluteca",
-    "SSPO",
-    "Stepping into Grace",
-    "Syrian American Medical Society",
-    "Tellus - Ukraine",
-    "Tim Cleveland",
-    "Todd Stone",
-    "UHuman",
-    "Unbroken - Ukraine",
-    "World Action Fund",
-    "Центр протезування і реабілітації «РАЗАН» (RAZAN)",
-  ];
+  useEffect(() => {
+    const apiKey = import.meta.env.VITE_REACT_APP_API_KEY;
+    const baseId = "appBrTbPbyamI0H6Z";
+    const tableName = "Partners";
+
+    async function fetchTableRecords(offset = null) {
+      const url = `https://api.airtable.com/v0/${baseId}/${tableName}?${
+        offset ? `offset=${offset}` : ""
+      }`;
+
+      const response = await fetch(url, {
+        headers: {
+          Authorization: `Bearer ${apiKey}`,
+        },
+      });
+
+      const data = await response.json();
+      const records = data.records;
+
+      return {
+        records,
+        offset: data.offset || undefined,
+      };
+    }
+
+    (async () => {
+      let allRecords = [];
+      let offset = null;
+
+      do {
+        const { records, offset: newOffset } = await fetchTableRecords(offset);
+        allRecords = allRecords.concat(records);
+        offset = newOffset;
+      } while (offset);
+
+      setData(
+        allRecords
+          .map((e) => e.fields.Name.trimStart())
+          .sort((a, b) => a.localeCompare(b))
+      );
+    })();
+  }, []);
 
   const handleSearch = (event) => {
     setSearchTerm(event.target.value);
@@ -79,7 +58,7 @@ const Partner = ({ setSelectedPartner }) => {
     setIsActive(false);
   };
 
-  const filteredOptions = options.filter((option) =>
+  const filteredOptions = data.filter((option) =>
     option.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
@@ -93,24 +72,16 @@ const Partner = ({ setSelectedPartner }) => {
 
   const submit = async () => {
     try {
-      // Update local storage
       localStorage.setItem("partner", partner);
 
-      // Wait for the local storage update to finish before navigating
       await new Promise((resolve) => setTimeout(resolve, 0)); // This simulates an asynchronous delay
 
-      // Now navigate to '/cart'
       setSelectedPartner(partner);
       navigate("/cart");
     } catch (error) {
       console.error("Error updating local storage:", error);
     }
   };
-
-  // useEffect(() => {
-  //     // This effect will run when the 'partner' value in localStorage changes
-  //     if (localStorage['partner']) navigate('/cart');
-  // }, [localStorage]);
 
   return (
     <div
@@ -135,7 +106,9 @@ const Partner = ({ setSelectedPartner }) => {
             aria-controls="dropdown-menu"
             id="partner-dropdown"
           >
-            <span style={{overflow: 'hidden'}}>{partner || "Select a Partner"}</span>
+            <span style={{ overflow: "hidden" }}>
+              {partner || "Select a Partner"}
+            </span>
             <span className="icon is-small">
               <i className="fas fa-angle-down" aria-hidden="true"></i>
             </span>
