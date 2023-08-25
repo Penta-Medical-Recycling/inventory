@@ -22,9 +22,17 @@ const SideBar = ({
     <div id="side-bar" className={isActive ? "is-filter-active" : ""}>
       <div id="side-bar-top">
         <h1 className="is-size-3 mt-3" style={{ fontWeight: '650', marginRight: '79px' }}>Filters</h1>
-        <p className="is-size-3 mx-4" onClick={activeToggle}>
+        {/* <p className="is-size-3 mx-4" onClick={activeToggle}>
           &#10006;
-        </p>
+        </p> */}
+        <span
+          className="icon is-right is-medium mt-3 mr-5"
+          style={{cursor: 'pointer'}}
+          onClick={activeToggle}
+          id='filter-x'
+        >
+          <i className="fas fa-times" style={{fontSize: '1.5rem'}}></i>
+        </span>
       </div>
       <hr style={{ width: "80%", margin: "10px auto" }}></hr>
       <MultipleSelect
@@ -32,7 +40,7 @@ const SideBar = ({
         setSelectedManufacturer={setSelectedManufacturer}
         selectedSKU={selectedSKU}
         setSelectedSKU={setSelectedSKU}
-      /> 
+      />
       <hr style={{ width: "80%", margin: "10px auto 0px" }}></hr>
       <SizeSlider
         minValue={minValue}
