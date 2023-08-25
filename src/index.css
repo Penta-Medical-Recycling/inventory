@@ -98,10 +98,15 @@ main {
   padding: 2px 10px;
   margin: 10px 5px;
   user-select: none;
+  transition: all .15s ease-in;
 }
 
 #filter-button:hover {
   cursor: pointer;
+  border-width: 1px;
+  box-shadow: rgba(23, 154, 255, 0.2) 0px 2px 8px 0px;
+  transform: scale(1.02);
+  
 }
 
 #filter-button p {
@@ -110,7 +115,7 @@ main {
 }
 
 #filter-button.filter-button-active {
-  background-color: #78d3fb;
+  background-color: #ff5c48;
   color: white;
   fill: #ffffff;
 }
@@ -127,10 +132,15 @@ main {
   margin: 10px 5px;
   width: 120px;
   user-select: none;
+  transition: all .15s ease-in;
 }
 
 .filter-3:hover {
   cursor: pointer;
+  border-color: #70b9d7;
+  border-width: 1px;
+  box-shadow: rgba(23, 154, 255, 0.2) 0px 2px 8px 0px;
+  transform: scale(1.02);
 }
 
 .filter-selected {
@@ -380,6 +390,20 @@ input[type="range"]::-moz-range-thumb {
   color: white
 }
 
+.pag-btn{
+  border-radius: 40px;
+  width:40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all .1s ease-in-out;
+}
+
+.pag-btn:hover{
+  background-color: rgb(226, 226, 226);
+}
+
 .custom-toast{
   background-color: red;
 }
@@ -398,6 +422,17 @@ input[type="range"]::-moz-range-thumb {
 }
 
 .crease-click:hover{
+  background-color: rgb(226, 226, 226);
+}
+
+#filter-x{
+  height: 40px;
+  width: 40px;
+  border-radius: 40px;
+  transition: all .1s ease-in;
+}
+
+#filter-x:hover{
   background-color: rgb(226, 226, 226);
 }
 

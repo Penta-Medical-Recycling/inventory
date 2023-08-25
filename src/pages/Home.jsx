@@ -148,11 +148,9 @@ function Home({
       let header = "ID,Description,Size,Model/Type,Manufacturer\n";
 
       allRecords.forEach((e) => {
-        header += `"${e.fields["Item ID"] || ""}","${
-          e.fields["Description (from SKU)"] || ""
-        }","${e.fields["Size"] || ""}","${e.fields["Model/Type"] || ""}","${
-          e.fields["Manufacturer"] || ""
-        }"\n`;
+        header += `"${e.fields["Item ID"] || ""}","${e.fields["Description (from SKU)"] || ""
+          }","${e.fields["Size"] || ""}","${e.fields["Model/Type"] || ""}","${e.fields["Manufacturer"] || ""
+          }"\n`;
       });
 
       if (fileType === "csv") {
@@ -217,11 +215,11 @@ function Home({
           }}
         >
           <div id="search-form">
-            <form>
+            <form onSubmit={(e) => e.preventDefault()}>
               <div className="field">
                 <div className="control has-icons-left has-icons-right">
                   <input
-                    className="input"
+                    className="input is-rounded mr-3"
                     type="text"
                     placeholder="Search by description, size, or model/type"
                     value={searchInput}
@@ -237,7 +235,7 @@ function Home({
                       onClick={clearSearchInput}
                       id="search-clear"
                     >
-                      <i className="fas fa-times"></i>
+                      <i className="fas fa-times mr-5"></i>
                     </span>
                   )}
                 </div>
@@ -246,7 +244,7 @@ function Home({
             <div className={`dropdown ${isDropActive ? "is-active" : ""}`}>
               <div className="dropdown-trigger">
                 <button
-                  className="button"
+                  className="button is-rounded"
                   aria-haspopup="true"
                   aria-controls="dropdown-menu3"
                   onClick={toggleDropdown}
@@ -361,13 +359,13 @@ function Home({
         // </div>
         <div className="is-flex is-justify-content-center is-align-items-center">
           <div
-            style={{ marginLeft: "33px" }}
+            style={{ marginLeft: "44px" }}
             className="is-flex is-justify-content-center is-align-items-center has-text-weight-bold is-size-5 num-pag"
           >
             <p>{offset + 1}</p>
           </div>
           <p
-            className="is-size-4 ml-3 is-text-weight-bold"
+            className="is-size-4 ml-1 is-text-weight-bold pag-btn"
             style={{ cursor: "pointer" }}
             onClick={() => setOffset(offset + 1)}
           >
@@ -377,14 +375,14 @@ function Home({
       ) : page === "Previous" ? (
         <div className="is-flex is-justify-content-center is-align-items-center">
           <p
-            className="is-size-4 mr-3 is-text-weight-bold"
+            className="is-size-4 mr-1 is-text-weight-bold pag-btn"
             style={{ cursor: "pointer" }}
             onClick={() => setOffset(offset - 1)}
           >
             <i className="fas fas fa-angle-double-left"></i>
           </p>
           <div
-            style={{ marginRight: "33px" }}
+            style={{ marginRight: "44px" }}
             className="is-flex is-justify-content-center is-align-items-center has-text-weight-bold is-size-5 num-pag"
           >
             <p>{offset + 1}</p>
@@ -393,7 +391,7 @@ function Home({
       ) : page === "Next/Previous" ? (
         <div className="is-flex is-justify-content-center is-align-items-center">
           <p
-            className="is-size-4 mr-3 is-text-weight-bold"
+            className="is-size-4 mr-1 is-text-weight-bold pag-btn"
             style={{ cursor: "pointer" }}
             onClick={() => setOffset(offset - 1)}
           >
@@ -403,7 +401,7 @@ function Home({
             <p>{offset + 1}</p>
           </div>
           <p
-            className="is-size-4 ml-3 is-text-weight-bold"
+            className="is-size-4 ml-1 is-text-weight-bold pag-btn"
             style={{ cursor: "pointer" }}
             onClick={() => setOffset(offset + 1)}
           >
@@ -436,15 +434,25 @@ function Home({
         setIsLoading={setIsLoading}
       />
       {page === "Next" ? (
+        // <div className="is-flex is-justify-content-center">
+        //   <nav className="pagination" role="navigation" aria-label="pagination">
+        //     <a
+        //       className="pagination-next"
+        //       onClick={() => setOffset(offset + 1)}
+        //     >
+        //       Next ⊳
+        //     </a>
+        //   </nav>
+        // </div>
         <div className="is-flex is-justify-content-center is-align-items-center">
           <div
-            style={{ marginLeft: "25px" }}
-            className="is-flex is-justify-content-center is-align-items-center has-text-weight-bold  is-size-5 num-pag"
+            style={{ marginLeft: "44px" }}
+            className="is-flex is-justify-content-center is-align-items-center has-text-weight-bold is-size-5 num-pag"
           >
             <p>{offset + 1}</p>
           </div>
           <p
-            className="is-size-4 ml-3 is-text-weight-bold"
+            className="is-size-4 ml-1 is-text-weight-bold pag-btn"
             style={{ cursor: "pointer" }}
             onClick={() => setOffset(offset + 1)}
           >
@@ -454,14 +462,14 @@ function Home({
       ) : page === "Previous" ? (
         <div className="is-flex is-justify-content-center is-align-items-center">
           <p
-            className="is-size-4 mr-3 is-text-weight-bold"
+            className="is-size-4 mr-1 is-text-weight-bold pag-btn"
             style={{ cursor: "pointer" }}
             onClick={() => setOffset(offset - 1)}
           >
             <i className="fas fas fa-angle-double-left"></i>
           </p>
           <div
-            style={{ marginRight: "33px" }}
+            style={{ marginRight: "44px" }}
             className="is-flex is-justify-content-center is-align-items-center has-text-weight-bold is-size-5 num-pag"
           >
             <p>{offset + 1}</p>
@@ -470,7 +478,7 @@ function Home({
       ) : page === "Next/Previous" ? (
         <div className="is-flex is-justify-content-center is-align-items-center">
           <p
-            className="is-size-4 mr-3 is-text-weight-bold"
+            className="is-size-4 mr-1 is-text-weight-bold pag-btn"
             style={{ cursor: "pointer" }}
             onClick={() => setOffset(offset - 1)}
           >
@@ -480,7 +488,7 @@ function Home({
             <p>{offset + 1}</p>
           </div>
           <p
-            className="is-size-4 ml-3 is-text-weight-bold"
+            className="is-size-4 ml-1 is-text-weight-bold pag-btn"
             style={{ cursor: "pointer" }}
             onClick={() => setOffset(offset + 1)}
           >
