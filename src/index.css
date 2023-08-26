@@ -13,13 +13,29 @@ main {
   justify-content: space-evenly;
 }
 
-#cardDiv .card {
+.card {
   display: flex;
   flex-direction: column;
   justify-content: space-between;
   width: 300px;
-  margin: 20px
+  margin: 20px;
+  opacity: 0;
+  transform: translateY(20px);
+  transition: opacity 1s ease, transform 1s ease;
+  border-radius: 20px;
 }
+
+.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0px 4px 20px rgba(0, 0, 0, 0.2);
+}
+
+
 
 .content {
   /* display:flex;
@@ -33,20 +49,34 @@ main {
 }
 
 #penta-title {
-  margin: 150px auto 0px auto;
+  margin: 20px auto 0px auto;
+  /* margin: 150px auto 0px auto; */
 }
 
 #nav {
   position: fixed;
   z-index: 5;
-  height: 120px;
+  height: 100px;
+  /* height: 120px; */
   width: 100vw;
-  background-color: white;
+  /* background-color: white; */
+  background: rgba(255, 255, 255, 0.2);
   box-shadow: rgba(0, 0, 0, 0.24) 0px 3px 8px;
   display: flex;
   justify-content: space-between;
   align-items: center;
+  /* opacity: 0.9; */
+  z-index: 25;
+  backdrop-filter: blur(15px);
 }
+
+.navbar {
+  background: rgba(255, 255, 255, 0.2); /* Adjust the opacity as needed */
+  backdrop-filter: blur(10px); /* Adjust the blur amount as needed */
+  padding: 1rem;
+  /* Add other styling properties for your navbar */
+}
+
 
 #shopping-cart {
   margin-right: 10%;
@@ -120,6 +150,48 @@ main {
   fill: #ffffff;
 }
 
+.add-button {
+  background-color: #78d3fb;
+  color: white;
+  border: 0;
+  border-radius: 0px 0px 20px 0px;
+}
+
+.add-button:hover {
+  color: white;
+  background-color: #5fc1fe;
+}
+
+.remove-button {
+  background-color: #ff5c47e8;
+  color: white;
+  border: 0;
+  border-radius: 0px 0px 20px 0px;
+}
+
+.remove-button:hover {
+  color: white;
+  background-color: #fb553f;
+}
+
+.images-button-red {
+  border-radius: 0 0 0 20px; 
+  border: 0";
+}
+.images-button-blue {
+  border-radius: 0 0 0 20px; 
+  border: 0";
+}
+
+.images-button-blue:hover {
+  color: white;
+  background-color: #78d3fb;
+}
+.images-button-red:hover {
+  color: white;
+  background-color: #ff5c48;
+}
+
 .filter-3 {
   display: flex;
   align-items: center;
@@ -157,7 +229,7 @@ main {
   height: 100%;
   left: -350px;
   transition: all .3s ease-in;
-  z-index: 6;
+  z-index: 26;
 }
 
 .is-filter-active {
@@ -193,6 +265,34 @@ main {
   margin-left: -16px;
   margin-top: -5px;
 }
+
+.badge.animate {
+  animation: pulse 1s ease-in-out 1;;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    transform: scale(1);
+    background-color: #fe5b47;
+  }
+  50% {
+    transform: scale(1.2);
+    background-color: #35b0fb;
+  }
+}
+
+/* 
+@keyframes pulse {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.2);
+  }
+  100% {
+    transform: scale(1);
+  }
+} */
 
 .badge p {
   margin: 3px;

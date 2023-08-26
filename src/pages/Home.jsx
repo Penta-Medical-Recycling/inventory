@@ -2,7 +2,7 @@ import CardLister from "../Components/CardLister";
 import LoadingSpinner from "../Components/LoadingSpinner";
 import * as Papa from "papaparse";
 import * as XLSX from "xlsx/xlsx.mjs";
-import { useEffect, useState } from "react";
+import { useRef, useState, useEffect } from "react";
 
 function Home({
   cartCount,
@@ -16,6 +16,8 @@ function Home({
   minValue,
   maxValue,
   isOn,
+  isCartPressed,
+  setIsCartPressed,
 }) {
   const [selectedFilter, setSelectedFilters] = useState({
     Prosthesis: false,
@@ -66,10 +68,31 @@ function Home({
 
   const [isDropActive, setIsDropActive] = useState(false);
 
+  const scrollToTop = () => {
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
+
   const toggleDropdown = (event) => {
     event.stopPropagation();
     setIsDropActive(!isDropActive);
   };
+
+  const dropdownRef = useRef(null);
+
+  const handleClickOutside = (event) => {
+    if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+      setIsDropActive(false);
+    }
+  };
+
+  useEffect(() => {
+    document.addEventListener("mousedown", handleClickOutside);
+
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
+
   async function createBlob(fileType) {
     setLoading(true);
     const apiKey = import.meta.env.VITE_REACT_APP_API_KEY;
@@ -133,8 +156,6 @@ function Home({
       };
     }
 
-    let header;
-
     (async () => {
       let allRecords = [];
       let offset = null;
@@ -148,9 +169,11 @@ function Home({
       let header = "ID,Description,Size,Model/Type,Manufacturer\n";
 
       allRecords.forEach((e) => {
-        header += `"${e.fields["Item ID"] || ""}","${e.fields["Description (from SKU)"] || ""
-          }","${e.fields["Size"] || ""}","${e.fields["Model/Type"] || ""}","${e.fields["Manufacturer"] || ""
-          }"\n`;
+        header += `"${e.fields["Item ID"] || ""}","${
+          e.fields["Description (from SKU)"] || ""
+        }","${e.fields["Size"] || ""}","${e.fields["Model/Type"] || ""}","${
+          e.fields["Manufacturer"] || ""
+        }"\n`;
       });
 
       if (fileType === "csv") {
@@ -241,7 +264,10 @@ function Home({
                 </div>
               </div>
             </form>
-            <div className={`dropdown ${isDropActive ? "is-active" : ""}`}>
+            <div
+              className={`dropdown ${isDropActive ? "is-active" : ""}`}
+              ref={dropdownRef}
+            >
               <div className="dropdown-trigger">
                 <button
                   className="button is-rounded"
@@ -275,14 +301,20 @@ function Home({
                 <div className="dropdown-content">
                   <a
                     className="dropdown-item"
-                    onClick={() => createBlob("csv")}
+                    onClick={() => {
+                      createBlob("csv");
+                      setIsDropActive(false);
+                    }}
                   >
                     .csv
                   </a>
                   <a
                     href="#"
                     className="dropdown-item"
-                    onClick={() => createBlob("xlsx")}
+                    onClick={() => {
+                      createBlob("xlsx");
+                      setIsDropActive(false);
+                    }}
                   >
                     .xlsx
                   </a>
@@ -367,7 +399,9 @@ function Home({
           <p
             className="is-size-4 ml-1 is-text-weight-bold pag-btn"
             style={{ cursor: "pointer" }}
-            onClick={() => setOffset(offset + 1)}
+            onClick={() => {
+              setOffset(offset + 1);
+            }}
           >
             <i className="fas fas fa-angle-double-right"></i>
           </p>
@@ -377,7 +411,9 @@ function Home({
           <p
             className="is-size-4 mr-1 is-text-weight-bold pag-btn"
             style={{ cursor: "pointer" }}
-            onClick={() => setOffset(offset - 1)}
+            onClick={() => {
+              setOffset(offset - 1);
+            }}
           >
             <i className="fas fas fa-angle-double-left"></i>
           </p>
@@ -393,7 +429,9 @@ function Home({
           <p
             className="is-size-4 mr-1 is-text-weight-bold pag-btn"
             style={{ cursor: "pointer" }}
-            onClick={() => setOffset(offset - 1)}
+            onClick={() => {
+              setOffset(offset - 1);
+            }}
           >
             <i className="fas fas fa-angle-double-left"></i>
           </p>
@@ -403,7 +441,9 @@ function Home({
           <p
             className="is-size-4 ml-1 is-text-weight-bold pag-btn"
             style={{ cursor: "pointer" }}
-            onClick={() => setOffset(offset + 1)}
+            onClick={() => {
+              setOffset(offset + 1);
+            }}
           >
             <i className="fas fas fa-angle-double-right"></i>
           </p>
@@ -432,6 +472,8 @@ function Home({
         setDebouncedSearchValue={setDebouncedSearchValue}
         isLoading={isLoading}
         setIsLoading={setIsLoading}
+        setIsCartPressed={setIsCartPressed}
+        isCartPressed={isCartPressed}
       />
       {page === "Next" ? (
         // <div className="is-flex is-justify-content-center">
@@ -454,7 +496,10 @@ function Home({
           <p
             className="is-size-4 ml-1 is-text-weight-bold pag-btn"
             style={{ cursor: "pointer" }}
-            onClick={() => setOffset(offset + 1)}
+            onClick={() => {
+              setOffset(offset + 1);
+              scrollToTop();
+            }}
           >
             <i className="fas fas fa-angle-double-right"></i>
           </p>
@@ -464,7 +509,10 @@ function Home({
           <p
             className="is-size-4 mr-1 is-text-weight-bold pag-btn"
             style={{ cursor: "pointer" }}
-            onClick={() => setOffset(offset - 1)}
+            onClick={() => {
+              setOffset(offset - 1);
+              scrollToTop();
+            }}
           >
             <i className="fas fas fa-angle-double-left"></i>
           </p>
@@ -480,7 +528,10 @@ function Home({
           <p
             className="is-size-4 mr-1 is-text-weight-bold pag-btn"
             style={{ cursor: "pointer" }}
-            onClick={() => setOffset(offset - 1)}
+            onClick={() => {
+              setOffset(offset - 1);
+              scrollToTop();
+            }}
           >
             <i className="fas fas fa-angle-double-left"></i>
           </p>
@@ -490,7 +541,10 @@ function Home({
           <p
             className="is-size-4 ml-1 is-text-weight-bold pag-btn"
             style={{ cursor: "pointer" }}
-            onClick={() => setOffset(offset + 1)}
+            onClick={() => {
+              setOffset(offset + 1);
+              scrollToTop();
+            }}
           >
             <i className="fas fas fa-angle-double-right"></i>
           </p>
