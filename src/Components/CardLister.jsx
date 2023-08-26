@@ -66,7 +66,7 @@ const CardLister = ({
   const encodedTableName = encodeURIComponent(tableName);
 
   async function fetchData() {
-    let url = `https://api.airtable.com/v0/${baseId}/${encodedTableName}?pageSize=36&filterByFormula=AND(`;
+    let url = `https://api.airtable.com/v0/${baseId}/${encodedTableName}?pageSize=36&sort%5B0%5D%5Bfield%5D=Item%20ID&sort%5B0%5D%5Bdirection%5D=asc&filterByFormula=AND(`;
     const skus = selectedSKU.map((option) => option.value);
     const manufacturers = selectedManufacturer.map((option) => option.value);
     const selectedTags = Object.keys(selectedFilter).filter(
@@ -171,7 +171,7 @@ const CardLister = ({
               item.fields.SKU && (
                 <div
                   className={`card ${cardsVisible ? "visible" : ""}`}
-                  style={{ animationDelay: `${index * 200}ms` }}
+                  // style={{ animationDelay: `${index * 200}ms` }}
                   key={item.id}
                 >
                   <div>

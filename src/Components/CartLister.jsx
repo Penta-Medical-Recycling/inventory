@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from "react";
-
+import RemoveCartLogo from "./RemoveCartLogo";
+import Image from "./Image";
 const CartLister = ({ cartCount, setCartCount }) => {
   const [button, setButton] = useState(1);
+  const [cardsVisible, setCardsVisible] = useState(true);
 
   return (
     <>
@@ -12,7 +14,11 @@ const CartLister = ({ cartCount, setCartCount }) => {
             item = JSON.parse(value);
           }
           return item ? (
-            <div className="card" key={item.id}>
+            <div
+              className={`card ${cardsVisible ? "visible" : ""}`}
+              // style={{ animationDelay: `${index * 200}ms` }}
+              key={item.id}
+            >
               <div>
                 <header className="card-header">
                   <div className="has-text-centered" style={{ width: "100%" }}>
@@ -22,7 +28,12 @@ const CartLister = ({ cartCount, setCartCount }) => {
                     >
                       {item["Description (from SKU)"]}
                     </p>
-                    {/* <p className="has-text-grey ml-3 mb-3">ID: {item.fields["Item ID"]}</p> */}
+                    <p
+                      style={{ marginTop: "-12px" }}
+                      className="has-text-grey ml-3 mb-3"
+                    >
+                      {item["Item ID"]}
+                    </p>
                   </div>
                 </header>
                 <div className="">
@@ -77,16 +88,40 @@ const CartLister = ({ cartCount, setCartCount }) => {
                 </div>
               </div>
               <footer className="card-footer">
+                <a
+                  className={`button card-footer-item ${
+                    !localStorage.getItem([item["Item ID"]])
+                      ? "images-button-red"
+                      : "images-button-blue"
+                  }`}
+                  href={`https://www.google.com/search?q=${encodeURIComponent(
+                    item.StringSearch
+                  )}&tbm=isch`}
+                  target="_blank"
+                >
+                  <Image color={"white"}></Image>
+                </a>
+
                 <button
-                  className="button card-footer-item"
-                  style={{ backgroundColor: "#ff5c47", color: "white" }}
+                  className="button card-footer-item remove-button"
+                  style={{
+                    color: "white",
+                  }}
                   onClick={() => {
                     localStorage.removeItem(item["Item ID"]);
                     setButton(button + 1);
                     setCartCount(cartCount - 1);
+                    // setIsPulsing(true);
+                    // setTimeout(() => {
+                    //   setIsPulsing(false);
+                    // }, 1000);
+                    setIsCartPressed(true);
+                    setTimeout(() => {
+                      setIsCartPressed(false);
+                    }, 1000);
                   }}
                 >
-                  Remove From Cart
+                  <RemoveCartLogo></RemoveCartLogo>
                 </button>
               </footer>
             </div>

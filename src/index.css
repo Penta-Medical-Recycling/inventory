@@ -550,6 +550,6 @@ input[type="range"]::-moz-range-thumb {
 }
 
 .notification.is-info {
-  background-color: #3f8ed0;
+  background-color: #35b0fb;
   color: #fff;
 }
