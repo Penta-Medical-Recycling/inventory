@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import CartLister from "../Components/CartLister";
 import { useNavigate, Link } from "react-router-dom";
-import LoadingScreen from "../Components/LoadingScreen";
+import Logo from "../Components/Logo";
 import Toast from "../Components/Toast";
 
 function Cart({ cartCount, setCartCount, selectedPartner }) {
@@ -21,7 +21,7 @@ function Cart({ cartCount, setCartCount, selectedPartner }) {
 
   const requestButton = (event) => {
     event.preventDefault();
-    setIsLoading(true)
+    setIsLoading(true);
     const BaseID = "appBrTbPbyamI0H6Z";
     // const APIKey = config.SECRET_API_KEY;
     const APIKey = import.meta.env.VITE_REACT_APP_API_KEY;
@@ -67,10 +67,12 @@ function Cart({ cartCount, setCartCount, selectedPartner }) {
           const partner = localStorage["partner"];
           localStorage.clear();
           localStorage.setItem("partner", partner);
-          setIsLoading(false)
-          Toast({ message: 'Thank you for your time, we will get back to you as soon as possible!' });
+          setIsLoading(false);
+          Toast({
+            message:
+              "Thank you for your time, we will get back to you as soon as possible!",
+          });
         }
-        
       })
       .catch((error) => {
         console.error("Error:", error);
@@ -85,14 +87,14 @@ function Cart({ cartCount, setCartCount, selectedPartner }) {
 
   const missingInfo = () => {
     !notes &&
-      Object.keys(localStorage).filter((k) => k !== "partner" && k !== "notes")
-        .length === 0
+    Object.keys(localStorage).filter((k) => k !== "partner" && k !== "notes")
+      .length === 0
       ? setErrorMessage(
-        "Please add additional notes, and add items to your cart"
-      )
+          "Please add additional notes, and add items to your cart"
+        )
       : !notes
-        ? setErrorMessage("Please add additional notes")
-        : setErrorMessage("Please add items to your cart");
+      ? setErrorMessage("Please add additional notes")
+      : setErrorMessage("Please add items to your cart");
   };
 
   return (
@@ -100,42 +102,51 @@ function Cart({ cartCount, setCartCount, selectedPartner }) {
       <div id="text-section">
         <h1 className="title has-text-centered mt-6">CART</h1>
       </div>
-      {isLoading? <LoadingScreen />: (<>
-        <h1 className="has-text-centered is-size-5 my-4">
-        Hello, {selectedPartner} Member!
-      </h1>
-      <Link to="/partner" className="is-flex is-justify-content-center my-3">
-        <button className="button">Change Partner</button>
-      </Link>
+      {isLoading ? (
+        <Logo />
+      ) : (
+        <>
+          <h1 className="has-text-centered is-size-5 my-4">
+            Hello, {selectedPartner} Member!
+          </h1>
+          <Link
+            to="/partner"
+            className="is-flex is-justify-content-center my-3"
+          >
+            <button className="button">Change Partner</button>
+          </Link>
 
-      <CartLister cartCount={cartCount} setCartCount={setCartCount} />
+          <CartLister cartCount={cartCount} setCartCount={setCartCount} />
 
-      <div style={{ width: "60vw", margin: "auto" }}>
-        <textarea
-          className="textarea my-4"
-          placeholder="Additional Notes"
-          value={notes}
-          onChange={handleNotesChange}
-        ></textarea>
-      </div>
-      <div className="is-flex is-justify-content-center">
-        <button
-          className="button mb-1"
-          type="button"
-          onClick={
-            notes &&
-              Object.keys(localStorage).filter(
-                (k) => k !== "partner" && k !== "notes"
-              ).length >= 1
-              ? requestButton
-              : missingInfo
-          }
-        >
-          Request Items
-        </button>
-      </div>
-      <p className="has-text-centered has-text-danger mb-4">{errorMessage}</p>
-      </>)}
+          <div style={{ width: "60vw", margin: "auto" }}>
+            <textarea
+              className="textarea my-4"
+              placeholder="Additional Notes"
+              value={notes}
+              onChange={handleNotesChange}
+            ></textarea>
+          </div>
+          <div className="is-flex is-justify-content-center">
+            <button
+              className="button mb-1"
+              type="button"
+              onClick={
+                notes &&
+                Object.keys(localStorage).filter(
+                  (k) => k !== "partner" && k !== "notes"
+                ).length >= 1
+                  ? requestButton
+                  : missingInfo
+              }
+            >
+              Request Items
+            </button>
+          </div>
+          <p className="has-text-centered has-text-danger mb-4">
+            {errorMessage}
+          </p>
+        </>
+      )}
     </>
   );
 }
