@@ -1,14 +1,17 @@
 import React, { useEffect, useState } from "react";
 import CartLister from "../Components/CartLister";
 import { useNavigate, Link } from "react-router-dom";
-import LoadingScreen from "../Components/LoadingScreen";
+import Logo from "../Components/Logo";
 import Toast from "../Components/Toast";
 
 function Cart({ cartCount, setCartCount, selectedPartner }) {
+  const ids = [];
+  const [outOfStock, setOutOfStock] = useState();
   const navigate = useNavigate();
   const [errorMessage, setErrorMessage] = useState();
   const [notes, setNotes] = useState(localStorage.getItem("notes") || "");
   const [isLoading, setIsLoading] = useState(false);
+  const APIKey = import.meta.env.VITE_REACT_APP_API_KEY;
 
   useEffect(() => {
     if (!selectedPartner) navigate("/partner");
@@ -19,12 +22,73 @@ function Cart({ cartCount, setCartCount, selectedPartner }) {
     localStorage.setItem("notes", event.target.value); // Notes save across pages or reload
   };
 
-  const requestButton = (event) => {
-    event.preventDefault();
+  const idFetcher = async () => {
+    for (let [key, value] of Object.entries(localStorage)) {
+      if (key !== 'partner' && key !== 'notes') {
+        const parse = JSON.parse(value)
+        const itemID = parse['Item ID'];
+        if (itemID !== undefined) {
+          ids.push(itemID);
+        }
+      }
+    }
+    const idSet = new Set();
+
+    for (const id of ids) {
+      const searchString = `SEARCH("${id}", {StringSearch})`;
+      const url = `https://api.airtable.com/v0/appBrTbPbyamI0H6Z/Requests?filterByFormula=${encodeURIComponent(searchString)}&maxRecords=1`;
+
+      try {
+        const response = await fetch(url, {
+          headers: {
+            Authorization: `Bearer ${APIKey}`,
+          },
+        });
+
+        const data = await response.json();
+
+        if (data.records && data.records.length > 0) {
+          idSet.add(id);
+        }
+      } catch (error) {
+        console.error(`Error fetching data for ID ${id}:`, error);
+      }
+    }
+
+    setOutOfStock(idSet)
+    if (idSet.size > 0) {
+      return true
+    } else{
+      return false
+    }
+    
+  }
+
+
+  useEffect(() => {
+    idFetcher();
+  }, []);
+
+
+  // console.log(idFetcher())
+
+
+
+
+  const requestButton = async (event) => {
     setIsLoading(true)
+    event.preventDefault();
+    setOutOfStock(new Set()); // Reset the out-of-stock items
+    const stockCheck = await idFetcher(); // Wait for idFetcher to complete
+
+    if (stockCheck) {
+      Toast({ message: 'Sorry but one or more of your items are out of stock, please remove', type:'is-danger' });
+      setIsLoading(false)
+      return;
+    }
     const BaseID = "appBrTbPbyamI0H6Z";
     // const APIKey = config.SECRET_API_KEY;
-    const APIKey = import.meta.env.VITE_REACT_APP_API_KEY;
+
     const tableName = "Requests";
     setErrorMessage("");
     const items = [];
@@ -68,9 +132,9 @@ function Cart({ cartCount, setCartCount, selectedPartner }) {
           localStorage.clear();
           localStorage.setItem("partner", partner);
           setIsLoading(false)
-          Toast({ message: 'Thank you for your time, we will get back to you as soon as possible!' });
+          Toast({ message: 'Thank you for your time, we will get back to you as soon as possible!', type:'is-info' });
         }
-        
+
       })
       .catch((error) => {
         console.error("Error:", error);
@@ -100,41 +164,40 @@ function Cart({ cartCount, setCartCount, selectedPartner }) {
       <div id="text-section">
         <h1 className="title has-text-centered mt-6">CART</h1>
       </div>
-      {isLoading? <LoadingScreen />: (<>
+      {isLoading ? <Logo /> : (<>
         <h1 className="has-text-centered is-size-5 my-4">
-        Hello, {selectedPartner} Member!
-      </h1>
-      <Link to="/partner" className="is-flex is-justify-content-center my-3">
-        <button className="button">Change Partner</button>
-      </Link>
+          Hello, {selectedPartner} Member!
+        </h1>
+        <Link to="/partner" className="is-flex is-justify-content-center my-3">
+          <button className="button">Change Partner</button>
+        </Link>
 
-      <CartLister cartCount={cartCount} setCartCount={setCartCount} />
-
-      <div style={{ width: "60vw", margin: "auto" }}>
-        <textarea
-          className="textarea my-4"
-          placeholder="Additional Notes"
-          value={notes}
-          onChange={handleNotesChange}
-        ></textarea>
-      </div>
-      <div className="is-flex is-justify-content-center">
-        <button
-          className="button mb-1"
-          type="button"
-          onClick={
-            notes &&
-              Object.keys(localStorage).filter(
-                (k) => k !== "partner" && k !== "notes"
-              ).length >= 1
-              ? requestButton
-              : missingInfo
-          }
-        >
-          Request Items
-        </button>
-      </div>
-      <p className="has-text-centered has-text-danger mb-4">{errorMessage}</p>
+        {outOfStock ? <CartLister cartCount={cartCount} setCartCount={setCartCount} outOfStock={outOfStock} setOutOfStock={setOutOfStock} /> : <Logo />}
+        <div style={{ width: "60vw", margin: "auto" }}>
+          <textarea
+            className="textarea my-4"
+            placeholder="Additional Notes"
+            value={notes}
+            onChange={handleNotesChange}
+          ></textarea>
+        </div>
+        <div className="is-flex is-justify-content-center">
+          <button
+            className="button mb-1"
+            type="button"
+            onClick={
+              notes &&
+                Object.keys(localStorage).filter(
+                  (k) => k !== "partner" && k !== "notes"
+                ).length >= 1
+                ? requestButton
+                : missingInfo
+            }
+          >
+            Request Items
+          </button>
+        </div>
+        <p className="has-text-centered has-text-danger mb-4">{errorMessage}</p>
       </>)}
     </>
   );

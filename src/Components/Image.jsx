@@ -9,6 +9,7 @@ function Image({ color }) {
       fill="#000"
       width={30}
       height={30}
+      className="image-component"
     >
       <g
         id="SVGRepo_tracerCarrier"

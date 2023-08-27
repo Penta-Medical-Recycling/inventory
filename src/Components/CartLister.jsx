@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from "react";
 import RemoveCartLogo from "./RemoveCartLogo";
 import Image from "./Image";
-const CartLister = ({ cartCount, setCartCount }) => {
+import OutOfStockCard from "./OutOfStockCard";
+const CartLister = ({ cartCount, setCartCount, outOfStock, setOutOfStock }) => {
   const [button, setButton] = useState(1);
   const [cardsVisible, setCardsVisible] = useState(true);
 
@@ -14,6 +15,7 @@ const CartLister = ({ cartCount, setCartCount }) => {
             item = JSON.parse(value);
           }
           return item ? (
+            outOfStock.has(item['Item ID']) ? <OutOfStockCard item={item} button={button} setButton={setButton} setCartCount={setCartCount} cartCount={cartCount} setOutOfStock={setOutOfStock}/> :(
             <div
               className={`card ${cardsVisible ? "visible" : ""}`}
               // style={{ animationDelay: `${index * 200}ms` }}
@@ -107,9 +109,8 @@ const CartLister = ({ cartCount, setCartCount }) => {
                   )}&tbm=isch`}
                   target="_blank"
                 >
-                  <Image color={"white"}></Image>
+                  <Image color={"black"}></Image>
                 </a>
-
                 <button
                   className="button card-footer-item remove-button"
                   style={{
@@ -132,11 +133,12 @@ const CartLister = ({ cartCount, setCartCount }) => {
                   <RemoveCartLogo></RemoveCartLogo>
                 </button>
               </footer>
-            </div>
+            </div>)
           ) : (
             <></>
           );
         })}
+        {/* {console.log(ids)} */}
       </div>
     </>
   );
