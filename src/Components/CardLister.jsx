@@ -1,29 +1,32 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
+import PentaContext from "../context/PentaContext";
 import Logo from "./Logo";
 import AddCartLogo from "./AddCartLogo";
 import RemoveCartLogo from "./RemoveCartLogo";
 import Image from "./Image";
 
 const CardLister = ({
-  cartCount,
-  setCartCount,
-  selectedManufacturer,
-  selectedSKU,
   selectedFilter,
   offsetArray,
   setOffsetArray,
   setOffset,
   offset,
-  minValue,
-  maxValue,
-  isOn,
   searchInput,
   debouncedSearchValue,
   setDebouncedSearchValue,
   isLoading,
   setIsLoading,
-  setIsCartPressed,
 }) => {
+  const {
+    setCartCount,
+    cartCount,
+    setIsCartPressed,
+    selectedManufacturer,
+    selectedSKU,
+    minValue,
+    maxValue,
+    isOn,
+  } = useContext(PentaContext);
   const [data, setData] = useState([]);
   const patKey = import.meta.env.VITE_REACT_APP_API_KEY;
   const baseId = "appnx8gtnlQx5b7nI";

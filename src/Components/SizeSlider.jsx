@@ -1,16 +1,17 @@
-// components/PriceRangeSlider.js
+import { useState, useContext } from "react";
+import PentaContext from "../context/PentaContext";
 
-import { useState } from "react";
+const SizeSlider = ({}) => {
+  const {
+    minValue,
+    setMinValue,
+    maxValue,
+    setMaxValue,
+    largestSize,
+    isOn,
+    setIsOn,
+  } = useContext(PentaContext);
 
-const SizeSlider = ({
-  minValue,
-  setMinValue,
-  maxValue,
-  setMaxValue,
-  isOn,
-  setIsOn,
-  largestSize,
-}) => {
   const toggleSwitch = () => {
     setIsOn((prevState) => !prevState);
   };
@@ -136,7 +137,7 @@ const SizeSlider = ({
           type="range"
           className="range-min"
           min="1"
-          max={largestSize} // Update max attribute
+          max={largestSize}
           value={minValue}
           step="1"
           onChange={handleMinSliderChange}

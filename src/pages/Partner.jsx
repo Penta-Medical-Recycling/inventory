@@ -1,6 +1,9 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useContext } from "react";
 import { useNavigate } from "react-router-dom";
-const Partner = ({ setSelectedPartner }) => {
+import PentaContext from "../context/PentaContext";
+
+const Partner = () => {
+  const { setSelectedPartner } = useContext(PentaContext);
   const [isActive, setIsActive] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const [partner, setPartner] = useState("");

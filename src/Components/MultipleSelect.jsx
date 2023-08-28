@@ -1,12 +1,14 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useContext } from "react";
+import PentaContext from "../context/PentaContext";
 import { MultiSelect } from "react-multi-select-component";
 
-const MultipleSelect = ({
-  selectedManufacturer,
-  setSelectedManufacturer,
-  selectedSKU,
-  setSelectedSKU,
-}) => {
+const MultipleSelect = () => {
+  const {
+    selectedManufacturer,
+    setSelectedManufacturer,
+    selectedSKU,
+    setSelectedSKU,
+  } = useContext(PentaContext);
   const [manuOptions, setManu] = useState([]);
   const [SKUOptions, setSKUs] = useState([]);
 

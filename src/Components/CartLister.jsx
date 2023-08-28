@@ -1,8 +1,12 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
+import PentaContext from "../context/PentaContext";
 import RemoveCartLogo from "./RemoveCartLogo";
 import Image from "./Image";
 import OutOfStockCard from "./OutOfStockCard";
-const CartLister = ({ cartCount, setCartCount, outOfStock, setOutOfStock }) => {
+const CartLister = ({ outOfStock, setOutOfStock }) => {
+  const { cartCount, setCartCount, setIsCartPressed } =
+    useContext(PentaContext);
+
   const [button, setButton] = useState(1);
   const [cardsVisible, setCardsVisible] = useState(true);
 
@@ -20,8 +24,6 @@ const CartLister = ({ cartCount, setCartCount, outOfStock, setOutOfStock }) => {
                 item={item}
                 button={button}
                 setButton={setButton}
-                setCartCount={setCartCount}
-                cartCount={cartCount}
                 setOutOfStock={setOutOfStock}
               />
             ) : (

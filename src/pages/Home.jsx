@@ -1,24 +1,20 @@
-import CardLister from "../Components/CardLister";
-import LoadingSpinner from "../Components/LoadingSpinner";
+import CardLister from "../components/CardLister";
+import LoadingSpinner from "../components/LoadingSpinner";
 import * as Papa from "papaparse";
 import * as XLSX from "xlsx/xlsx.mjs";
-import { useRef, useState, useEffect } from "react";
+import { useRef, useState, useEffect, useContext } from "react";
+import PentaContext from "../context/PentaContext";
 
-function Home({
-  cartCount,
-  setCartCount,
-  isActive,
-  setIsActive,
-  selectedManufacturer,
-  setSelectedManufacturer,
-  selectedSKU,
-  setSelectedSKU,
-  minValue,
-  maxValue,
-  isOn,
-  isCartPressed,
-  setIsCartPressed,
-}) {
+function Home() {
+  const {
+    isActive,
+    setIsActive,
+    selectedManufacturer,
+    selectedSKU,
+    minValue,
+    maxValue,
+    isOn,
+  } = useContext(PentaContext);
   const [selectedFilter, setSelectedFilters] = useState({
     Prosthesis: false,
     Orthosis: false,
@@ -250,7 +246,7 @@ function Home({
                   <span className="icon is-small is-left">
                     <i className="fas fa-search"></i>
                   </span>
-                  {searchInput && ( // Conditionally render clear button
+                  {searchInput && (
                     <span
                       className="icon is-small is-right"
                       onClick={clearSearchInput}
@@ -440,27 +436,16 @@ function Home({
         <></>
       )}
       <CardLister
-        cartCount={cartCount}
-        setCartCount={setCartCount}
-        selectedManufacturer={selectedManufacturer}
-        setSelectedManufacturer={setSelectedManufacturer}
-        selectedSKU={selectedSKU}
-        setSelectedSKU={setSelectedSKU}
         selectedFilter={selectedFilter}
         offsetArray={offsetArray}
         setOffsetArray={setOffsetArray}
         offset={offset}
         setOffset={setOffset}
-        minValue={minValue}
-        maxValue={maxValue}
-        isOn={isOn}
         searchInput={searchInput}
         debouncedSearchValue={debouncedSearchValue}
         setDebouncedSearchValue={setDebouncedSearchValue}
         isLoading={isLoading}
         setIsLoading={setIsLoading}
-        setIsCartPressed={setIsCartPressed}
-        isCartPressed={isCartPressed}
       />
       {page === "Next" ? (
         <div className="is-flex is-justify-content-center is-align-items-center">

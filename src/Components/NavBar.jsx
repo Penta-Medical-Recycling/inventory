@@ -1,6 +1,12 @@
 import logo from "../assets/Penta1.png";
 import { Link } from "react-router-dom";
-const NavBar = ({ cartCount, selectedPartner, isActive, isCartPressed }) => {
+import React, { useContext } from "react";
+import PentaContext from "../context/PentaContext";
+
+const NavBar = () => {
+  const { selectedPartner, cartCount, isCartPressed, isActive } =
+    useContext(PentaContext);
+
   return (
     <div>
       <nav id="nav" className={isActive ? "sidebar-active" : ""}>

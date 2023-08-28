@@ -1,22 +1,10 @@
 import MultipleSelect from "./MultipleSelect";
 import SizeSlider from "./SizeSlider";
-import React, { useEffect, useRef } from "react";
+import React, { useEffect, useRef, useContext } from "react";
+import PentaContext from "../context/PentaContext";
 
-const SideBar = ({
-  isActive,
-  setIsActive,
-  selectedManufacturer,
-  setSelectedManufacturer,
-  selectedSKU,
-  setSelectedSKU,
-  minValue,
-  setMinValue,
-  maxValue,
-  setMaxValue,
-  isOn,
-  setIsOn,
-  largestSize,
-}) => {
+const SideBar = () => {
+  const { setIsActive, isActive } = useContext(PentaContext);
   const activeToggle = () => {
     setIsActive(!isActive);
   };
@@ -60,22 +48,9 @@ const SideBar = ({
         </span>
       </div>
       <hr style={{ width: "80%", margin: "10px auto" }}></hr>
-      <MultipleSelect
-        selectedManufacturer={selectedManufacturer}
-        setSelectedManufacturer={setSelectedManufacturer}
-        selectedSKU={selectedSKU}
-        setSelectedSKU={setSelectedSKU}
-      />
+      <MultipleSelect />
       <hr style={{ width: "80%", margin: "10px auto 0px" }}></hr>
-      <SizeSlider
-        minValue={minValue}
-        setMinValue={setMinValue}
-        maxValue={maxValue}
-        setMaxValue={setMaxValue}
-        isOn={isOn}
-        setIsOn={setIsOn}
-        largestSize={largestSize}
-      />
+      <SizeSlider />
     </div>
   );
 };

@@ -1,12 +1,9 @@
 import RemoveCartLogo from "./RemoveCartLogo";
-const OutOfStockCard = ({
-  item,
-  setButton,
-  setCartCount,
-  cartCount,
-  setIsCartPressed,
-  button,
-}) => {
+import PentaContext from "../context/PentaContext";
+import React, { useContext } from "react";
+const OutOfStockCard = ({ item, setButton, button }) => {
+  const { setCartCount, cartCount, setIsCartPressed } =
+    useContext(PentaContext);
   return (
     <div className={`card visible`} key={item.id}>
       <div className="ribbon-wrapper">

@@ -1,10 +1,13 @@
-import React, { useEffect, useState } from "react";
-import CartLister from "../Components/CartLister";
+import React, { useEffect, useState, useContext } from "react";
+import CartLister from "../components/CartLister";
 import { useNavigate, Link } from "react-router-dom";
-import Logo from "../Components/Logo";
-import Toast from "../Components/Toast";
+import Logo from "../components/Logo";
+import Toast from "../components/Toast";
+import PentaContext from "../context/PentaContext";
 
-function Cart({ cartCount, setCartCount, selectedPartner }) {
+function Cart() {
+  const { selectedPartner, setCartCount } = useContext(PentaContext);
+
   const ids = [];
   const [outOfStock, setOutOfStock] = useState();
   const navigate = useNavigate();
@@ -174,12 +177,7 @@ function Cart({ cartCount, setCartCount, selectedPartner }) {
           </Link>
 
           {outOfStock ? (
-            <CartLister
-              cartCount={cartCount}
-              setCartCount={setCartCount}
-              outOfStock={outOfStock}
-              setOutOfStock={setOutOfStock}
-            />
+            <CartLister outOfStock={outOfStock} setOutOfStock={setOutOfStock} />
           ) : (
             <Logo />
           )}
