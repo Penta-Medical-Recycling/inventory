@@ -1,7 +1,6 @@
 import * as React from "react";
-import "../LoadingScreen.css";
 
-function SvgComponent() {
+function Logo() {
   return (
     <div className="loading-container">
       <svg
@@ -40,4 +39,4 @@ function SvgComponent() {
   );
 }
 
-export default SvgComponent;
+export default Logo;

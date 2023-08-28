@@ -73,9 +73,7 @@ const Partner = ({ setSelectedPartner }) => {
   const submit = async () => {
     try {
       localStorage.setItem("partner", partner);
-
-      await new Promise((resolve) => setTimeout(resolve, 0)); // This simulates an asynchronous delay
-
+      await new Promise((resolve) => setTimeout(resolve, 0));
       setSelectedPartner(partner);
       navigate("/cart");
     } catch (error) {
@@ -114,11 +112,7 @@ const Partner = ({ setSelectedPartner }) => {
             </span>
           </button>
         </div>
-        <div
-          className="dropdown-menu"
-          // id={isActive ? "partner-content" : ""}
-          role="menu"
-        >
+        <div className="dropdown-menu" role="menu">
           <div
             className="dropdown-content"
             style={{ maxHeight: "400px", overflowY: "auto", width: "80vw" }}

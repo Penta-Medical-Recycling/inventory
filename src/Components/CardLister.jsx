@@ -8,15 +8,12 @@ const CardLister = ({
   cartCount,
   setCartCount,
   selectedManufacturer,
-  setSelectedManufacturer,
   selectedSKU,
-  setSelectedSKU,
   selectedFilter,
   offsetArray,
   setOffsetArray,
   setOffset,
   offset,
-  setCsv,
   minValue,
   maxValue,
   isOn,
@@ -26,19 +23,14 @@ const CardLister = ({
   isLoading,
   setIsLoading,
   setIsCartPressed,
-  isCartPressed,
 }) => {
   const [data, setData] = useState([]);
   const patKey = import.meta.env.VITE_REACT_APP_API_KEY;
   const baseId = "appnx8gtnlQx5b7nI";
   const tableName = "Inventory";
   const [button, setButton] = useState(1);
-  const [isPulsing, setIsPulsing] = useState(false);
-  // const [isLoading, setIsLoading] = useState(true);
-
   const [debouncedMinValue, setDebouncedMinValue] = useState(minValue);
   const [debouncedMaxValue, setDebouncedMaxValue] = useState(maxValue);
-  // const [debouncedSearchValue, setDebouncedSearchValue] = useState(searchInput);
 
   useEffect(() => {
     const debounceTimeout = setTimeout(() => {
@@ -137,7 +129,6 @@ const CardLister = ({
       setCardsVisible(true);
     });
   }, [offset, offsetArray]);
-  // }, []);
 
   useEffect(() => {
     setOffset(0);
@@ -297,10 +288,6 @@ const CardLister = ({
                           localStorage.removeItem(item.fields["Item ID"]);
                           setButton(button + 1);
                           setCartCount(cartCount - 1);
-                          // setIsPulsing(true);
-                          // setTimeout(() => {
-                          //   setIsPulsing(false);
-                          // }, 1000);
                           setIsCartPressed(true);
                           setTimeout(() => {
                             setIsCartPressed(false);

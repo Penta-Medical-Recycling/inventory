@@ -18,15 +18,16 @@ function Cart({ cartCount, setCartCount, selectedPartner }) {
   }, []);
 
   const handleNotesChange = (event) => {
-    setNotes(event.target.value); // Update notes when changed
-    localStorage.setItem("notes", event.target.value); // Notes save across pages or reload
+    setNotes(event.target.value);
+    localStorage.setItem("notes", event.target.value);
+    s;
   };
 
   const idFetcher = async () => {
     for (let [key, value] of Object.entries(localStorage)) {
-      if (key !== 'partner' && key !== 'notes') {
-        const parse = JSON.parse(value)
-        const itemID = parse['Item ID'];
+      if (key !== "partner" && key !== "notes") {
+        const parse = JSON.parse(value);
+        const itemID = parse["Item ID"];
         if (itemID !== undefined) {
           ids.push(itemID);
         }
@@ -36,7 +37,9 @@ function Cart({ cartCount, setCartCount, selectedPartner }) {
 
     for (const id of ids) {
       const searchString = `SEARCH("${id}", {StringSearch})`;
-      const url = `https://api.airtable.com/v0/appBrTbPbyamI0H6Z/Requests?filterByFormula=${encodeURIComponent(searchString)}&maxRecords=1`;
+      const url = `https://api.airtable.com/v0/appBrTbPbyamI0H6Z/Requests?filterByFormula=${encodeURIComponent(
+        searchString
+      )}&maxRecords=1`;
 
       try {
         const response = await fetch(url, {
@@ -55,40 +58,34 @@ function Cart({ cartCount, setCartCount, selectedPartner }) {
       }
     }
 
-    setOutOfStock(idSet)
+    setOutOfStock(idSet);
     if (idSet.size > 0) {
-      return true
-    } else{
-      return false
+      return true;
+    } else {
+      return false;
     }
-    
-  }
-
+  };
 
   useEffect(() => {
     idFetcher();
   }, []);
 
-
-  // console.log(idFetcher())
-
-
-
-
   const requestButton = async (event) => {
-    setIsLoading(true)
+    setIsLoading(true);
     event.preventDefault();
-    setOutOfStock(new Set()); // Reset the out-of-stock items
-    const stockCheck = await idFetcher(); // Wait for idFetcher to complete
+    setOutOfStock(new Set());
+    const stockCheck = await idFetcher();
 
     if (stockCheck) {
-      Toast({ message: 'Sorry but one or more of your items are out of stock, please remove', type:'is-danger' });
-      setIsLoading(false)
+      Toast({
+        message:
+          "Sorry but one or more of your items are out of stock, please remove to checkout.",
+        type: "is-danger",
+      });
+      setIsLoading(false);
       return;
     }
     const BaseID = "appBrTbPbyamI0H6Z";
-    // const APIKey = config.SECRET_API_KEY;
-
     const tableName = "Requests";
     setErrorMessage("");
     const items = [];
@@ -131,32 +128,30 @@ function Cart({ cartCount, setCartCount, selectedPartner }) {
           const partner = localStorage["partner"];
           localStorage.clear();
           localStorage.setItem("partner", partner);
-          setIsLoading(false)
-          Toast({ message: 'Thank you for your time, we will get back to you as soon as possible!', type:'is-info' });
+          setIsLoading(false);
+          Toast({
+            message:
+              "Thank you for your time, we will get back to you as soon as possible!",
+            type: "is-info",
+          });
         }
-
       })
       .catch((error) => {
         console.error("Error:", error);
         setNotes("Error");
       });
-
-    //items like 23-2086 are still appearing despite already having been in some orders?
-    //This is a problem for Mija, the data seems dirty, we need to clean it up.
-    //also a message to show that the order was successful should show.
-    //Maybe should we send an automatic email notification? the message also includes the order number to look for in email.
   };
 
   const missingInfo = () => {
     !notes &&
-      Object.keys(localStorage).filter((k) => k !== "partner" && k !== "notes")
-        .length === 0
+    Object.keys(localStorage).filter((k) => k !== "partner" && k !== "notes")
+      .length === 0
       ? setErrorMessage(
-        "Please add additional notes, and add items to your cart"
-      )
+          "Please add additional notes, and add items to your cart"
+        )
       : !notes
-        ? setErrorMessage("Please add additional notes")
-        : setErrorMessage("Please add items to your cart");
+      ? setErrorMessage("Please add additional notes")
+      : setErrorMessage("Please add items to your cart");
   };
 
   return (
@@ -164,41 +159,59 @@ function Cart({ cartCount, setCartCount, selectedPartner }) {
       <div id="text-section">
         <h1 className="title has-text-centered mt-6">CART</h1>
       </div>
-      {isLoading ? <Logo /> : (<>
-        <h1 className="has-text-centered is-size-5 my-4">
-          Hello, {selectedPartner} Member!
-        </h1>
-        <Link to="/partner" className="is-flex is-justify-content-center my-3">
-          <button className="button">Change Partner</button>
-        </Link>
+      {isLoading ? (
+        <Logo />
+      ) : (
+        <>
+          <h1 className="has-text-centered is-size-5 my-4">
+            Hello, {selectedPartner} Member!
+          </h1>
+          <Link
+            to="/partner"
+            className="is-flex is-justify-content-center my-3"
+          >
+            <button className="button">Change Partner</button>
+          </Link>
 
-        {outOfStock ? <CartLister cartCount={cartCount} setCartCount={setCartCount} outOfStock={outOfStock} setOutOfStock={setOutOfStock} /> : <Logo />}
-        <div style={{ width: "60vw", margin: "auto" }}>
-          <textarea
-            className="textarea my-4"
-            placeholder="Additional Notes"
-            value={notes}
-            onChange={handleNotesChange}
-          ></textarea>
-        </div>
-        <div className="is-flex is-justify-content-center">
-          <button
-            className="button mb-1"
-            type="button"
-            onClick={
-              notes &&
+          {outOfStock ? (
+            <CartLister
+              cartCount={cartCount}
+              setCartCount={setCartCount}
+              outOfStock={outOfStock}
+              setOutOfStock={setOutOfStock}
+            />
+          ) : (
+            <Logo />
+          )}
+          <div style={{ width: "60vw", margin: "auto" }}>
+            <textarea
+              className="textarea my-4"
+              placeholder="Additional Notes"
+              value={notes}
+              onChange={handleNotesChange}
+            ></textarea>
+          </div>
+          <div className="is-flex is-justify-content-center">
+            <button
+              className="button mb-1"
+              type="button"
+              onClick={
+                notes &&
                 Object.keys(localStorage).filter(
                   (k) => k !== "partner" && k !== "notes"
                 ).length >= 1
-                ? requestButton
-                : missingInfo
-            }
-          >
-            Request Items
-          </button>
-        </div>
-        <p className="has-text-centered has-text-danger mb-4">{errorMessage}</p>
-      </>)}
+                  ? requestButton
+                  : missingInfo
+              }
+            >
+              Request Items
+            </button>
+          </div>
+          <p className="has-text-centered has-text-danger mb-4">
+            {errorMessage}
+          </p>
+        </>
+      )}
     </>
   );
 }

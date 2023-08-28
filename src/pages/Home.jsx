@@ -24,7 +24,6 @@ function Home({
     Orthosis: false,
     Pediatric: false,
   });
-  const [next, setNext] = useState("");
   const [offset, setOffset] = useState(0);
   const [offsetArray, setOffsetArray] = useState([""]);
   const [searchInput, setSearchInput] = useState("");
@@ -378,16 +377,6 @@ function Home({
         </p>
       </div>
       {page === "Next" ? (
-        // <div className="is-flex is-justify-content-center">
-        //   <nav className="pagination" role="navigation" aria-label="pagination">
-        //     <a
-        //       className="pagination-next"
-        //       onClick={() => setOffset(offset + 1)}
-        //     >
-        //       Next ⊳
-        //     </a>
-        //   </nav>
-        // </div>
         <div className="is-flex is-justify-content-center is-align-items-center">
           <div
             style={{ marginLeft: "44px" }}
@@ -462,7 +451,6 @@ function Home({
         setOffsetArray={setOffsetArray}
         offset={offset}
         setOffset={setOffset}
-        // setCsv={setCsv}
         minValue={minValue}
         maxValue={maxValue}
         isOn={isOn}
@@ -475,16 +463,6 @@ function Home({
         isCartPressed={isCartPressed}
       />
       {page === "Next" ? (
-        // <div className="is-flex is-justify-content-center">
-        //   <nav className="pagination" role="navigation" aria-label="pagination">
-        //     <a
-        //       className="pagination-next"
-        //       onClick={() => setOffset(offset + 1)}
-        //     >
-        //       Next ⊳
-        //     </a>
-        //   </nav>
-        // </div>
         <div className="is-flex is-justify-content-center is-align-items-center">
           <div
             style={{ marginLeft: "44px" }}

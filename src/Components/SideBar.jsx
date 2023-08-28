@@ -50,9 +50,6 @@ const SideBar = ({
         >
           Filters
         </h1>
-        {/* <p className="is-size-3 mx-4" onClick={activeToggle}>
-          &#10006;
-        </p> */}
         <span
           className="icon is-right is-medium mt-3 mr-5"
           style={{ cursor: "pointer" }}

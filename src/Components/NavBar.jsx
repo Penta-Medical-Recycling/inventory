@@ -1,11 +1,13 @@
-import logo from "../assets/logo.png";
+import logo from "../assets/Penta1.png";
 import { Link } from "react-router-dom";
 const NavBar = ({ cartCount, selectedPartner, isActive, isCartPressed }) => {
   return (
-    <>
+    <div>
       <nav id="nav" className={isActive ? "sidebar-active" : ""}>
         <Link to="/" id="logo">
-          <img src={logo}></img>
+          <div class="logo-container">
+            <img src={logo} className="logo"></img>
+          </div>
         </Link>
 
         <Link to={selectedPartner ? "/cart" : "/partner"} id="shopping-cart">
@@ -23,7 +25,7 @@ const NavBar = ({ cartCount, selectedPartner, isActive, isCartPressed }) => {
         </Link>
       </nav>
       <div style={{ width: "100%", height: "120px" }}></div>
-    </>
+    </div>
   );
 };
 
