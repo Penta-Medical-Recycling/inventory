@@ -11,7 +11,7 @@ const NavBar = () => {
     <div>
       <nav id="nav" className={isActive ? "sidebar-active" : ""}>
         <Link to="/" id="logo">
-          <div class="logo-container">
+          <div className="logo-container">
             <img src={logo} className="logo"></img>
           </div>
         </Link>

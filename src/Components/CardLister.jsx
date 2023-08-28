@@ -140,7 +140,6 @@ const CardLister = ({
     fetchData().then((records) => {
       setData(records);
       setIsLoading(false);
-      // setCardsVisible(true);
     });
   }, [
     selectedManufacturer,
@@ -161,11 +160,10 @@ const CardLister = ({
       ) : data.length ? (
         <div id="cardDiv">
           {data.map(
-            (item, index) =>
+            (item) =>
               item.fields.SKU && (
                 <div
                   className={`card ${cardsVisible ? "visible" : ""}`}
-                  // style={{ animationDelay: `${index * 200}ms` }}
                   key={item.id}
                 >
                   <div>
