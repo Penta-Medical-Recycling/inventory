@@ -162,7 +162,6 @@ const CardLister = ({
 
   return (
     <>
-      {/* <Logo /> */}
       {isLoading ? (
         <Logo />
       ) : data.length ? (

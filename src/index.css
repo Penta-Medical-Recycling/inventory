@@ -72,7 +72,7 @@ main {
 
 .navbar {
   background: rgba(255, 255, 255, 0.2); /* Adjust the opacity as needed */
-  backdrop-filter: blur(10px); /* Adjust the blur amount as needed */
+  backdrop-filter: blur(10px); 
   padding: 1rem;
   /* Add other styling properties for your navbar */
 }
@@ -228,7 +228,8 @@ main {
   position: fixed;
   border-top-right-radius: 30px;
   border-bottom-right-radius: 30px;
-  background-color: white;
+  background: rgba(255, 255, 255, 0.2);
+  backdrop-filter: blur(15px);
   width: 350px;
   height: 100%;
   left: -350px;
@@ -338,7 +339,7 @@ main {
 .wrapper {
   width: 80%;
   margin: auto;
-  background: #fff;
+  background: rgba(255, 255, 255, 0);
   border-radius: 10px;
   padding: 20px 0px 40px;
 }
@@ -631,4 +632,9 @@ input[type="range"]::-moz-range-thumb {
   .filter-3 {
     width: 80px;
   }
+}
+
+.notification.is-info {
+  background-color: #35b0fb;
+  color: #fff;
 }

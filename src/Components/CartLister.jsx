@@ -23,10 +23,7 @@ const CartLister = ({ cartCount, setCartCount, outOfStock, setOutOfStock }) => {
             >
               <div>
                 <header className="card-header">
-                  <div
-                    className="has-text-centered"
-                    style={{ width: "100%" }}
-                  >
+                  <div className="has-text-centered" style={{ width: "100%" }}>
                     <p
                       className="has-text-weight-bold ml-3 my-3"
                       style={{ fontSize: "18px" }}
@@ -69,10 +66,7 @@ const CartLister = ({ cartCount, setCartCount, outOfStock, setOutOfStock }) => {
                     </div>
                   )}
                   {item["Size"] && (
-                    <div
-                      className="has-text-centered"
-                      style={{ width: "50%" }}
-                    >
+                    <div className="has-text-centered" style={{ width: "50%" }}>
                       <p
                         className="has-text-weight-bold has-text-centered"
                         style={{ margin: "0" }}
@@ -83,10 +77,7 @@ const CartLister = ({ cartCount, setCartCount, outOfStock, setOutOfStock }) => {
                     </div>
                   )}
                   {item["Model/Type"] && (
-                    <div
-                      className="has-text-centered"
-                      style={{ width: "50%" }}
-                    >
+                    <div className="has-text-centered" style={{ width: "50%" }}>
                       <p
                         className="has-text-weight-bold has-text-centered"
                         style={{ margin: "0" }}
@@ -100,10 +91,11 @@ const CartLister = ({ cartCount, setCartCount, outOfStock, setOutOfStock }) => {
               </div>
               <footer className="card-footer">
                 <a
-                  className={`button card-footer-item ${!localStorage.getItem([item["Item ID"]])
-                    ? "images-button-red"
-                    : "images-button-blue"
-                    }`}
+                  className={`button card-footer-item ${
+                    !localStorage.getItem([item["Item ID"]])
+                      ? "images-button-red"
+                      : "images-button-blue"
+                  }`}
                   href={`https://www.google.com/search?q=${encodeURIComponent(
                     item.StringSearch
                   )}&tbm=isch`}
