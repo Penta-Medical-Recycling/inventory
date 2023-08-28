@@ -1,11 +1,11 @@
 import React, { useState, useEffect, useContext } from "react";
 import PentaContext from "../context/PentaContext";
-import Logo from "./Logo";
-import AddCartLogo from "./AddCartLogo";
-import RemoveCartLogo from "./RemoveCartLogo";
-import Image from "./Image";
+import BigSpinner from "../assets/BigSpinner";
+import AddCartLogo from "../assets/AddCartLogo";
+import RemoveCartLogo from "../assets/RemoveCartLogo";
+import ImageIcon from "../assets/ImageIcon";
 
-const CardLister = ({
+const HomeLister = ({
   selectedFilter,
   offsetArray,
   setOffsetArray,
@@ -156,7 +156,7 @@ const CardLister = ({
   return (
     <>
       {isLoading ? (
-        <Logo />
+        <BigSpinner size={50} />
       ) : data.length ? (
         <div id="cardDiv">
           {data.map(
@@ -255,7 +255,7 @@ const CardLister = ({
                       )}&tbm=isch`}
                       target="_blank"
                     >
-                      <Image color={"black"}></Image>
+                      <ImageIcon color={"black"}></ImageIcon>
                     </a>
                     {!localStorage.getItem([item.fields["Item ID"]]) &&
                     button ? (
@@ -312,4 +312,4 @@ const CardLister = ({
   );
 };
 
-export default CardLister;
+export default HomeLister;

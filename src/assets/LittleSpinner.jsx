@@ -1,11 +1,11 @@
 import React from "react";
 
-const LoadingSpinner = () => {
+const LittleSpinner = ({ size }) => {
   return (
     <svg
       xmlns="http://www.w3.org/2000/svg"
-      width={30}
-      height={30}
+      width={size}
+      height={size}
       viewBox="0, 0, 400,382.00836820083686"
       className="loading-logo"
     >
@@ -35,4 +35,4 @@ const LoadingSpinner = () => {
   );
 };
 
-export default LoadingSpinner;
+export default LittleSpinner;

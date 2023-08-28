@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useContext } from "react";
 import { useNavigate, Link } from "react-router-dom";
-import Logo from "../components/Logo";
+import BigSpinner from "../assets/BigSpinner";
 import CartLister from "../components/CartLister";
 import Toast from "../components/Toast";
 import PentaContext from "../context/PentaContext";
@@ -23,7 +23,6 @@ function Cart() {
   const handleNotesChange = (event) => {
     setNotes(event.target.value);
     localStorage.setItem("notes", event.target.value);
-    s;
   };
 
   const idFetcher = async () => {
@@ -163,7 +162,7 @@ function Cart() {
         <h1 className="title has-text-centered mt-6">CART</h1>
       </div>
       {isLoading ? (
-        <Logo />
+        <BigSpinner size={50} />
       ) : (
         <>
           <h1 className="has-text-centered is-size-5 my-4">
@@ -179,7 +178,7 @@ function Cart() {
           {outOfStock ? (
             <CartLister outOfStock={outOfStock} setOutOfStock={setOutOfStock} />
           ) : (
-            <Logo />
+            <BigSpinner size={50} />
           )}
           <div style={{ width: "60vw", margin: "auto" }}>
             <textarea

@@ -1,5 +1,5 @@
-import CardLister from "../components/CardLister";
-import LoadingSpinner from "../components/LoadingSpinner";
+import HomeLister from "../components/HomeLister";
+import LittleSpinner from "../assets/LittleSpinner";
 import * as Papa from "papaparse";
 import * as XLSX from "xlsx/xlsx.mjs";
 import { useRef, useState, useEffect, useContext } from "react";
@@ -270,7 +270,7 @@ function Home() {
                   onClick={toggleDropdown}
                 >
                   {loading ? (
-                    <LoadingSpinner />
+                    <LittleSpinner size={30} />
                   ) : (
                     <svg
                       xmlns="http://www.w3.org/2000/svg"
@@ -435,7 +435,7 @@ function Home() {
       ) : (
         <></>
       )}
-      <CardLister
+      <HomeLister
         selectedFilter={selectedFilter}
         offsetArray={offsetArray}
         setOffsetArray={setOffsetArray}

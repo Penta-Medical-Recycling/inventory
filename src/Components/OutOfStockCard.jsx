@@ -1,4 +1,4 @@
-import RemoveCartLogo from "./RemoveCartLogo";
+import RemoveCartLogo from "../assets/RemoveCartLogo";
 import PentaContext from "../context/PentaContext";
 import React, { useContext } from "react";
 const OutOfStockCard = ({ item, setButton, button }) => {

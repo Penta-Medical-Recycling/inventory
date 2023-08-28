@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useContext } from "react";
 import PentaContext from "../context/PentaContext";
-import RemoveCartLogo from "./RemoveCartLogo";
-import Image from "./Image";
+import RemoveCartLogo from "../assets/RemoveCartLogo";
+import ImageIcon from "../assets/ImageIcon";
 import OutOfStockCard from "./OutOfStockCard";
 const CartLister = ({ outOfStock, setOutOfStock }) => {
   const { cartCount, setCartCount, setIsCartPressed } =
@@ -112,7 +112,7 @@ const CartLister = ({ outOfStock, setOutOfStock }) => {
                   )}&tbm=isch`}
                   target="_blank"
                 >
-                  <Image color={"black"}></Image>
+                  <ImageIcon color={"black"}></ImageIcon>
                 </a>
                 <button
                   className="button card-footer-item remove-button"

@@ -1,4 +1,4 @@
-import logo from "../assets/Penta1.png";
+import logo from "../assets/PentaLogo.png";
 import { Link } from "react-router-dom";
 import React, { useContext } from "react";
 import PentaContext from "../context/PentaContext";
