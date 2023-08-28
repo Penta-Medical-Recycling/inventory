@@ -263,7 +263,7 @@ const CardLister = ({
                       )}&tbm=isch`}
                       target="_blank"
                     >
-                      <Image color={"white"}></Image>
+                      <Image color={"black"}></Image>
                     </a>
                     {!localStorage.getItem([item.fields["Item ID"]]) &&
                     button ? (

@@ -1,11 +1,12 @@
-import * as bulmaToast from "bulma-toast";
-import { redirect } from "react-router-dom";
-const Toast = ({ message }) => {
+import * as bulmaToast from 'bulma-toast'
+import { redirect } from 'react-router-dom';
+const Toast = ({ message, type }) => {
   const toastConfig = {
     message: message,
-    type: "is-info",
-    position: "top-center",
-    duration: 6000,
+    type: type,
+    position: 'top-center',
+    duration: 4000, 
+
     dismissible: true,
   };
 
