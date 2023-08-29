@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import PentaContext from "../context/PentaContext";
 
 const Partner = () => {
-  const { setSelectedPartner } = useContext(PentaContext);
+  const { setSelectedPartner, fetchSelectOptions } = useContext(PentaContext);
   const [isActive, setIsActive] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const [partner, setPartner] = useState("");
@@ -11,46 +11,11 @@ const Partner = () => {
   const [data, setData] = useState([]);
 
   useEffect(() => {
-    const apiKey = import.meta.env.VITE_REACT_APP_API_KEY;
-    const baseId = "appBrTbPbyamI0H6Z";
-    const tableName = "Partners";
-
-    async function fetchTableRecords(offset = null) {
-      const url = `https://api.airtable.com/v0/${baseId}/${tableName}?${
-        offset ? `offset=${offset}` : ""
-      }`;
-
-      const response = await fetch(url, {
-        headers: {
-          Authorization: `Bearer ${apiKey}`,
-        },
-      });
-
-      const data = await response.json();
-      const records = data.records;
-
-      return {
-        records,
-        offset: data.offset || undefined,
-      };
-    }
-
-    (async () => {
-      let allRecords = [];
-      let offset = null;
-
-      do {
-        const { records, offset: newOffset } = await fetchTableRecords(offset);
-        allRecords = allRecords.concat(records);
-        offset = newOffset;
-      } while (offset);
-
-      setData(
-        allRecords
-          .map((e) => e.fields.Name.trimStart())
-          .sort((a, b) => a.localeCompare(b))
-      );
-    })();
+    const fetchPartners = async () => {
+      const partnerOptions = await fetchSelectOptions("Partners");
+      setData(partnerOptions);
+    };
+    fetchPartners();
   }, []);
 
   const handleSearch = (event) => {
@@ -75,8 +40,7 @@ const Partner = () => {
 
   const submit = async () => {
     try {
-      localStorage.setItem("partner", partner);
-      await new Promise((resolve) => setTimeout(resolve, 0));
+      await localStorage.setItem("partner", partner);
       setSelectedPartner(partner);
       navigate("/cart");
     } catch (error) {

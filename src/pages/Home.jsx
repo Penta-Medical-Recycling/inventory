@@ -100,7 +100,7 @@ function Home() {
       (key) => selectedFilter[key]
     );
 
-    let url = `https://api.airtable.com/v0/${baseId}/${encodedTableName}?filterByFormula=AND(`;
+    let url = `https://api.airtable.com/v0/${baseId}/${encodedTableName}?sort%5B0%5D%5Bfield%5D=Item%20ID&sort%5B0%5D%5Bdirection%5D=asc&filterByFormula=AND(`;
     url += 'AND({Requests}=BLANK(),{Shipment Status}=BLANK()),NOT({SKU}="")';
 
     if (
@@ -161,47 +161,56 @@ function Home() {
         offset = newOffset;
       } while (offset);
 
-      let header = "ID,Description,Size,Model/Type,Manufacturer\n";
+      const mappedData = allRecords.map((e) => [
+        e.fields["Item ID"] || "",
+        e.fields["Description (from SKU)"] || "",
+        e.fields["Size"] || "",
+        e.fields["Model/Type"] || "",
+        e.fields["Manufacturer"] || "",
+      ]);
 
-      allRecords.forEach((e) => {
-        header += `"${e.fields["Item ID"] || ""}","${
-          e.fields["Description (from SKU)"] || ""
-        }","${e.fields["Size"] || ""}","${e.fields["Model/Type"] || ""}","${
-          e.fields["Manufacturer"] || ""
-        }"\n`;
-      });
+      const allContent = [
+        "ID,Description,Size,Model/Type,Manufacturer",
+        ...mappedData.map((row) => `"${row.join('","')}"`),
+      ].join("\n");
 
-      if (fileType === "csv") {
-        const blob = new Blob([header], { type: "text/csv" });
+      const downloadBlob = (blob, filename) => {
         const link = document.createElement("a");
         link.href = URL.createObjectURL(blob);
-        link.download = "Inventory Data";
+        link.download = filename;
         link.click();
+      };
+
+      const s2ab = (s) => {
+        const buf = new ArrayBuffer(s.length);
+        const view = new Uint8Array(buf);
+        for (let i = 0; i < s.length; i++) {
+          view[i] = s.charCodeAt(i) & 0xff;
+        }
+        return buf;
+      };
+
+      if (fileType === "csv") {
+        const blob = new Blob([allContent], { type: "text/csv" });
+        downloadBlob(blob, "Inventory Data.csv");
       } else {
-        const { data: rows } = Papa.parse(header, { skipEmptyLines: true });
         const workbook = XLSX.utils.book_new();
-        const sheetData = XLSX.utils.aoa_to_sheet(rows);
-        XLSX.utils.book_append_sheet(workbook, sheetData, "Sheet1");
-        const wopts = { bookType: "xlsx", bookSST: false, type: "binary" };
-        const wbout = XLSX.write(workbook, wopts);
+        const sheetData = [
+          ["ID", "Description", "Size", "Model/Type", "Manufacturer"],
+          ...mappedData,
+        ];
+        const worksheet = XLSX.utils.aoa_to_sheet(sheetData);
+        XLSX.utils.book_append_sheet(workbook, worksheet, "Sheet1");
 
-        const s2ab = (s) => {
-          const buf = new ArrayBuffer(s.length);
-          const view = new Uint8Array(buf);
-          for (let i = 0; i < s.length; i++) {
-            view[i] = s.charCodeAt(i) & 0xff;
-          }
-          return buf;
-        };
-
+        const wbout = XLSX.write(workbook, {
+          bookType: "xlsx",
+          bookSST: false,
+          type: "binary",
+        });
         const blob = new Blob([s2ab(wbout)], {
           type: "application/octet-stream",
         });
-
-        const link = document.createElement("a");
-        link.href = URL.createObjectURL(blob);
-        link.download = "Inventory Data.xlsx";
-        link.click();
+        downloadBlob(blob, "Inventory Data.xlsx");
       }
       setLoading(false);
     })();

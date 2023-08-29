@@ -18,26 +18,98 @@ function PentaProvider({ children }) {
   const [largestSize, setLargestSize] = useState(60);
   const [isOn, setIsOn] = useState(false);
 
-  useEffect(() => {
-    const fetchMax = async () => {
-      const baseId = "appnx8gtnlQx5b7nI";
-      const patKey = import.meta.env.VITE_REACT_APP_API_KEY;
-      const encodedTableName = encodeURIComponent("Inventory");
-      const url = `https://api.airtable.com/v0/${baseId}/${encodedTableName}?pageSize=1&sort%5B0%5D%5Bfield%5D=Size&sort%5B0%5D%5Bdirection%5D=desc&filterByFormula=AND(AND({Requests}=%22%22,{Shipment%20Status}=%22%22),NOT({SKU}=%22%22))`;
-
+  async function fetchAPI(url) {
+    try {
       const response = await fetch(url, {
         headers: {
-          Authorization: `Bearer ${patKey}`,
+          Authorization: `Bearer ${import.meta.env.VITE_REACT_APP_API_KEY}`,
         },
       });
+
       if (!response.ok) {
         throw new Error("Network response was not ok");
       }
-      const data = await response.json();
-      setLargestSize(data.records[0].fields.Size);
-      setMaxValue(data.records[0].fields.Size);
-    };
 
+      const data = await response.json();
+      return data;
+    } catch (error) {
+      console.error("Error fetching data:", error);
+      return null;
+    }
+  }
+
+  async function fetchTableRecords(tableName, offset = null) {
+    const baseId = "appBrTbPbyamI0H6Z";
+    const url = `https://api.airtable.com/v0/${baseId}/${tableName}?${
+      offset ? `offset=${offset}` : ""
+    }`;
+
+    return fetchAPI(url);
+  }
+
+  async function fetchTableRecordsWithOffset(tableName) {
+    let allRecords = [];
+    let offset = null;
+
+    do {
+      const { records, offset: newOffset } = await fetchTableRecords(
+        tableName,
+        offset
+      );
+      allRecords = allRecords.concat(records);
+      offset = newOffset;
+    } while (offset);
+    return allRecords;
+  }
+
+  async function fetchMaxSize() {
+    const url = `https://api.airtable.com/v0/appnx8gtnlQx5b7nI/Inventory?pageSize=1&sort%5B0%5D%5Bfield%5D=Size&sort%5B0%5D%5Bdirection%5D=desc&filterByFormula=AND(AND({Requests}=%22%22,{Shipment%20Status}=%22%22),NOT({SKU}=%22%22))`;
+
+    const data = await fetchAPI(url);
+    if (data && data.records && data.records.length > 0) {
+      return data.records[0].fields.Size;
+    }
+    return null;
+  }
+
+  const fetchSelectOptions = async (fieldToMap) => {
+    const records = await fetchTableRecordsWithOffset(fieldToMap);
+
+    if (fieldToMap === "Manufacturers") {
+      return records
+        .map((e) => {
+          return {
+            label: e.fields.Name.trimStart(),
+            value: encodeURIComponent(e.fields.Name.trimStart()),
+          };
+        })
+        .sort((a, b) => {
+          return a.label.localeCompare(b.label);
+        });
+    } else if (fieldToMap === "SKUs") {
+      return records
+        .map((e) => {
+          return {
+            label: `${e.fields.Name.trimStart()} - ${e.fields.Description.trimStart()}`,
+            value: encodeURIComponent(e.fields.Name.trimStart()),
+          };
+        })
+        .sort((a, b) => {
+          return a.label.localeCompare(b.label);
+        });
+    } else {
+      return records
+        .map((e) => e.fields.Name.trimStart())
+        .sort((a, b) => a.localeCompare(b));
+    }
+  };
+
+  useEffect(() => {
+    const fetchMax = async () => {
+      const max = await fetchMaxSize();
+      setLargestSize(max);
+      setMaxValue(max);
+    };
     fetchMax();
   }, []);
 
@@ -62,6 +134,10 @@ function PentaProvider({ children }) {
     setLargestSize,
     isOn,
     setIsOn,
+    fetchAPI,
+    fetchTableRecords,
+    fetchTableRecordsWithOffset,
+    fetchSelectOptions,
   };
 
   return (

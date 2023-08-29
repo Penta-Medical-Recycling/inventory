@@ -8,87 +8,19 @@ const MultipleSelect = () => {
     setSelectedManufacturer,
     selectedSKU,
     setSelectedSKU,
+    fetchSelectOptions,
   } = useContext(PentaContext);
   const [manuOptions, setManu] = useState([]);
   const [SKUOptions, setSKUs] = useState([]);
 
   useEffect(() => {
-    const apiKey = import.meta.env.VITE_REACT_APP_API_KEY;
-    const baseId = "appBrTbPbyamI0H6Z";
-
-    async function fetchTableRecords(offset = null, tableName) {
-      const url = `https://api.airtable.com/v0/${baseId}/${tableName}?${
-        offset ? `offset=${offset}` : ""
-      }`;
-
-      const response = await fetch(url, {
-        headers: {
-          Authorization: `Bearer ${apiKey}`,
-        },
-      });
-
-      const data = await response.json();
-      const records = data.records;
-
-      return {
-        records,
-        offset: data.offset || undefined,
-      };
-    }
-
-    (async () => {
-      let allSKUs = [];
-      let SKUSoffset = null;
-
-      do {
-        const { records, offset: newOffset } = await fetchTableRecords(
-          SKUSoffset,
-          "SKUs"
-        );
-        allSKUs = allSKUs.concat(records);
-        SKUSoffset = newOffset;
-      } while (SKUSoffset);
-
-      setSKUs(
-        allSKUs
-          .map((e) => {
-            return {
-              label: `${e.fields.Name.trimStart()} - ${e.fields.Description.trimStart()}`,
-              value: encodeURIComponent(e.fields.Name.trimStart()),
-            };
-          })
-          .sort((a, b) => {
-            return a.label.localeCompare(b.label);
-          })
-      );
-    })();
-
-    (async () => {
-      let allManu = [];
-      let Manuoffset = null;
-
-      do {
-        const { records, offset: newOffset } = await fetchTableRecords(
-          Manuoffset,
-          "Manufacturers"
-        );
-        allManu = allManu.concat(records);
-        Manuoffset = newOffset;
-      } while (Manuoffset);
-
-      setManu(
-        allManu
-          .map((e) => {
-            return {
-              label: e.fields.Name.trimStart(),
-              value: encodeURIComponent(e.fields.Name.trimStart()),
-            };
-          })
-          .sort((a, b) => {
-            return a.label.localeCompare(b.label);
-          })
-      );
-    })();
+    const fetchFilters = async () => {
+      const manufacturersOptions = await fetchSelectOptions("Manufacturers");
+      const skuOptions = await fetchSelectOptions("SKUs");
+      setManu(manufacturersOptions);
+      setSKUs(skuOptions);
+    };
+    fetchFilters();
   }, []);
 
   return (

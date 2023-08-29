@@ -119,7 +119,6 @@ const HomeLister = ({
     fetchData().then((records) => {
       setData(records);
       setIsLoading(false);
-      setCardsVisible(true);
     });
   }, [offset, offsetArray]);
 
@@ -140,8 +139,6 @@ const HomeLister = ({
     debouncedMaxValue,
     debouncedSearchValue,
   ]);
-
-  const [cardsVisible, setCardsVisible] = useState(false);
 
   return (
     <>
