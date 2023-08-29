@@ -1,9 +1,7 @@
 import React, { useState, useEffect, useContext } from "react";
 import PentaContext from "../context/PentaContext";
 import BigSpinner from "../assets/BigSpinner";
-import AddCartLogo from "../assets/AddCartLogo";
-import RemoveCartLogo from "../assets/RemoveCartLogo";
-import ImageIcon from "../assets/ImageIcon";
+import InStockCard from "./cards/InStockCard";
 
 const HomeLister = ({
   selectedFilter,
@@ -17,16 +15,8 @@ const HomeLister = ({
   isLoading,
   setIsLoading,
 }) => {
-  const {
-    setCartCount,
-    cartCount,
-    setIsCartPressed,
-    selectedManufacturer,
-    selectedSKU,
-    minValue,
-    maxValue,
-    isOn,
-  } = useContext(PentaContext);
+  const { selectedManufacturer, selectedSKU, minValue, maxValue, isOn } =
+    useContext(PentaContext);
   const [data, setData] = useState([]);
   const patKey = import.meta.env.VITE_REACT_APP_API_KEY;
   const baseId = "appnx8gtnlQx5b7nI";
@@ -162,144 +152,12 @@ const HomeLister = ({
           {data.map(
             (item) =>
               item.fields.SKU && (
-                <div
-                  className={`card ${cardsVisible ? "visible" : ""}`}
-                  key={item.id}
-                >
-                  <div>
-                    <header className="card-header">
-                      <div
-                        className="has-text-centered"
-                        style={{ width: "100%" }}
-                      >
-                        <p
-                          className="has-text-weight-bold ml-3 my-3"
-                          style={{ fontSize: "18px" }}
-                        >
-                          {item.fields["Description (from SKU)"]}
-                        </p>
-                        <p
-                          style={{ marginTop: "-12px" }}
-                          className="has-text-grey ml-3 mb-3"
-                        >
-                          {item.fields["Item ID"]}
-                        </p>
-                      </div>
-                    </header>
-                    <div className="">
-                      <p
-                        className="has-text-weight-bold has-text-centered mt-4"
-                        style={{ fontSize: "18px" }}
-                      >
-                        {item.fields["Tag"]}
-                      </p>
-                      <hr
-                        className="mb-4 mt-3"
-                        style={{ margin: "0 auto", width: "80%" }}
-                      ></hr>
-                    </div>
-                    <div className="content mx-5 mb-5">
-                      {item.fields["Manufacturer"] && (
-                        <div
-                          className="mb-4 has-text-centered"
-                          style={{ width: "50%" }}
-                        >
-                          <p
-                            className="has-text-weight-bold"
-                            style={{ margin: "0" }}
-                          >
-                            Manufacturer
-                          </p>
-                          <p>{item.fields["Manufacturer"]}</p>
-                        </div>
-                      )}
-                      {item.fields["Size"] && (
-                        <div
-                          className="has-text-centered"
-                          style={{ width: "50%" }}
-                        >
-                          <p
-                            className="has-text-weight-bold has-text-centered"
-                            style={{ margin: "0" }}
-                          >
-                            Size
-                          </p>
-                          <p>{item.fields["Size"]}</p>
-                        </div>
-                      )}
-                      {item.fields["Model/Type"] && (
-                        <div
-                          className="has-text-centered"
-                          style={{ width: "50%" }}
-                        >
-                          <p
-                            className="has-text-weight-bold has-text-centered"
-                            style={{ margin: "0" }}
-                          >
-                            Model
-                          </p>
-                          <p>{item.fields["Model/Type"]}</p>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                  <footer className="card-footer">
-                    <a
-                      className={`button card-footer-item ${
-                        !localStorage.getItem([item.fields["Item ID"]])
-                          ? "images-button-red"
-                          : "images-button-blue"
-                      }`}
-                      href={`https://www.google.com/search?q=${encodeURIComponent(
-                        item.fields.StringSearch
-                      )}&tbm=isch`}
-                      target="_blank"
-                    >
-                      <ImageIcon color={"black"}></ImageIcon>
-                    </a>
-                    {!localStorage.getItem([item.fields["Item ID"]]) &&
-                    button ? (
-                      <button
-                        className="button card-footer-item add-button"
-                        style={{
-                          color: "white",
-                        }}
-                        onClick={() => {
-                          localStorage.setItem(
-                            item.fields["Item ID"],
-                            JSON.stringify(item.fields)
-                          );
-                          setButton(button + 1);
-                          setCartCount(cartCount + 1);
-                          setIsCartPressed(true);
-                          setTimeout(() => {
-                            setIsCartPressed(false);
-                          }, 1000);
-                        }}
-                      >
-                        <AddCartLogo></AddCartLogo>
-                      </button>
-                    ) : (
-                      <button
-                        className="button card-footer-item remove-button"
-                        style={{
-                          color: "white",
-                        }}
-                        onClick={() => {
-                          localStorage.removeItem(item.fields["Item ID"]);
-                          setButton(button + 1);
-                          setCartCount(cartCount - 1);
-                          setIsCartPressed(true);
-                          setTimeout(() => {
-                            setIsCartPressed(false);
-                          }, 1000);
-                        }}
-                      >
-                        <RemoveCartLogo></RemoveCartLogo>
-                      </button>
-                    )}
-                  </footer>
-                </div>
+                <InStockCard
+                  item={item.fields}
+                  button={button}
+                  setButton={setButton}
+                  key={item.fields["Item ID"]}
+                />
               )
           )}
         </div>
