@@ -1,47 +1,20 @@
-import HomeLister from "../components/HomeLister";
-import LittleSpinner from "../assets/LittleSpinner";
-import * as Papa from "papaparse";
-import * as XLSX from "xlsx/xlsx.mjs";
-import { useRef, useState, useEffect, useContext } from "react";
+import HomeLister from "../components/home/HomeLister";
+import { useEffect, useContext } from "react";
 import PentaContext from "../context/PentaContext";
+import Pagination from "../components/home/Pagination";
+import Tags from "../components/home/Tags";
+import Search from "../components/home/Search";
 
 function Home() {
   const {
     isActive,
-    setIsActive,
-    selectedManufacturer,
-    selectedSKU,
-    minValue,
-    maxValue,
-    isOn,
+    fetchMaxSize,
+    setLargestSize,
+    setMaxValue,
+    offset,
+    offsetArray,
+    setPage,
   } = useContext(PentaContext);
-  const [selectedFilter, setSelectedFilters] = useState({
-    Prosthesis: false,
-    Orthosis: false,
-    Pediatric: false,
-  });
-  const [offset, setOffset] = useState(0);
-  const [offsetArray, setOffsetArray] = useState([""]);
-  const [searchInput, setSearchInput] = useState("");
-  const onSearchChange = (e) => {
-    setSearchInput(e.target.value);
-  };
-  const clearSearchInput = () => {
-    setSearchInput("");
-  };
-  const [page, setPage] = useState("");
-  const activeToggle = () => {
-    setIsActive(!isActive);
-  };
-  const [loading, setLoading] = useState(false);
-  const [isLoading, setIsLoading] = useState(true);
-  const [debouncedSearchValue, setDebouncedSearchValue] = useState(searchInput);
-
-  const filterClick = (key) => {
-    const newObj = { ...selectedFilter };
-    newObj[key] = !selectedFilter[key];
-    setSelectedFilters(newObj);
-  };
 
   useEffect(() => {
     if (offset === 0 && offsetArray.length > 1) {
@@ -61,160 +34,14 @@ function Home() {
     }
   }, [offset, offsetArray]);
 
-  const [isDropActive, setIsDropActive] = useState(false);
-
-  const scrollToTop = () => {
-    window.scrollTo({ top: 0, behavior: "smooth" });
-  };
-
-  const toggleDropdown = (event) => {
-    event.stopPropagation();
-    setIsDropActive(!isDropActive);
-  };
-
-  const dropdownRef = useRef(null);
-
-  const handleClickOutside = (event) => {
-    if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
-      setIsDropActive(false);
-    }
-  };
-
   useEffect(() => {
-    document.addEventListener("mousedown", handleClickOutside);
-
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
+    const fetchMax = async () => {
+      const max = await fetchMaxSize();
+      setLargestSize(max);
+      setMaxValue(max);
     };
+    fetchMax();
   }, []);
-
-  async function createBlob(fileType) {
-    setLoading(true);
-    const apiKey = import.meta.env.VITE_REACT_APP_API_KEY;
-    const baseId = "appnx8gtnlQx5b7nI";
-    const tableName = "Inventory";
-    const encodedTableName = encodeURIComponent(tableName);
-    const skus = selectedSKU.map((option) => option.value);
-    const manufacturers = selectedManufacturer.map((option) => option.value);
-    const selectedTags = Object.keys(selectedFilter).filter(
-      (key) => selectedFilter[key]
-    );
-
-    let url = `https://api.airtable.com/v0/${baseId}/${encodedTableName}?sort%5B0%5D%5Bfield%5D=Item%20ID&sort%5B0%5D%5Bdirection%5D=asc&filterByFormula=AND(`;
-    url += 'AND({Requests}=BLANK(),{Shipment Status}=BLANK()),NOT({SKU}="")';
-
-    if (
-      skus.length > 0 ||
-      manufacturers.length > 0 ||
-      selectedTags.length > 0 ||
-      isOn ||
-      debouncedSearchValue
-    ) {
-      if (skus.length > 0) {
-        url += `,OR(${skus.map((sku) => `{SKU}='${sku}'`).join(",")})`;
-      }
-      if (manufacturers.length > 0) {
-        url += `,OR(${manufacturers
-          .map((manufacturer) => `{Manufacturer}='${manufacturer}'`)
-          .join(",")})`;
-      }
-      if (selectedTags.length > 0) {
-        url += `,OR(${selectedTags.map((tag) => `{Tag}='${tag}'`).join(",")})`;
-      }
-      if (isOn) {
-        url += `,AND({Size} >= ${minValue}, {Size} <= ${maxValue})`;
-      }
-      if (debouncedSearchValue) {
-        const searchTerms = debouncedSearchValue.toLowerCase().split(" ");
-        const searchConditions = searchTerms.map(
-          (term) => `SEARCH("${term}", {Concat2})`
-        );
-        url += `,AND(${searchConditions.join(",")})`;
-      }
-    }
-
-    async function fetchTableRecords(offset = null) {
-      const newUrl = url + `)&offset=${offset || ""}`;
-
-      const response = await fetch(newUrl, {
-        headers: {
-          Authorization: `Bearer ${apiKey}`,
-        },
-      });
-
-      const data = await response.json();
-      const records = data.records;
-
-      return {
-        records,
-        offset: data.offset || undefined,
-      };
-    }
-
-    (async () => {
-      let allRecords = [];
-      let offset = null;
-
-      do {
-        const { records, offset: newOffset } = await fetchTableRecords(offset);
-        allRecords = allRecords.concat(records);
-        offset = newOffset;
-      } while (offset);
-
-      const mappedData = allRecords.map((e) => [
-        e.fields["Item ID"] || "",
-        e.fields["Description (from SKU)"] || "",
-        e.fields["Size"] || "",
-        e.fields["Model/Type"] || "",
-        e.fields["Manufacturer"] || "",
-      ]);
-
-      const allContent = [
-        "ID,Description,Size,Model/Type,Manufacturer",
-        ...mappedData.map((row) => `"${row.join('","')}"`),
-      ].join("\n");
-
-      const downloadBlob = (blob, filename) => {
-        const link = document.createElement("a");
-        link.href = URL.createObjectURL(blob);
-        link.download = filename;
-        link.click();
-      };
-
-      const s2ab = (s) => {
-        const buf = new ArrayBuffer(s.length);
-        const view = new Uint8Array(buf);
-        for (let i = 0; i < s.length; i++) {
-          view[i] = s.charCodeAt(i) & 0xff;
-        }
-        return buf;
-      };
-
-      if (fileType === "csv") {
-        const blob = new Blob([allContent], { type: "text/csv" });
-        downloadBlob(blob, "Inventory Data.csv");
-      } else {
-        const workbook = XLSX.utils.book_new();
-        const sheetData = [
-          ["ID", "Description", "Size", "Model/Type", "Manufacturer"],
-          ...mappedData,
-        ];
-        const worksheet = XLSX.utils.aoa_to_sheet(sheetData);
-        XLSX.utils.book_append_sheet(workbook, worksheet, "Sheet1");
-
-        const wbout = XLSX.write(workbook, {
-          bookType: "xlsx",
-          bookSST: false,
-          type: "binary",
-        });
-        const blob = new Blob([s2ab(wbout)], {
-          type: "application/octet-stream",
-        });
-        downloadBlob(blob, "Inventory Data.xlsx");
-      }
-      setLoading(false);
-    })();
-  }
 
   return (
     <div className={isActive ? "sidebar-active" : ""}>
@@ -241,288 +68,17 @@ function Home() {
             alignItems: "flex-end",
           }}
         >
-          <div id="search-form">
-            <form onSubmit={(e) => e.preventDefault()}>
-              <div className="field">
-                <div className="control has-icons-left has-icons-right">
-                  <input
-                    className="input is-rounded mr-3 search-bar"
-                    type="text"
-                    placeholder="Search by description, size, or model/type"
-                    value={searchInput}
-                    onChange={onSearchChange}
-                  />
-                  <span className="icon is-small is-left">
-                    <i className="fas fa-search"></i>
-                  </span>
-                  {searchInput && (
-                    <span
-                      className="icon is-small is-right"
-                      onClick={clearSearchInput}
-                      id="search-clear"
-                    >
-                      <i className="fas fa-times mr-5"></i>
-                    </span>
-                  )}
-                </div>
-              </div>
-            </form>
-            <div
-              className={`dropdown ${isDropActive ? "is-active" : ""}`}
-              ref={dropdownRef}
-            >
-              <div className="dropdown-trigger">
-                <button
-                  className="button is-rounded"
-                  aria-haspopup="true"
-                  aria-controls="dropdown-menu3"
-                  onClick={toggleDropdown}
-                >
-                  {loading ? (
-                    <LittleSpinner size={30} />
-                  ) : (
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      height="1.5em"
-                      viewBox="0 0 512 512"
-                      id="download-button"
-                    >
-                      <path d="M288 32c0-17.7-14.3-32-32-32s-32 14.3-32 32V274.7l-73.4-73.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3l128 128c12.5 12.5 32.8 12.5 45.3 0l128-128c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L288 274.7V32zM64 352c-35.3 0-64 28.7-64 64v32c0 35.3 28.7 64 64 64H448c35.3 0 64-28.7 64-64V416c0-35.3-28.7-64-64-64H346.5l-45.3 45.3c-25 25-65.5 25-90.5 0L165.5 352H64zm368 56a24 24 0 1 1 0 48 24 24 0 1 1 0-48z" />
-                    </svg>
-                  )}
-                  <span className="icon is-small">
-                    <i className="fas fa-angle-down" aria-hidden="true"></i>
-                  </span>
-                </button>
-              </div>
-              <div
-                className="dropdown-menu"
-                id="dropdown-menu3"
-                role="menu"
-                style={{ minWidth: "87px" }}
-              >
-                <div className="dropdown-content">
-                  <a
-                    className="dropdown-item"
-                    onClick={() => {
-                      createBlob("csv");
-                      setIsDropActive(false);
-                    }}
-                  >
-                    .csv
-                  </a>
-                  <a
-                    href="#"
-                    className="dropdown-item"
-                    onClick={() => {
-                      createBlob("xlsx");
-                      setIsDropActive(false);
-                    }}
-                  >
-                    .xlsx
-                  </a>
-                </div>
-              </div>
-            </div>
-          </div>
+          <Search></Search>
         </div>
-        <div id="filter-buttons">
-          <div
-            className={
-              selectedFilter["Prosthesis"]
-                ? "filter-selected filter-3"
-                : "filter-3"
-            }
-            onClick={() => filterClick("Prosthesis")}
-          >
-            <p>Prosthesis</p>
-          </div>
-          <div
-            className={
-              selectedFilter["Orthosis"]
-                ? "filter-selected filter-3"
-                : "filter-3"
-            }
-            onClick={() => filterClick("Orthosis")}
-          >
-            <p>Orthosis</p>
-          </div>
-          <div
-            className={
-              selectedFilter["Pediatric"]
-                ? "filter-selected filter-3"
-                : "filter-3"
-            }
-            onClick={() => filterClick("Pediatric")}
-          >
-            <p>Pediatric</p>
-          </div>
-          <div
-            id="filter-button"
-            onClick={activeToggle}
-            className={
-              isOn || selectedManufacturer.length || selectedSKU.length
-                ? "filter-button-active"
-                : ""
-            }
-          >
-            <p>Filters</p>
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              height=".65em"
-              viewBox="0 0 512 512"
-            >
-              <path d="M0 416c0 17.7 14.3 32 32 32l54.7 0c12.3 28.3 40.5 48 73.3 48s61-19.7 73.3-48L480 448c17.7 0 32-14.3 32-32s-14.3-32-32-32l-246.7 0c-12.3-28.3-40.5-48-73.3-48s-61 19.7-73.3 48L32 384c-17.7 0-32 14.3-32 32zm128 0a32 32 0 1 1 64 0 32 32 0 1 1 -64 0zM320 256a32 32 0 1 1 64 0 32 32 0 1 1 -64 0zm32-80c-32.8 0-61 19.7-73.3 48L32 224c-17.7 0-32 14.3-32 32s14.3 32 32 32l246.7 0c12.3 28.3 40.5 48 73.3 48s61-19.7 73.3-48l54.7 0c17.7 0 32-14.3 32-32s-14.3-32-32-32l-54.7 0c-12.3-28.3-40.5-48-73.3-48zM192 128a32 32 0 1 1 0-64 32 32 0 1 1 0 64zm73.3-64C253 35.7 224.8 16 192 16s-61 19.7-73.3 48L32 64C14.3 64 0 78.3 0 96s14.3 32 32 32l86.7 0c12.3 28.3 40.5 48 73.3 48s61-19.7 73.3-48L480 128c17.7 0 32-14.3 32-32s-14.3-32-32-32L265.3 64z" />
-            </svg>
-          </div>
-        </div>
+        <Tags></Tags>
         <p className="my-6 mx-6 has-text-centered">
           If you would like to download a copy of the current page click the
           icon to the right of the search bar.
         </p>
       </div>
-      {page === "Next" ? (
-        <div className="is-flex is-justify-content-center is-align-items-center">
-          <div
-            style={{ marginLeft: "44px" }}
-            className="is-flex is-justify-content-center is-align-items-center has-text-weight-bold is-size-5 num-pag"
-          >
-            <p>{offset + 1}</p>
-          </div>
-          <p
-            className="is-size-4 ml-1 is-text-weight-bold pag-btn"
-            style={{ cursor: "pointer" }}
-            onClick={() => {
-              setOffset(offset + 1);
-            }}
-          >
-            <i className="fas fas fa-angle-double-right"></i>
-          </p>
-        </div>
-      ) : page === "Previous" ? (
-        <div className="is-flex is-justify-content-center is-align-items-center">
-          <p
-            className="is-size-4 mr-1 is-text-weight-bold pag-btn"
-            style={{ cursor: "pointer" }}
-            onClick={() => {
-              setOffset(offset - 1);
-            }}
-          >
-            <i className="fas fas fa-angle-double-left"></i>
-          </p>
-          <div
-            style={{ marginRight: "44px" }}
-            className="is-flex is-justify-content-center is-align-items-center has-text-weight-bold is-size-5 num-pag"
-          >
-            <p>{offset + 1}</p>
-          </div>
-        </div>
-      ) : page === "Next/Previous" ? (
-        <div className="is-flex is-justify-content-center is-align-items-center">
-          <p
-            className="is-size-4 mr-1 is-text-weight-bold pag-btn"
-            style={{ cursor: "pointer" }}
-            onClick={() => {
-              setOffset(offset - 1);
-            }}
-          >
-            <i className="fas fas fa-angle-double-left"></i>
-          </p>
-          <div className="is-flex is-justify-content-center is-align-items-center has-text-weight-bold is-size-5 num-pag">
-            <p>{offset + 1}</p>
-          </div>
-          <p
-            className="is-size-4 ml-1 is-text-weight-bold pag-btn"
-            style={{ cursor: "pointer" }}
-            onClick={() => {
-              setOffset(offset + 1);
-            }}
-          >
-            <i className="fas fas fa-angle-double-right"></i>
-          </p>
-        </div>
-      ) : (
-        <></>
-      )}
-      <HomeLister
-        selectedFilter={selectedFilter}
-        offsetArray={offsetArray}
-        setOffsetArray={setOffsetArray}
-        offset={offset}
-        setOffset={setOffset}
-        searchInput={searchInput}
-        debouncedSearchValue={debouncedSearchValue}
-        setDebouncedSearchValue={setDebouncedSearchValue}
-        isLoading={isLoading}
-        setIsLoading={setIsLoading}
-      />
-      {page === "Next" ? (
-        <div className="is-flex is-justify-content-center is-align-items-center">
-          <div
-            style={{ marginLeft: "44px" }}
-            className="is-flex is-justify-content-center is-align-items-center has-text-weight-bold is-size-5 num-pag"
-          >
-            <p>{offset + 1}</p>
-          </div>
-          <p
-            className="is-size-4 ml-1 is-text-weight-bold pag-btn"
-            style={{ cursor: "pointer" }}
-            onClick={() => {
-              setOffset(offset + 1);
-              scrollToTop();
-            }}
-          >
-            <i className="fas fas fa-angle-double-right"></i>
-          </p>
-        </div>
-      ) : page === "Previous" ? (
-        <div className="is-flex is-justify-content-center is-align-items-center">
-          <p
-            className="is-size-4 mr-1 is-text-weight-bold pag-btn"
-            style={{ cursor: "pointer" }}
-            onClick={() => {
-              setOffset(offset - 1);
-              scrollToTop();
-            }}
-          >
-            <i className="fas fas fa-angle-double-left"></i>
-          </p>
-          <div
-            style={{ marginRight: "44px" }}
-            className="is-flex is-justify-content-center is-align-items-center has-text-weight-bold is-size-5 num-pag"
-          >
-            <p>{offset + 1}</p>
-          </div>
-        </div>
-      ) : page === "Next/Previous" ? (
-        <div className="is-flex is-justify-content-center is-align-items-center">
-          <p
-            className="is-size-4 mr-1 is-text-weight-bold pag-btn"
-            style={{ cursor: "pointer" }}
-            onClick={() => {
-              setOffset(offset - 1);
-              scrollToTop();
-            }}
-          >
-            <i className="fas fas fa-angle-double-left"></i>
-          </p>
-          <div className="is-flex is-justify-content-center is-align-items-center has-text-weight-bold is-size-5 num-pag">
-            <p>{offset + 1}</p>
-          </div>
-          <p
-            className="is-size-4 ml-1 is-text-weight-bold pag-btn"
-            style={{ cursor: "pointer" }}
-            onClick={() => {
-              setOffset(offset + 1);
-              scrollToTop();
-            }}
-          >
-            <i className="fas fas fa-angle-double-right"></i>
-          </p>
-        </div>
-      ) : (
-        <></>
-      )}
+      <Pagination bottom={false}></Pagination>
+      <HomeLister />
+      <Pagination bottom={true}></Pagination>
     </div>
   );
 }

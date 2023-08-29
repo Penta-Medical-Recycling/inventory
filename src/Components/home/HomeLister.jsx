@@ -1,22 +1,27 @@
 import React, { useState, useEffect, useContext } from "react";
-import PentaContext from "../context/PentaContext";
-import BigSpinner from "../assets/BigSpinner";
-import InStockCard from "./cards/InStockCard";
+import PentaContext from "../../context/PentaContext";
+import BigSpinner from "../../assets/BigSpinner";
+import InStockCard from "../cards/InStockCard";
 
-const HomeLister = ({
-  selectedFilter,
-  offsetArray,
-  setOffsetArray,
-  setOffset,
-  offset,
-  searchInput,
-  debouncedSearchValue,
-  setDebouncedSearchValue,
-  isLoading,
-  setIsLoading,
-}) => {
-  const { selectedManufacturer, selectedSKU, minValue, maxValue, isOn } =
-    useContext(PentaContext);
+const HomeLister = ({}) => {
+  const {
+    selectedManufacturer,
+    selectedSKU,
+    minValue,
+    maxValue,
+    isOn,
+    selectedFilter,
+    offsetArray,
+    setOffsetArray,
+    setOffset,
+    offset,
+    searchInput,
+    debouncedSearchValue,
+    setDebouncedSearchValue,
+    isLoading,
+    setIsLoading,
+  } = useContext(PentaContext);
+
   const [data, setData] = useState([]);
   const patKey = import.meta.env.VITE_REACT_APP_API_KEY;
   const baseId = "appnx8gtnlQx5b7nI";
@@ -114,6 +119,22 @@ const HomeLister = ({
       return [];
     }
   }
+
+  // useEffect(() => {
+  //   setIsLoading(true);
+  //   const debounceTimeout = setTimeout(() => {
+  //     fetchData().then((records) => {
+  //       setData(records);
+  //       setIsLoading(false);
+  //     });
+  //   }, 1000);
+
+  //   return () => {
+  //     clearTimeout(debounceTimeout);
+  //     setIsLoading(false);
+  //   };
+  // }, [selectedManufacturer]);
+
   useEffect(() => {
     setIsLoading(true);
     fetchData().then((records) => {

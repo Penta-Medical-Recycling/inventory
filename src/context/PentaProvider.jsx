@@ -9,14 +9,54 @@ function PentaProvider({ children }) {
     Object.keys(localStorage).filter((k) => k !== "partner" && k !== "notes")
       .length
   );
+  const [selectedFilter, setSelectedFilters] = useState({
+    Prosthesis: false,
+    Orthosis: false,
+    Pediatric: false,
+  });
   const [isCartPressed, setIsCartPressed] = useState(false);
   const [isActive, setIsActive] = useState(false);
+  ////////////////////////////////////////////////////////////////////////////////////////////////
   const [selectedManufacturer, setSelectedManufacturer] = useState([]);
   const [selectedSKU, setSelectedSKU] = useState([]);
   const [minValue, setMinValue] = useState(1);
   const [maxValue, setMaxValue] = useState(55);
-  const [largestSize, setLargestSize] = useState(60);
   const [isOn, setIsOn] = useState(false);
+  const [searchInput, setSearchInput] = useState("");
+  const [debouncedSearchValue, setDebouncedSearchValue] = useState(searchInput);
+  ////////////////////////////////////////////////////////////////////////////////////////////////
+  const [offset, setOffset] = useState(0);
+  const [offsetArray, setOffsetArray] = useState([""]);
+  ////////////////////////////////////////////////////////////////////////////////////////////////
+  const [largestSize, setLargestSize] = useState(60);
+  const [page, setPage] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isDropActive, setIsDropActive] = useState(false);
+
+  // const [isVisible, setIsVisible] = useState(false); // for card animations after debouncing timeout
+  // const [data, setData] = useState([]]); // for card animations after debouncing timeout
+
+  // const baseURL = 'https://api.airtable.com/v0/${baseId}/${encodedTableName}?' (does not change state)
+  // const parameters = `${...}&${...}` (changes based on filters and search, if those chang offset is reset)
+  // const offSetParam = '&offset={offsetArray[offset] || ''}' (changes when paginating or resets when above changes)
+
+  // fetch (baseURL + parameters + offSetParam);
+  // setData(res); holds on to the baseURL + parameters + offSetParam
+  // sends data to home lister
+
+  // Changes to the follow value will result in a change in the inventory API endpoint, this global url is set above
+  // selectedManufacturer,
+  // selectedSKU,
+  // selectedFilter,
+  // isOn,
+  // debouncedMinValue,
+  // debouncedMaxValue,
+  // debouncedSearchValue,
+
+  // offset and offsetArray is reset to default any time the above varibales change (0, [])
+  // if the above remain the same value, but offset changes, then the offSetParam is updated and refetching occurs
+  // offset, offsetArray
 
   async function fetchAPI(url) {
     try {
@@ -104,15 +144,6 @@ function PentaProvider({ children }) {
     }
   };
 
-  useEffect(() => {
-    const fetchMax = async () => {
-      const max = await fetchMaxSize();
-      setLargestSize(max);
-      setMaxValue(max);
-    };
-    fetchMax();
-  }, []);
-
   let contextValues = {
     selectedPartner,
     setSelectedPartner,
@@ -134,10 +165,29 @@ function PentaProvider({ children }) {
     setLargestSize,
     isOn,
     setIsOn,
+    offset,
+    offsetArray,
+    page,
+    setPage,
+    setOffsetArray,
+    setOffset,
+    searchInput,
+    setSearchInput,
+    loading,
+    setLoading,
+    isLoading,
+    setIsLoading,
+    debouncedSearchValue,
+    setDebouncedSearchValue,
+    isDropActive,
+    setIsDropActive,
+    selectedFilter,
+    setSelectedFilters,
     fetchAPI,
     fetchTableRecords,
     fetchTableRecordsWithOffset,
     fetchSelectOptions,
+    fetchMaxSize,
   };
 
   return (
