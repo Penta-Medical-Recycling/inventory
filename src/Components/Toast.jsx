@@ -6,6 +6,7 @@ const Toast = ({ message, type }) => {
     type: type,
     position: 'top-center',
     duration: 4000, 
+
     dismissible: true,
   };
 
