@@ -1,171 +1,93 @@
-import React, { useState, useEffect, useContext } from "react";
+import React, { useState, useEffect, useContext, useRef } from "react";
 import PentaContext from "../../context/PentaContext";
 import BigSpinner from "../../assets/BigSpinner";
 import InStockCard from "../cards/InStockCard";
 
 const HomeLister = ({}) => {
   const {
+    isLoading,
+    data,
+    offset,
+    setOffset,
+    offsetArray,
+    setOffsetArray,
     selectedManufacturer,
     selectedSKU,
+    selectedFilter,
     minValue,
     maxValue,
     isOn,
-    selectedFilter,
-    offsetArray,
-    setOffsetArray,
-    setOffset,
-    offset,
     searchInput,
-    debouncedSearchValue,
-    setDebouncedSearchValue,
-    isLoading,
     setIsLoading,
+    urlCreator,
+    fetchAPI,
+    setData,
   } = useContext(PentaContext);
 
-  const [data, setData] = useState([]);
-  const patKey = import.meta.env.VITE_REACT_APP_API_KEY;
-  const baseId = "appnx8gtnlQx5b7nI";
-  const tableName = "Inventory";
   const [button, setButton] = useState(1);
-  const [debouncedMinValue, setDebouncedMinValue] = useState(minValue);
-  const [debouncedMaxValue, setDebouncedMaxValue] = useState(maxValue);
-
-  useEffect(() => {
-    const debounceTimeout = setTimeout(() => {
-      if (isOn) {
-        setDebouncedMinValue(minValue);
-        setDebouncedMaxValue(maxValue);
-      }
-    }, 1000);
-
-    return () => {
-      clearTimeout(debounceTimeout);
-    };
-  }, [minValue, maxValue]);
-
-  useEffect(() => {
-    const debounceTimeout = setTimeout(() => {
-      setDebouncedSearchValue(searchInput);
-    }, 1000);
-
-    return () => {
-      clearTimeout(debounceTimeout);
-    };
-  }, [searchInput]);
-
-  const encodedTableName = encodeURIComponent(tableName);
-
-  async function fetchData() {
-    let url = `https://api.airtable.com/v0/${baseId}/${encodedTableName}?pageSize=36&sort%5B0%5D%5Bfield%5D=Item%20ID&sort%5B0%5D%5Bdirection%5D=asc&filterByFormula=AND(`;
-    const skus = selectedSKU.map((option) => option.value);
-    const manufacturers = selectedManufacturer.map((option) => option.value);
-    const selectedTags = Object.keys(selectedFilter).filter(
-      (key) => selectedFilter[key]
-    );
-
-    url += 'AND({Requests}=BLANK(),{Shipment Status}=BLANK()),NOT({SKU}="")';
-
-    if (
-      skus.length > 0 ||
-      manufacturers.length > 0 ||
-      selectedTags.length > 0 ||
-      isOn ||
-      debouncedSearchValue
-    ) {
-      if (skus.length > 0) {
-        url += `,OR(${skus.map((sku) => `{SKU}='${sku}'`).join(",")})`;
-      }
-      if (manufacturers.length > 0) {
-        url += `,OR(${manufacturers
-          .map((manufacturer) => `{Manufacturer}='${manufacturer}'`)
-          .join(",")})`;
-      }
-      if (selectedTags.length > 0) {
-        url += `,OR(${selectedTags.map((tag) => `{Tag}='${tag}'`).join(",")})`;
-      }
-      if (isOn) {
-        url += `,AND({Size} >= ${minValue}, {Size} <= ${maxValue})`;
-      }
-      if (debouncedSearchValue) {
-        const searchTerms = debouncedSearchValue
-          .toLowerCase()
-          .split(" ")
-          .filter((a) => a !== "size");
-        const searchConditions = searchTerms.map(
-          (term) => `SEARCH("${term}", {Concat2})`
-        );
-        url += `,AND(${searchConditions.join(",")})`;
-      }
-    }
-    url += ")&offset=" + offsetArray[offset];
-
-    try {
-      const response = await fetch(url, {
-        headers: {
-          Authorization: `Bearer ${patKey}`,
-        },
-      });
-
-      if (!response.ok) {
-        throw new Error("Network response was not ok");
-      }
-      const data = await response.json();
-      if (data.offset && !offsetArray[offset + 1]) {
-        setOffsetArray([...offsetArray, data.offset]);
-      }
-      return data.records;
-    } catch (error) {
-      console.error("Error fetching data:", error);
-      return [];
-    }
-  }
-
-  // useEffect(() => {
-  //   setIsLoading(true);
-  //   const debounceTimeout = setTimeout(() => {
-  //     fetchData().then((records) => {
-  //       setData(records);
-  //       setIsLoading(false);
-  //     });
-  //   }, 1000);
-
-  //   return () => {
-  //     clearTimeout(debounceTimeout);
-  //     setIsLoading(false);
-  //   };
-  // }, [selectedManufacturer]);
+  const globalUrl = useRef("");
+  const offsetKey = useRef("&offset=");
 
   useEffect(() => {
     setIsLoading(true);
-    fetchData().then((records) => {
-      setData(records);
+    const debounceTimeout = setTimeout(() => {
+      async function loadNewPage() {
+        const newUrl = urlCreator();
+        if (globalUrl.current !== newUrl) {
+          const res = await fetchAPI(newUrl);
+          setOffset(0);
+          setOffsetArray([""]);
+          if (res.offset && !offsetArray[offset + 1]) {
+            setOffsetArray([...offsetArray, res.offset]);
+          }
+          setData(res.records);
+          globalUrl.current = newUrl;
+        }
+      }
+      loadNewPage();
       setIsLoading(false);
-    });
-  }, [offset, offsetArray]);
-
-  useEffect(() => {
-    setOffset(0);
-    setOffsetArray([""]);
-    setIsLoading(true);
-    fetchData().then((records) => {
-      setData(records);
-      setIsLoading(false);
-    });
+    }, 1000);
+    return () => {
+      clearTimeout(debounceTimeout);
+    };
   }, [
     selectedManufacturer,
     selectedSKU,
     selectedFilter,
+    minValue,
+    maxValue,
     isOn,
-    debouncedMinValue,
-    debouncedMaxValue,
-    debouncedSearchValue,
+    searchInput,
   ]);
+
+  useEffect(() => {
+    setIsLoading(true);
+    const debounceTimeout = setTimeout(() => {
+      async function loadNewPage() {
+        const newUrl = urlCreator();
+        const newOffset = "&offset=" + offsetArray[offset];
+        if (globalUrl.current === newUrl && offsetKey.current !== newOffset) {
+          const res = await fetchAPI(newUrl + newOffset);
+          if (res.offset && !offsetArray[offset + 1]) {
+            setOffsetArray([...offsetArray, res.offset]);
+          }
+          offsetKey.current = newOffset;
+          setData(res.records);
+        }
+        setIsLoading(false);
+      }
+      loadNewPage();
+    }, 1000);
+    return () => {
+      clearTimeout(debounceTimeout);
+    };
+  }, [offset]);
 
   return (
     <>
       {isLoading ? (
-        <BigSpinner size={50} />
-      ) : data.length ? (
+        <BigSpinner size={75} />
+      ) : data && data.length ? (
         <div id="cardDiv">
           {data.map(
             (item) =>
@@ -179,10 +101,12 @@ const HomeLister = ({}) => {
               )
           )}
         </div>
-      ) : (
+      ) : data && data.length === 0 ? (
         <p className="is-size-4 has-text-weight-bold has-text-centered">
           No Results Found
         </p>
+      ) : (
+        <></>
       )}
     </>
   );

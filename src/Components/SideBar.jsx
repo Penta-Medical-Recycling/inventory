@@ -4,7 +4,9 @@ import React, { useEffect, useRef, useContext } from "react";
 import PentaContext from "../context/PentaContext";
 
 const SideBar = () => {
-  const { setIsActive, isActive } = useContext(PentaContext);
+  const { setIsActive, isActive, fetchMaxSize, setLargestSize, setMaxValue } =
+    useContext(PentaContext);
+
   const activeToggle = () => {
     setIsActive(!isActive);
   };
@@ -23,6 +25,15 @@ const SideBar = () => {
     return () => {
       document.removeEventListener("mousedown", handleClickOutside);
     };
+  }, []);
+
+  useEffect(() => {
+    const fetchMax = async () => {
+      const max = await fetchMaxSize();
+      setLargestSize(max);
+      setMaxValue(max);
+    };
+    fetchMax();
   }, []);
 
   return (

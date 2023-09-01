@@ -17,7 +17,10 @@ const Search = ({}) => {
     <div id="search-form">
       <form onSubmit={(e) => e.preventDefault()}>
         <div className="field">
-          <div className="control has-icons-left has-icons-right">
+          <div
+            className="control has-icons-left has-icons-right loading-effect"
+            style={{ animationDelay: "0.5s" }}
+          >
             <input
               className="input is-rounded mr-3 search-bar"
               type="text"

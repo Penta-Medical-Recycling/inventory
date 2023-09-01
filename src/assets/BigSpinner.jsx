@@ -3,10 +3,16 @@ import LittleSpinner from "./LittleSpinner";
 
 function BigSpinner({ size }) {
   return (
-    <div className="loading-container">
-      <LittleSpinner size={size} />
-      <br></br>
-      <b>Loading ...</b>
+    <div
+      className="loading-container fade-out"
+      style={{
+        animationDelay: "0.5s",
+      }}
+    >
+      <div className="logo-container">
+        <LittleSpinner size={size} />
+        <p className="loading-text">Loading ...</p>
+      </div>
     </div>
   );
 }

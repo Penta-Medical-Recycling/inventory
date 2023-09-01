@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import PentaContext from "./PentaContext";
 
 function PentaProvider({ children }) {
@@ -16,47 +16,74 @@ function PentaProvider({ children }) {
   });
   const [isCartPressed, setIsCartPressed] = useState(false);
   const [isActive, setIsActive] = useState(false);
+  const [searchInput, setSearchInput] = useState("");
   ////////////////////////////////////////////////////////////////////////////////////////////////
   const [selectedManufacturer, setSelectedManufacturer] = useState([]);
   const [selectedSKU, setSelectedSKU] = useState([]);
   const [minValue, setMinValue] = useState(1);
   const [maxValue, setMaxValue] = useState(55);
   const [isOn, setIsOn] = useState(false);
-  const [searchInput, setSearchInput] = useState("");
   const [debouncedSearchValue, setDebouncedSearchValue] = useState(searchInput);
   ////////////////////////////////////////////////////////////////////////////////////////////////
   const [offset, setOffset] = useState(0);
   const [offsetArray, setOffsetArray] = useState([""]);
   ////////////////////////////////////////////////////////////////////////////////////////////////
-  const [largestSize, setLargestSize] = useState(60);
+  const [largestSize, setLargestSize] = useState(160);
   const [page, setPage] = useState("");
   const [loading, setLoading] = useState(false);
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(false);
   const [isDropActive, setIsDropActive] = useState(false);
+  ////////////////////////////////////////////////////////////////////////////////////////////////
+  const [data, setData] = useState();
 
-  // const [isVisible, setIsVisible] = useState(false); // for card animations after debouncing timeout
-  // const [data, setData] = useState([]]); // for card animations after debouncing timeout
+  function urlCreator() {
+    const baseUrl = "https://api.airtable.com/v0/appnx8gtnlQx5b7nI/Inventory?";
+    const sort = `sort%5B0%5D%5Bfield%5D=Item%20ID&sort%5B0%5D%5Bdirection%5D=asc`;
+    const pageSize = "pageSize=36";
+    let filterFunction = "filterByFormula=";
+    const filters = [
+      "{Requests}=BLANK()",
+      "{Shipment Status}=BLANK()",
+      'NOT({SKU}="")',
+    ];
+    const skus = selectedSKU.map((option) => option.value);
+    if (skus.length > 0) {
+      filters.push(`OR(${skus.map((sku) => `{SKU}='${sku}'`).join(",")})`);
+    }
+    const manufacturers = selectedManufacturer.map((option) => option.value);
+    if (manufacturers.length > 0) {
+      filters.push(
+        `OR(${manufacturers
+          .map((manufacturer) => `{Manufacturer}='${manufacturer}'`)
+          .join(",")})`
+      );
+    }
+    const selectedTags = Object.keys(selectedFilter).filter(
+      (key) => selectedFilter[key]
+    );
+    if (selectedTags.length > 0) {
+      filters.push(
+        `OR(${selectedTags.map((tag) => `{Tag}='${tag}'`).join(",")})`
+      );
+    }
+    if (isOn) {
+      filters.push(`AND({Size} >= ${minValue}, {Size} <= ${maxValue})`);
+    }
 
-  // const baseURL = 'https://api.airtable.com/v0/${baseId}/${encodedTableName}?' (does not change state)
-  // const parameters = `${...}&${...}` (changes based on filters and search, if those chang offset is reset)
-  // const offSetParam = '&offset={offsetArray[offset] || ''}' (changes when paginating or resets when above changes)
+    if (searchInput) {
+      const searchTerms = searchInput
+        .toLowerCase()
+        .split(" ")
+        .filter((term) => term !== "size");
+      const searchConditions = searchTerms.map(
+        (term) => `SEARCH("${term}", {Concat2})`
+      );
+      filters.push(`AND(${searchConditions.join(",")})`);
+    }
 
-  // fetch (baseURL + parameters + offSetParam);
-  // setData(res); holds on to the baseURL + parameters + offSetParam
-  // sends data to home lister
-
-  // Changes to the follow value will result in a change in the inventory API endpoint, this global url is set above
-  // selectedManufacturer,
-  // selectedSKU,
-  // selectedFilter,
-  // isOn,
-  // debouncedMinValue,
-  // debouncedMaxValue,
-  // debouncedSearchValue,
-
-  // offset and offsetArray is reset to default any time the above varibales change (0, [])
-  // if the above remain the same value, but offset changes, then the offSetParam is updated and refetching occurs
-  // offset, offsetArray
+    filterFunction += `${encodeURIComponent("AND(" + filters.join(",") + ")")}`;
+    return baseUrl + [pageSize, sort, filterFunction].join("&");
+  }
 
   async function fetchAPI(url) {
     try {
@@ -165,10 +192,10 @@ function PentaProvider({ children }) {
     setLargestSize,
     isOn,
     setIsOn,
-    offset,
-    offsetArray,
     page,
     setPage,
+    offset,
+    offsetArray,
     setOffsetArray,
     setOffset,
     searchInput,
@@ -180,6 +207,7 @@ function PentaProvider({ children }) {
     debouncedSearchValue,
     setDebouncedSearchValue,
     isDropActive,
+    urlCreator,
     setIsDropActive,
     selectedFilter,
     setSelectedFilters,
@@ -188,6 +216,8 @@ function PentaProvider({ children }) {
     fetchTableRecordsWithOffset,
     fetchSelectOptions,
     fetchMaxSize,
+    data,
+    setData,
   };
 
   return (

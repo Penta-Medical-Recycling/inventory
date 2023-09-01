@@ -1,3 +1,7 @@
+html {
+  background-color: #f7f7f9;
+}
+
 body {
   background-color: #f7f7f9;
 }
@@ -28,6 +32,10 @@ main {
 .visible {
   opacity: 1;
   transform: translateY(0);
+}
+
+#paginator {
+  padding: 20px;
 }
 
 .card:hover {
@@ -622,11 +630,19 @@ input[type="range"]::-moz-range-thumb {
 
 .loading-container {
   display: flex;
-  flex-direction: column;
+  justify-content: center;
   align-items: center;
-  justify-content: flex-start;
-  height: 70vh;
-  padding-top: 150px;
+  height: 50vh;
+}
+
+.logo-container {
+  text-align: center;
+}
+
+.loading-text {
+  font-size: 18px; 
+  margin-top: 15px; 
+  font-weight: bold;
 }
 
 .loading-spinner {
@@ -653,5 +669,63 @@ input[type="range"]::-moz-range-thumb {
   }
   to {
     transform: rotate(360deg);
+  }
+}
+
+.loading-effect {
+  opacity: 0;
+  transform: translateY(20px);
+  animation: fade-in 1s forwards;
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fade-out {
+  from {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  to {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+}
+
+.fade-in {
+  animation: fade-in-animation 1s forwards;
+}
+
+.fade-out {
+  animation: fade-out-animation 1s forwards;
+}
+
+@keyframes fade-in-animation {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fade-out-animation {
+  from {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  to {
+    opacity: 0;
+    transform: translateY(-20px);
   }
 }

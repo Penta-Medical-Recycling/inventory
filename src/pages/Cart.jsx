@@ -11,7 +11,6 @@ function Cart() {
   const ids = [];
   const [outOfStock, setOutOfStock] = useState();
   const navigate = useNavigate();
-  const [errorMessage, setErrorMessage] = useState();
   const [notes, setNotes] = useState(localStorage.getItem("notes") || "");
   const [isLoading, setIsLoading] = useState(false);
   const APIKey = import.meta.env.VITE_REACT_APP_API_KEY;
@@ -89,7 +88,6 @@ function Cart() {
     }
     const BaseID = "appBrTbPbyamI0H6Z";
     const tableName = "Requests";
-    setErrorMessage("");
     const items = [];
     Object.entries(localStorage).forEach(([key, value]) => {
       if (key !== "partner" && key !== "notes")
@@ -148,49 +146,69 @@ function Cart() {
     !notes &&
     Object.keys(localStorage).filter((k) => k !== "partner" && k !== "notes")
       .length === 0
-      ? setErrorMessage(
-          "Please add additional notes, and add items to your cart"
-        )
+      ? Toast({
+          message: "Please add additional notes, and add items to your cart",
+          type: "is-danger",
+        })
       : !notes
-      ? setErrorMessage("Please add additional notes")
-      : setErrorMessage("Please add items to your cart");
+      ? Toast({
+          message: "Please add additional notes",
+          type: "is-danger",
+        })
+      : Toast({
+          message: "Please add items to your cart",
+          type: "is-danger",
+        });
   };
 
   return (
     <>
       <div id="text-section">
-        <h1 className="title has-text-centered mt-6">CART</h1>
+        <h1
+          className="title has-text-centered mt-6 loading-effect"
+          style={{ animationDelay: "0.23s" }}
+        >
+          CART
+        </h1>
       </div>
       {isLoading ? (
-        <BigSpinner size={50} />
+        <BigSpinner size={75} />
       ) : (
         <>
-          <h1 className="has-text-centered is-size-5 my-4">
+          <h1
+            className="has-text-centered is-size-5 my-4 loading-effect"
+            style={{ animationDelay: "0.46s" }}
+          >
             Hello, {selectedPartner} Member!
           </h1>
           <Link
             to="/partner"
-            className="is-flex is-justify-content-center my-3"
+            className="is-flex is-justify-content-center my-3 loading-effect"
+            style={{ animationDelay: "0.66s" }}
           >
-            <button className="button">Change Partner</button>
+            <button className="button is-rounded">Change Partner</button>
           </Link>
 
           {outOfStock ? (
             <CartLister outOfStock={outOfStock} setOutOfStock={setOutOfStock} />
           ) : (
-            <BigSpinner size={50} />
+            <BigSpinner size={75} />
           )}
           <div style={{ width: "60vw", margin: "auto" }}>
             <textarea
-              className="textarea my-4"
+              className="textarea my-4 is-rounded loading-effect"
+              style={{ animationDelay: "0.83s" }}
               placeholder="Additional Notes"
               value={notes}
               onChange={handleNotesChange}
             ></textarea>
           </div>
-          <div className="is-flex is-justify-content-center">
+          <div
+            className="is-flex is-justify-content-center loading-effect"
+            style={{ animationDelay: "1s" }}
+          >
             <button
-              className="button mb-1"
+              className="button mb-1 is-rounded"
               type="button"
               onClick={
                 notes &&
@@ -204,9 +222,6 @@ function Cart() {
               Request Items
             </button>
           </div>
-          <p className="has-text-centered has-text-danger mb-4">
-            {errorMessage}
-          </p>
         </>
       )}
     </>

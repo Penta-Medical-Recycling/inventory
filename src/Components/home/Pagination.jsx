@@ -5,7 +5,18 @@ const Pagination = ({ bottom }) => {
   const { page, offset, setOffset } = useContext(PentaContext);
 
   const scrollToTop = () => {
-    window.scrollTo({ top: 0, behavior: "smooth" });
+    setTimeout(() => {
+      const navbarHeight = document.querySelector("#nav").offsetHeight;
+      const targetDiv = document.querySelector("#paginator");
+
+      if (targetDiv) {
+        const targetPosition = targetDiv.offsetTop - navbarHeight;
+        window.scrollTo({
+          top: targetPosition,
+          behavior: "smooth",
+        });
+      }
+    }, 1250);
   };
 
   const pageClick = (nextPage) => {
@@ -18,7 +29,11 @@ const Pagination = ({ bottom }) => {
   };
 
   return (
-    <>
+    <div
+      id="paginator"
+      className="loading-effect"
+      style={{ animationDelay: "1.5s" }}
+    >
       {page === "Next" ? (
         <div className="is-flex is-justify-content-center is-align-items-center">
           <div
@@ -82,7 +97,7 @@ const Pagination = ({ bottom }) => {
       ) : (
         <></>
       )}
-    </>
+    </div>
   );
 };
 

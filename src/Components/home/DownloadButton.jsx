@@ -47,7 +47,7 @@ const DownloadButton = ({}) => {
     const selectedTags = Object.keys(selectedFilter).filter(
       (key) => selectedFilter[key]
     );
-
+    //  https://api.airtable.com/v0/${baseId}/${encodedTableName}?pageSize=36&sort%5B0%5D%5Bfield%5D=Item%20ID&sort%5B0%5D%5Bdirection%5D=asc&filterByFormula=AND(`
     let url = `https://api.airtable.com/v0/${baseId}/${encodedTableName}?sort%5B0%5D%5Bfield%5D=Item%20ID&sort%5B0%5D%5Bdirection%5D=asc&filterByFormula=AND(`;
     url += 'AND({Requests}=BLANK(),{Shipment Status}=BLANK()),NOT({SKU}="")';
 
@@ -166,8 +166,9 @@ const DownloadButton = ({}) => {
 
   return (
     <div
-      className={`dropdown ${isDropActive ? "is-active" : ""}`}
+      className={`dropdown loading-effect ${isDropActive ? "is-active" : ""}`}
       ref={dropdownRef}
+      style={{ animationDelay: "0.667s" }}
     >
       <div className="dropdown-trigger">
         <button

@@ -1,15 +1,23 @@
 import RemoveCartLogo from "../../assets/RemoveCartLogo";
 import AddCartLogo from "../../assets/AddCartLogo";
 import PentaContext from "../../context/PentaContext";
-import React, { useContext } from "react";
+import React, { useContext, useState, useEffect } from "react";
 import ImageIcon from "../../assets/ImageIcon";
 import CardBody from "./CardBody";
 
 const InStockCard = ({ item, setButton, button }) => {
-  const { setCartCount, cartCount, setIsCartPressed } =
+  const { setCartCount, cartCount, setIsCartPressed, isLoading } =
     useContext(PentaContext);
+
+  const [isL, setIsL] = useState(false);
+
+  useEffect(() => {
+    if (isLoading === false) {
+      setIsL(true);
+    }
+  }, [isLoading]);
   return (
-    <div className="card visible" key={item["Item ID"]}>
+    <div className={`card ${isL ? "visible" : ""}`} key={item["Item ID"]}>
       <CardBody item={item} centered={true}></CardBody>
       <footer className="card-footer">
         <a

@@ -1,15 +1,23 @@
 import RemoveCartLogo from "../../assets/RemoveCartLogo";
 import PentaContext from "../../context/PentaContext";
 import CardBody from "./CardBody";
-import React, { useContext } from "react";
+import React, { useContext, useState, useEffect } from "react";
 const OutOfStockCard = ({ item, setButton, button }) => {
-  const { setCartCount, cartCount, setIsCartPressed } =
+  const { setCartCount, cartCount, setIsCartPressed, isLoading } =
     useContext(PentaContext);
+
+  const [isL, setIsL] = useState(false);
+
+  useEffect(() => {
+    if (isLoading === false) {
+      setIsL(true);
+    }
+  }, [isLoading]);
   return (
-    <div className={`card visible`} key={item.id}>
+    <div className={`card ${isL ? "visible" : ""}`} key={item.id}>
       <div className="ribbon-wrapper">
         <div className="ribbon ribbon-top-left">
-          <span>Out Of Stock</span>
+          <span>Unavailable</span>
         </div>
         <CardBody item={item} centered={false}></CardBody>
       </div>

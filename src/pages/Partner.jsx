@@ -53,66 +53,74 @@ const Partner = () => {
       className="is-flex is-flex-direction-column is-justify-content-center is-align-items-center"
       style={{ height: "50vh" }}
     >
-      <h1 className="is-size-4 has-text-weight-bold has-text-centered my-4">
+      <h1
+        className="is-size-4 has-text-weight-bold has-text-centered my-4 loading-effect"
+        style={{ animationDelay: "0.33s" }}
+      >
         Select Partner To View Cart
       </h1>
-      <div
-        className={
-          isActive
-            ? "is-active dropdown is-flex is-justify-content-center"
-            : "dropdown is-flex is-justify-content-center"
-        }
-        onClick={dropDown}
-      >
-        <div className="dropdown-trigger">
-          <button
-            className="button"
-            aria-haspopup="true"
-            aria-controls="dropdown-menu"
-            id="partner-dropdown"
-          >
-            <span style={{ overflow: "hidden" }}>
-              {partner || "Select a Partner"}
-            </span>
-            <span className="icon is-small">
-              <i className="fas fa-angle-down" aria-hidden="true"></i>
-            </span>
-          </button>
-        </div>
-        <div className="dropdown-menu" role="menu">
-          <div
-            className="dropdown-content"
-            style={{ maxHeight: "400px", overflowY: "auto", width: "80vw" }}
-          >
-            <div className="dropdown-item">
-              <input
-                className="input is-small"
-                type="text"
-                placeholder="Search"
-                value={searchTerm}
-                onChange={handleSearch}
-                onClick={handleSearchClick}
-              />
+      <div className="loading-effect" style={{ animationDelay: "0.66s" }}>
+        <div
+          className={
+            isActive
+              ? "is-active dropdown is-flex is-justify-content-center"
+              : "dropdown is-flex is-justify-content-center"
+          }
+          onClick={dropDown}
+        >
+          <div className="dropdown-trigger">
+            <button
+              className="button"
+              aria-haspopup="true"
+              aria-controls="dropdown-menu"
+              id="partner-dropdown"
+            >
+              <span style={{ overflow: "hidden" }}>
+                {partner || "Select a Partner"}
+              </span>
+              <span className="icon is-small">
+                <i className="fas fa-angle-down" aria-hidden="true"></i>
+              </span>
+            </button>
+          </div>
+          <div className="dropdown-menu" role="menu">
+            <div
+              className="dropdown-content"
+              style={{ maxHeight: "400px", overflowY: "auto", width: "80vw" }}
+            >
+              <div className="dropdown-item">
+                <input
+                  className="input is-small"
+                  type="text"
+                  placeholder="Search"
+                  value={searchTerm}
+                  onChange={handleSearch}
+                  onClick={handleSearchClick}
+                />
+              </div>
+              <hr className="dropdown-divider" />
+              {filteredOptions.map((option, index) => (
+                <p
+                  className={
+                    partner === option
+                      ? "dropdown-item is-active partnerOption"
+                      : "dropdown-item partnerOption"
+                  }
+                  key={index}
+                  onClick={() => handleOptionClick(option)}
+                >
+                  {option}
+                </p>
+              ))}
             </div>
-            <hr className="dropdown-divider" />
-            {filteredOptions.map((option, index) => (
-              <p
-                className={
-                  partner === option
-                    ? "dropdown-item is-active partnerOption"
-                    : "dropdown-item partnerOption"
-                }
-                key={index}
-                onClick={() => handleOptionClick(option)}
-              >
-                {option}
-              </p>
-            ))}
           </div>
         </div>
       </div>
-      <div className="is-flex is-justify-content-center">
-        <button className="button my-4" onClick={submit}>
+      <div
+        className="is-flex is-justify-content-center loading-effect"
+        style={{ animationDelay: "1s" }}
+      >
+        <button className="button my-4 is-rounded" onClick={submit}>
           Submit
         </button>
       </div>

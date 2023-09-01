@@ -23,7 +23,11 @@ const Tags = ({}) => {
   };
 
   return (
-    <div id="filter-buttons">
+    <div
+      id="filter-buttons"
+      className="loading-effect"
+      style={{ animationDelay: "0.83s" }}
+    >
       <div
         className={
           selectedFilter["Prosthesis"] ? "filter-selected filter-3" : "filter-3"
