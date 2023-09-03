@@ -27,6 +27,7 @@ const CartLister = ({ outOfStock, setOutOfStock }) => {
               button={button}
               setButton={setButton}
               key={item["Item ID"]}
+              inCart={true}
             />
           ))
         );

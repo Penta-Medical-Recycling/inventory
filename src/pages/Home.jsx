@@ -48,9 +48,9 @@ function Home() {
           icon to the right of the search bar.
         </p>
       </div>
-      <Pagination bottom={false} onR={onR} setR={setR}></Pagination>
+      <Pagination bottom={false} onR={onR}></Pagination>
       <HomeLister onR={onR} setR={setR} />
-      <Pagination bottom={true} onR={onR} setR={setR}></Pagination>
+      <Pagination bottom={true} onR={onR}></Pagination>
     </div>
   );
 }

@@ -5,13 +5,15 @@ import React, { useContext, useState, useEffect } from "react";
 import ImageIcon from "../../assets/ImageIcon";
 import CardBody from "./CardBody";
 
-const InStockCard = ({ item, setButton, button, onR, setOnR }) => {
+const InStockCard = ({ item, setButton, button, onR, inCart }) => {
   const { setCartCount, cartCount, setIsCartPressed, isLoading } =
     useContext(PentaContext);
 
+  const [discard, setDiscard] = useState(false);
+
   return (
     <div
-      className={`card fade-in ${onR ? "fade-out" : ""}`}
+      className={`card fade-in ${onR || (discard && inCart) ? "fade-out" : ""}`}
       key={item["Item ID"]}
     >
       <CardBody item={item} centered={true}></CardBody>
@@ -54,13 +56,25 @@ const InStockCard = ({ item, setButton, button, onR, setOnR }) => {
               color: "white",
             }}
             onClick={() => {
-              localStorage.removeItem(item["Item ID"]);
-              setButton(button + 1);
-              setCartCount(cartCount - 1);
-              setIsCartPressed(true);
-              setTimeout(() => {
-                setIsCartPressed(false);
-              }, 1000);
+              if (inCart) {
+                setButton(button + 1);
+                setCartCount(cartCount - 1);
+                setDiscard(true);
+                setIsCartPressed(true);
+                setTimeout(() => {
+                  localStorage.removeItem(item["Item ID"]);
+                  setIsCartPressed(false);
+                }, 1000);
+              } else {
+                localStorage.removeItem(item["Item ID"]);
+                setButton(button + 1);
+                setCartCount(cartCount - 1);
+                setDiscard(true);
+                setIsCartPressed(true);
+                setTimeout(() => {
+                  setIsCartPressed(false);
+                }, 1000);
+              }
             }}
           >
             <RemoveCartLogo></RemoveCartLogo>

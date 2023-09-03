@@ -13,7 +13,7 @@ const Pagination = ({ bottom, onR }) => {
         const targetPosition = targetDiv.offsetTop - navbarHeight;
         window.scrollTo({
           top: targetPosition,
-          behavior: "smooth",
+          // behavior: "smooth",
         });
       }
     }, 1750);
@@ -29,7 +29,7 @@ const Pagination = ({ bottom, onR }) => {
   };
 
   return (
-    <div id="paginator" className={`fade-in ${onR ? "fade-out" : ""}`}>
+    <div id="paginator">
       {page === "Next" ? (
         <div
           className={`is-flex is-justify-content-center is-align-items-center fade-in ${

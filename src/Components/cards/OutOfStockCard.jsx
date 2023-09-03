@@ -3,18 +3,13 @@ import PentaContext from "../../context/PentaContext";
 import CardBody from "./CardBody";
 import React, { useContext, useState, useEffect } from "react";
 const OutOfStockCard = ({ item, setButton, button }) => {
-  const { setCartCount, cartCount, setIsCartPressed, isLoading } =
+  const { setCartCount, cartCount, setIsCartPressed } =
     useContext(PentaContext);
 
-  const [isL, setIsL] = useState(false);
+  const [discard, setDiscard] = useState(false);
 
-  useEffect(() => {
-    if (isLoading === false) {
-      setIsL(true);
-    }
-  }, [isLoading]);
   return (
-    <div className={`card ${isL ? "visible" : ""}`} key={item.id}>
+    <div className={`card fade-in ${discard ? "fade-out" : ""}`} key={item.id}>
       <div className="ribbon-wrapper">
         <div className="ribbon ribbon-top-left">
           <span>Unavailable</span>
@@ -28,11 +23,12 @@ const OutOfStockCard = ({ item, setButton, button }) => {
             color: "white",
           }}
           onClick={() => {
-            localStorage.removeItem(item["Item ID"]);
             setButton(button + 1);
             setCartCount(cartCount - 1);
+            setDiscard(true);
             setIsCartPressed(true);
             setTimeout(() => {
+              localStorage.removeItem(item["Item ID"]);
               setIsCartPressed(false);
             }, 1000);
           }}
