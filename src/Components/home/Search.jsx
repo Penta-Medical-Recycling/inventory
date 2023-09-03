@@ -19,12 +19,12 @@ const Search = ({}) => {
         <div className="field">
           <div
             className="control has-icons-left has-icons-right loading-effect"
-            style={{ animationDelay: "0.5s" }}
+            style={{ animationDelay: "0.321s" }}
           >
             <input
               className="input is-rounded mr-3 search-bar"
               type="text"
-              placeholder="Search by description, size, or model/type"
+              placeholder="Search ..."
               value={searchInput}
               onChange={onSearchChange}
             />

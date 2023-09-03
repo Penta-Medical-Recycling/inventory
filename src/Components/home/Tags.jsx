@@ -26,7 +26,7 @@ const Tags = ({}) => {
     <div
       id="filter-buttons"
       className="loading-effect"
-      style={{ animationDelay: "0.83s" }}
+      style={{ animationDelay: "0.535s" }}
     >
       <div
         className={

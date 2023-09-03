@@ -27,6 +27,7 @@ main {
   transform: translateY(20px);
   transition: opacity 1s ease, transform 1s ease;
   border-radius: 20px;
+  /* overflow: hidden; */
 }
 
 .visible {
@@ -605,6 +606,10 @@ input[type="range"]::-moz-range-thumb {
   transition: all .17s ease-in;
 }
 
+.card-header {
+  border-radius: 20px 20px 0px 0px !important;
+}
+
 .ribbon {
   width: 150px;
   height: 150px;
@@ -729,7 +734,7 @@ input[type="range"]::-moz-range-thumb {
 }
 
 .loading-logo {
-  animation: spin2 2s cubic-bezier(0.25, 0.1, 0.25, 1) infinite;
+  animation: spin2 1.5s cubic-bezier(0.25, 0.1, 0.25, 1) infinite;
 }
 
 @keyframes spin2 {
@@ -744,7 +749,7 @@ input[type="range"]::-moz-range-thumb {
 .loading-effect {
   opacity: 0;
   transform: translateY(20px);
-  animation: fade-in 1s forwards;
+  animation: fade-in 0.75s forwards;
 }
 
 @keyframes fade-in {
@@ -770,11 +775,27 @@ input[type="range"]::-moz-range-thumb {
 }
 
 .fade-in {
-  animation: fade-in-animation 1s forwards;
+  animation: fade-in-animation 0.75s forwards;
 }
 
 .fade-out {
-  animation: fade-out-animation 1s forwards;
+  animation: fade-out-animation 0.75s forwards;
+}
+
+@keyframes fadeSpin {
+  0% {
+    opacity: 0;
+  }
+  50% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+
+.fade-in-out-Spin {
+  animation: fadeSpin 1.5s infinite; 
 }
 
 @keyframes fade-in-animation {

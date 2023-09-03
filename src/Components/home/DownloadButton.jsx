@@ -113,7 +113,7 @@ const DownloadButton = ({}) => {
     <div
       className={`dropdown loading-effect ${isDropActive ? "is-active" : ""}`}
       ref={dropdownRef}
-      style={{ animationDelay: "0.667s", zIndex: 1 }}
+      style={{ animationDelay: "0.428s", zIndex: 1 }}
     >
       <div className="dropdown-trigger">
         <button

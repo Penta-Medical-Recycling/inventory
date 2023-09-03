@@ -3,7 +3,7 @@ import PentaContext from "../../context/PentaContext";
 import BigSpinner from "../../assets/BigSpinner";
 import InStockCard from "../cards/InStockCard";
 
-const HomeLister = ({}) => {
+const HomeLister = ({ onR, setR }) => {
   const {
     isLoading,
     data,
@@ -26,9 +26,6 @@ const HomeLister = ({}) => {
   } = useContext(PentaContext);
 
   const [button, setButton] = useState(1);
-  const [isL, setIsL] = useState(false);
-  const [onL, setOL] = useState(false);
-  const [onR, setR] = useState(false);
   const globalUrl = useRef("");
   const offsetKey = useRef("&offset=");
   const cardDiv = useRef(null);
@@ -49,7 +46,6 @@ const HomeLister = ({}) => {
       globalUrl.current = newUrl;
       setOffset(0);
       setData(res.records);
-      setR(false);
     } else if (
       globalUrl.current === newUrl &&
       offsetKey.current !== newOffset
@@ -74,7 +70,6 @@ const HomeLister = ({}) => {
       }
       offsetKey.current = newOffset;
       setData(res.records);
-      setR(false);
     }
   }
 
@@ -83,7 +78,15 @@ const HomeLister = ({}) => {
       setTimeout(() => {
         setIsLoading(true);
         resolve();
-      }, 1000);
+      }, 750);
+    });
+  }
+  async function addingCard() {
+    return new Promise((resolve) => {
+      setTimeout(() => {
+        setIsLoading(false);
+        resolve();
+      }, 750);
     });
   }
 
@@ -98,8 +101,8 @@ const HomeLister = ({}) => {
     const debounceTimeout = setTimeout(async () => {
       setR(false);
       await loadNewPage();
-      setIsLoading(false);
-    }, 1000);
+      await addingCard();
+    }, 750);
     return () => {
       clearTimeout(debounceTimeout);
     };
