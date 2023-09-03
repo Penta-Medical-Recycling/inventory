@@ -186,7 +186,9 @@ function Cart() {
             className="is-flex is-justify-content-center my-3 loading-effect"
             style={{ animationDelay: "0.66s" }}
           >
-            <button className="button is-rounded">Change Partner</button>
+            <button className="button is-rounded" id="partner-button">
+              Change Partner
+            </button>
           </Link>
 
           {outOfStock ? (
@@ -196,6 +198,7 @@ function Cart() {
           )}
           <div style={{ width: "60vw", margin: "auto" }}>
             <textarea
+              id="cart-textarea"
               className="textarea my-4 is-rounded loading-effect"
               style={{ animationDelay: "0.83s" }}
               placeholder="Additional Notes"
@@ -208,6 +211,7 @@ function Cart() {
             style={{ animationDelay: "1s" }}
           >
             <button
+              id="partner-button"
               className="button mb-1 is-rounded"
               type="button"
               onClick={

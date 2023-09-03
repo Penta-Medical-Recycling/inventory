@@ -29,7 +29,7 @@ function PentaProvider({ children }) {
   const [offsetArray, setOffsetArray] = useState([""]);
   ////////////////////////////////////////////////////////////////////////////////////////////////
   const [largestSize, setLargestSize] = useState(160);
-  const [page, setPage] = useState("");
+  const [page, setPage] = useState();
   const [loading, setLoading] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [isDropActive, setIsDropActive] = useState(false);
@@ -157,7 +157,7 @@ function PentaProvider({ children }) {
       return records
         .map((e) => {
           return {
-            label: `${e.fields.Name.trimStart()} - ${e.fields.Description.trimStart()}`,
+            label: e.fields.Description.trimStart(),
             value: encodeURIComponent(e.fields.Name.trimStart()),
           };
         })

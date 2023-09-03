@@ -1,4 +1,4 @@
-import { useEffect, useState, useContext } from "react";
+import { useEffect, useState, useContext, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import PentaContext from "../context/PentaContext";
 
@@ -9,6 +9,30 @@ const Partner = () => {
   const [partner, setPartner] = useState("");
   const navigate = useNavigate();
   const [data, setData] = useState([]);
+
+  const containerRef = useRef(null);
+
+  const handleClickOutside = (event) => {
+    if (containerRef.current && !containerRef.current.contains(event.target)) {
+      setIsActive(false);
+    }
+  };
+
+  useEffect(() => {
+    const handleDocumentClick = (event) => {
+      handleClickOutside(event);
+    };
+
+    if (isActive) {
+      document.addEventListener("mousedown", handleDocumentClick);
+    } else {
+      document.removeEventListener("mousedown", handleDocumentClick);
+    }
+
+    return () => {
+      document.removeEventListener("mousedown", handleDocumentClick);
+    };
+  }, [isActive]);
 
   useEffect(() => {
     const fetchPartners = async () => {
@@ -21,6 +45,7 @@ const Partner = () => {
   const handleSearch = (event) => {
     setSearchTerm(event.target.value);
   };
+
   const handleOptionClick = (option) => {
     setPartner(option);
     setIsActive(false);
@@ -59,7 +84,11 @@ const Partner = () => {
       >
         Select Partner To View Cart
       </h1>
-      <div className="loading-effect" style={{ animationDelay: "0.66s" }}>
+      <div
+        className="loading-effect"
+        ref={containerRef}
+        style={{ animationDelay: "0.66s", zIndex: "1" }}
+      >
         <div
           className={
             isActive
@@ -90,7 +119,7 @@ const Partner = () => {
             >
               <div className="dropdown-item">
                 <input
-                  className="input is-small"
+                  className="input is-small is-rounded search-partner"
                   type="text"
                   placeholder="Search"
                   value={searchTerm}
@@ -120,7 +149,12 @@ const Partner = () => {
         className="is-flex is-justify-content-center loading-effect"
         style={{ animationDelay: "1s" }}
       >
-        <button className="button my-4 is-rounded" onClick={submit}>
+        <button
+          id="partner-button"
+          className="button my-4 is-rounded"
+          onClick={submit}
+          z-index="0"
+        >
           Submit
         </button>
       </div>

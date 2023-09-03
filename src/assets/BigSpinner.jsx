@@ -6,7 +6,7 @@ function BigSpinner({ size }) {
     <div
       className="loading-container fade-out"
       style={{
-        animationDelay: "0.5s",
+        animationDelay: "0.7s",
       }}
     >
       <div className="logo-container">

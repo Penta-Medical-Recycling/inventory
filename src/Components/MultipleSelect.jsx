@@ -49,7 +49,7 @@ const MultipleSelect = () => {
             fontWeight: "600",
           }}
         >
-          Select SKU or Description
+          Select Description
         </h1>
         <MultiSelect
           options={SKUOptions}

@@ -1,6 +1,7 @@
 import React, { useContext, useRef, useEffect } from "react";
 import PentaContext from "../../context/PentaContext";
 import LittleSpinner from "../../assets/LittleSpinner";
+import * as XLSX from "xlsx";
 
 const DownloadButton = ({}) => {
   const {
@@ -8,11 +9,8 @@ const DownloadButton = ({}) => {
     setIsDropActive,
     loading,
     setLoading,
-    selectedSKU,
-    selectedManufacturer,
-    selectedFilter,
-    isOn,
-    debouncedSearchValue,
+    urlCreator,
+    fetchAPI,
   } = useContext(PentaContext);
 
   const toggleDropdown = (event) => {
@@ -38,76 +36,23 @@ const DownloadButton = ({}) => {
 
   async function createBlob(fileType) {
     setLoading(true);
-    const apiKey = import.meta.env.VITE_REACT_APP_API_KEY;
-    const baseId = "appnx8gtnlQx5b7nI";
-    const tableName = "Inventory";
-    const encodedTableName = encodeURIComponent(tableName);
-    const skus = selectedSKU.map((option) => option.value);
-    const manufacturers = selectedManufacturer.map((option) => option.value);
-    const selectedTags = Object.keys(selectedFilter).filter(
-      (key) => selectedFilter[key]
-    );
-    //  https://api.airtable.com/v0/${baseId}/${encodedTableName}?pageSize=36&sort%5B0%5D%5Bfield%5D=Item%20ID&sort%5B0%5D%5Bdirection%5D=asc&filterByFormula=AND(`
-    let url = `https://api.airtable.com/v0/${baseId}/${encodedTableName}?sort%5B0%5D%5Bfield%5D=Item%20ID&sort%5B0%5D%5Bdirection%5D=asc&filterByFormula=AND(`;
-    url += 'AND({Requests}=BLANK(),{Shipment Status}=BLANK()),NOT({SKU}="")';
-
-    if (
-      skus.length > 0 ||
-      manufacturers.length > 0 ||
-      selectedTags.length > 0 ||
-      isOn ||
-      debouncedSearchValue
-    ) {
-      if (skus.length > 0) {
-        url += `,OR(${skus.map((sku) => `{SKU}='${sku}'`).join(",")})`;
-      }
-      if (manufacturers.length > 0) {
-        url += `,OR(${manufacturers
-          .map((manufacturer) => `{Manufacturer}='${manufacturer}'`)
-          .join(",")})`;
-      }
-      if (selectedTags.length > 0) {
-        url += `,OR(${selectedTags.map((tag) => `{Tag}='${tag}'`).join(",")})`;
-      }
-      if (isOn) {
-        url += `,AND({Size} >= ${minValue}, {Size} <= ${maxValue})`;
-      }
-      if (debouncedSearchValue) {
-        const searchTerms = debouncedSearchValue.toLowerCase().split(" ");
-        const searchConditions = searchTerms.map(
-          (term) => `SEARCH("${term}", {Concat2})`
-        );
-        url += `,AND(${searchConditions.join(",")})`;
-      }
-    }
-
-    async function fetchTableRecords(offset = null) {
-      const newUrl = url + `)&offset=${offset || ""}`;
-
-      const response = await fetch(newUrl, {
-        headers: {
-          Authorization: `Bearer ${apiKey}`,
-        },
-      });
-
-      const data = await response.json();
-      const records = data.records;
-
-      return {
-        records,
-        offset: data.offset || undefined,
-      };
-    }
-
     (async () => {
+      const base = urlCreator().replace("pageSize=36&", "");
+      let url = base;
       let allRecords = [];
-      let offset = null;
+      let shouldContinue = true;
 
-      do {
-        const { records, offset: newOffset } = await fetchTableRecords(offset);
+      while (shouldContinue) {
+        const { records, offset } = await fetchAPI(url);
+
         allRecords = allRecords.concat(records);
-        offset = newOffset;
-      } while (offset);
+
+        if (offset) {
+          url = `${base}&offset=${offset}`;
+        } else {
+          shouldContinue = false;
+        }
+      }
 
       const mappedData = allRecords.map((e) => [
         e.fields["Item ID"] || "",
@@ -168,11 +113,11 @@ const DownloadButton = ({}) => {
     <div
       className={`dropdown loading-effect ${isDropActive ? "is-active" : ""}`}
       ref={dropdownRef}
-      style={{ animationDelay: "0.667s" }}
+      style={{ animationDelay: "0.667s", zIndex: 1 }}
     >
       <div className="dropdown-trigger">
         <button
-          className="button is-rounded"
+          className="button is-rounded dropdown-download"
           aria-haspopup="true"
           aria-controls="dropdown-menu3"
           onClick={toggleDropdown}

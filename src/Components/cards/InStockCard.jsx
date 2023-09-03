@@ -5,17 +5,20 @@ import React, { useContext, useState, useEffect } from "react";
 import ImageIcon from "../../assets/ImageIcon";
 import CardBody from "./CardBody";
 
-const InStockCard = ({ item, setButton, button }) => {
+const InStockCard = ({ item, setButton, button, isL, setIsL }) => {
   const { setCartCount, cartCount, setIsCartPressed, isLoading } =
     useContext(PentaContext);
-
-  const [isL, setIsL] = useState(false);
 
   useEffect(() => {
     if (isLoading === false) {
       setIsL(true);
+    } else {
+      setTimeout(() => {
+        setIsL(false);
+      }, 500);
     }
   }, [isLoading]);
+
   return (
     <div className={`card ${isL ? "visible" : ""}`} key={item["Item ID"]}>
       <CardBody item={item} centered={true}></CardBody>

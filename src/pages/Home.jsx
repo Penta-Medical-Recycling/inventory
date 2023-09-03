@@ -6,25 +6,7 @@ import Tags from "../components/home/Tags";
 import Search from "../components/home/Search";
 
 function Home() {
-  const { isActive, offset, offsetArray, setPage } = useContext(PentaContext);
-
-  useEffect(() => {
-    if (offset === 0 && offsetArray.length > 1) {
-      setPage("Next");
-    } else if (
-      offsetArray[offset + 1] !== undefined &&
-      offsetArray[offset - 1] !== undefined
-    ) {
-      setPage("Next/Previous");
-    } else if (
-      offsetArray[offset - 1] !== undefined &&
-      offsetArray[offset + 1] === undefined
-    ) {
-      setPage("Previous");
-    } else {
-      setPage("None");
-    }
-  }, [offset, offsetArray]);
+  const { isActive } = useContext(PentaContext);
 
   return (
     <div className={isActive ? "sidebar-active" : ""}>
