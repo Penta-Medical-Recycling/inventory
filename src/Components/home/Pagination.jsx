@@ -34,11 +34,7 @@ const Pagination = ({ bottom }) => {
       {isLoading ? (
         <></>
       ) : (
-        <div
-          id="paginator"
-          className="loading-effect"
-          // style={{ animationDelay: "1.5s" }}
-        >
+        <div id="paginator" className="fade-in">
           {page === "Next" ? (
             <div className="is-flex is-justify-content-center is-align-items-center">
               <div

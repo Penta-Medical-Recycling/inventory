@@ -5,22 +5,17 @@ import React, { useContext, useState, useEffect } from "react";
 import ImageIcon from "../../assets/ImageIcon";
 import CardBody from "./CardBody";
 
-const InStockCard = ({ item, setButton, button, isL, setIsL }) => {
+const InStockCard = ({ item, setButton, button, onR, setR }) => {
   const { setCartCount, cartCount, setIsCartPressed, isLoading } =
     useContext(PentaContext);
 
-  useEffect(() => {
-    if (isLoading === false) {
-      setIsL(true);
-    } else {
-      setTimeout(() => {
-        setIsL(false);
-      }, 500);
-    }
-  }, [isLoading]);
-
   return (
-    <div className={`card ${isL ? "visible" : ""}`} key={item["Item ID"]}>
+    <div
+      className={`card fade-in ${onR ? "fade-out" : ""}`}
+      key={item["Item ID"]}
+    >
+      {/* <div className={`card loading-effect`} key={item["Item ID"]}> */}
+      {/* <div className={`card ${isL ? "visible" : ""}`} key={item["Item ID"]}> */}
       <CardBody item={item} centered={true}></CardBody>
       <footer className="card-footer">
         <a

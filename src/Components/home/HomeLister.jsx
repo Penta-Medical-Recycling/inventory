@@ -31,6 +31,7 @@ const HomeLister = ({}) => {
   const [onR, setR] = useState(false);
   const globalUrl = useRef("");
   const offsetKey = useRef("&offset=");
+  const cardDiv = useRef(null);
 
   async function loadNewPage() {
     const newUrl = urlCreator();
@@ -48,6 +49,7 @@ const HomeLister = ({}) => {
       globalUrl.current = newUrl;
       setOffset(0);
       setData(res.records);
+      setR(false);
     } else if (
       globalUrl.current === newUrl &&
       offsetKey.current !== newOffset
@@ -72,17 +74,29 @@ const HomeLister = ({}) => {
       }
       offsetKey.current = newOffset;
       setData(res.records);
+      setR(false);
     }
   }
 
-  /// page starts page loads
-  /// animation plays ofr 0.5
-
-  /// when we click next page, 0.5 seconds to remove cards => then display isLoading
+  async function removingCard() {
+    return new Promise((resolve) => {
+      setTimeout(() => {
+        setIsLoading(true);
+        resolve();
+      }, 1000);
+    });
+  }
 
   useEffect(() => {
-    setIsLoading(true);
+    async function onStart() {
+      if (cardDiv.current) {
+        setR(true);
+        await removingCard();
+      }
+    }
+    onStart();
     const debounceTimeout = setTimeout(async () => {
+      setR(false);
       await loadNewPage();
       setIsLoading(false);
     }, 1000);
@@ -100,24 +114,12 @@ const HomeLister = ({}) => {
     offset,
   ]);
 
-  // on start once after fetched
-  // we turn on isLoading, right after words we add .visible to the cards to they fade in
-  // no waiting
-  // when they disappear
-  // we instantly remove .visible from the cards
-  // we hold off isLoading for 5 seconds
-  // once they are gone then the new cards fade in.
-
-  // two different useeffects in different ords
-  // on load spinner => then add visible
-  // on offload => remove visible => then start spinner
-
   return (
     <>
       {isLoading ? (
         <BigSpinner size={75} />
       ) : data && data.length ? (
-        <div id="cardDiv">
+        <div id="cardDiv" ref={cardDiv}>
           {data.map(
             (item) =>
               item.fields.SKU && (
@@ -126,8 +128,8 @@ const HomeLister = ({}) => {
                   button={button}
                   setButton={setButton}
                   key={item.fields["Item ID"]}
-                  isL={isL}
-                  setIsL={setIsL}
+                  onR={onR}
+                  setR={setR}
                 />
               )
           )}
