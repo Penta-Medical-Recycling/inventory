@@ -189,11 +189,11 @@ main {
 
 .images-button-red {
   border-radius: 0 0 0 20px; 
-  border: 0";
+  border: 0;
 }
 .images-button-blue {
   border-radius: 0 0 0 20px; 
-  border: 0";
+  border: 0;
 }
 
 .images-button-blue:hover {
@@ -693,6 +693,11 @@ input[type="range"]::-moz-range-thumb {
 @media screen and (max-width: 400px) {
   .filter-3 {
     width: 80px;
+  }
+}
+@media screen and (max-width: 430px) {
+  .filterCount {
+    display: none;
   }
 }
 

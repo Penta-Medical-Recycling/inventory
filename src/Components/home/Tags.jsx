@@ -79,9 +79,8 @@ const Tags = ({}) => {
             : ""
         }
       >
-        <p>{`${count > 0 ? count : ""} ${
-          count !== 1 ? "Filters" : "Filter"
-        }`}</p>
+        <p className="filterCount">{`${count > 0 ? count + " " : ""}`}</p>
+        <p>{`${count !== 1 ? "Filters" : "Filter"}`}</p>
         <svg
           xmlns="http://www.w3.org/2000/svg"
           height=".65em"
