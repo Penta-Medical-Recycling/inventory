@@ -4,8 +4,17 @@ import React, { useEffect, useRef, useContext } from "react";
 import PentaContext from "../context/PentaContext";
 
 const SideBar = () => {
-  const { setIsActive, isActive, fetchMaxSize, setLargestSize, setMaxValue } =
-    useContext(PentaContext);
+  const {
+    setIsActive,
+    isActive,
+    fetchMaxSize,
+    setLargestSize,
+    setMaxValue,
+    setSelectedManufacturer,
+    setSelectedSKU,
+    setIsOn,
+    setSelectedFilters,
+  } = useContext(PentaContext);
 
   const activeToggle = () => {
     setIsActive(!isActive);
@@ -17,6 +26,17 @@ const SideBar = () => {
     if (sidebarRef.current && !sidebarRef.current.contains(event.target)) {
       setIsActive(false);
     }
+  };
+
+  const removeAllFilters = () => {
+    setSelectedManufacturer([]);
+    setSelectedSKU([]);
+    setIsOn(false);
+    setSelectedFilters({
+      Prosthesis: false,
+      Orthosis: false,
+      Pediatric: false,
+    });
   };
 
   useEffect(() => {
@@ -62,6 +82,15 @@ const SideBar = () => {
       <MultipleSelect />
       <hr style={{ width: "80%", margin: "10px auto 0px" }}></hr>
       <SizeSlider />
+      <br></br>
+      <div className="is-flex is-justify-content-center">
+        <button
+          className="button is-rounded removeFilter"
+          onClick={removeAllFilters}
+        >
+          Reset Filters
+        </button>
+      </div>
     </div>
   );
 };

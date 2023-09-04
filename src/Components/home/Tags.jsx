@@ -1,4 +1,4 @@
-import React, { useContext } from "react";
+import React, { useContext, useState, useEffect } from "react";
 import PentaContext from "../../context/PentaContext";
 
 const Tags = ({}) => {
@@ -11,6 +11,19 @@ const Tags = ({}) => {
     isActive,
     setIsActive,
   } = useContext(PentaContext);
+
+  const [count, setCount] = useState(0);
+
+  useEffect(() => {
+    let c = 0;
+    c += isOn ? 1 : 0;
+    c += selectedManufacturer.length || 0;
+    c += selectedSKU.length || 0;
+    c += selectedFilter["Prosthesis"] ? 1 : 0;
+    c += selectedFilter["Orthosis"] ? 1 : 0;
+    c += selectedFilter["Pediatric"] ? 1 : 0;
+    setCount(c);
+  }, [selectedFilter, selectedManufacturer, selectedSKU, isOn]);
 
   const activeToggle = () => {
     setIsActive(!isActive);
@@ -56,12 +69,19 @@ const Tags = ({}) => {
         id="filter-button"
         onClick={activeToggle}
         className={
-          isOn || selectedManufacturer.length || selectedSKU.length
+          isOn ||
+          selectedManufacturer.length ||
+          selectedSKU.length ||
+          selectedFilter["Prosthesis"] ||
+          selectedFilter["Orthosis"] ||
+          selectedFilter["Pediatric"]
             ? "filter-button-active"
             : ""
         }
       >
-        <p>Filters</p>
+        <p>{`${count > 0 ? count : ""} ${
+          count !== 1 ? "Filters" : "Filter"
+        }`}</p>
         <svg
           xmlns="http://www.w3.org/2000/svg"
           height=".65em"

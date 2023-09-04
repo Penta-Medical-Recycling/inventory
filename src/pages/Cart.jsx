@@ -168,7 +168,7 @@ function Cart() {
           className="title has-text-centered mt-6 loading-effect"
           style={{ animationDelay: "0.23s" }}
         >
-          CART
+          MY CART
         </h1>
       </div>
       {isLoading ? (
