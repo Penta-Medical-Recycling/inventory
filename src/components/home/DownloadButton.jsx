@@ -143,6 +143,7 @@ const DownloadButton = ({}) => {
       >
         <div className="dropdown-content">
           <a
+            href="#"
             className="dropdown-item"
             onClick={() => {
               createBlob("csv");
