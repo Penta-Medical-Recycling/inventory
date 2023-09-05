@@ -19,6 +19,8 @@ const OutOfStockCard = ({ item, setButton, button }) => {
       <footer className="card-footer">
         <button
           className="button card-footer-item remove-button out-btn"
+          aria-label="RemoveFromCart"
+          role="button"
           style={{
             color: "white",
           }}

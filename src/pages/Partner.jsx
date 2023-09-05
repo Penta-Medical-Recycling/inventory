@@ -102,6 +102,8 @@ const Partner = () => {
               className="button"
               aria-haspopup="true"
               aria-controls="dropdown-menu"
+              aria-label="PartnerDropdown"
+              role="button"
               id="partner-dropdown"
             >
               <span style={{ overflow: "hidden" }}>
@@ -151,6 +153,8 @@ const Partner = () => {
       >
         <button
           id="partner-button"
+          aria-label="SubmitPartner"
+          role="button"
           className="button my-4 is-rounded"
           onClick={submit}
           z-index="0"

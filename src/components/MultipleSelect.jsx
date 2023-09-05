@@ -38,7 +38,7 @@ const MultipleSelect = () => {
           options={manuOptions}
           value={selectedManufacturer}
           onChange={setSelectedManufacturer}
-          labelledBy="Select"
+          // labelledBy="Select"
         />
       </div>
       <hr style={{ width: "80%", margin: "10px auto" }}></hr>
@@ -55,7 +55,7 @@ const MultipleSelect = () => {
           options={SKUOptions}
           value={selectedSKU}
           onChange={setSelectedSKU}
-          labelledBy="Select"
+          // labelledBy="Select"
         />
       </div>
     </>

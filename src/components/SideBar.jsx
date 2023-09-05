@@ -87,6 +87,8 @@ const SideBar = () => {
         <button
           className="button is-rounded removeFilter"
           onClick={removeAllFilters}
+          aria-label="FilterReset"
+          role="button"
         >
           Reset Filters
         </button>

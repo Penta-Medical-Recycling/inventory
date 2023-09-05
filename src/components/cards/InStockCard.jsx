@@ -25,15 +25,18 @@ const InStockCard = ({ item, setButton, button, onR, inCart }) => {
               : "images-button-blue"
           }`}
           href={`https://www.google.com/search?q=${encodeURIComponent(
-            item.StringSearch
+            item.ImageSearch
           )}&tbm=isch`}
           target="_blank"
+          aria-label={`Google Search: ${item.ImageSearch}`}
         >
           <ImageIcon color={"black"}></ImageIcon>
         </a>
         {!localStorage.getItem([item["Item ID"]]) && button ? (
           <button
             className="button card-footer-item add-button"
+            aria-label="AddToCart"
+            role="button"
             style={{
               color: "white",
             }}
@@ -52,6 +55,8 @@ const InStockCard = ({ item, setButton, button, onR, inCart }) => {
         ) : (
           <button
             className="button card-footer-item remove-button"
+            aria-label="RemoveFromCart"
+            role="button"
             style={{
               color: "white",
             }}

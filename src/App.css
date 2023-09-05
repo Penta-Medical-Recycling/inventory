@@ -743,7 +743,7 @@ input[type="range"]::-moz-range-thumb {
 }
 
 .loading-logo {
-  animation: spin2 1.5s cubic-bezier(0.25, 0.1, 0.25, 1) infinite;
+  animation: spin2 1.15s cubic-bezier(0.25, 0.1, 0.25, 1) infinite;
 }
 
 @keyframes spin2 {
@@ -804,7 +804,7 @@ input[type="range"]::-moz-range-thumb {
 }
 
 .fade-in-out-Spin {
-  animation: fadeSpin 1.5s infinite; 
+  animation: fadeSpin 1.15s infinite; 
 }
 
 @keyframes fade-in-animation {

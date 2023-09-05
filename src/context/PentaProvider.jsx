@@ -76,7 +76,7 @@ function PentaProvider({ children }) {
         .split(" ")
         .filter((term) => term !== "size");
       const searchConditions = searchTerms.map(
-        (term) => `SEARCH("${term}", {Concat2})`
+        (term) => `SEARCH("${term}", {StringSearch})`
       );
       filters.push(`AND(${searchConditions.join(",")})`);
     }

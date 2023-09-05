@@ -16,7 +16,7 @@ const CardBody = ({ item, centered }) => {
           >
             {item["Description (from SKU)"]}
           </p>
-          <p style={{ marginTop: "-12px" }} className="has-text-grey ml-3 mb-3">
+          <p style={{ marginTop: "-12px" }} className="ml-3 mb-3">
             {item["Item ID"]}
           </p>
         </div>

@@ -15,9 +15,22 @@ function Cart() {
   const [isLoading, setIsLoading] = useState(false);
   const APIKey = import.meta.env.VITE_REACT_APP_API_KEY;
 
-  useEffect(() => {
-    if (!selectedPartner) navigate("/partner");
-  }, []);
+  function generateRandomHexadecimal() {
+    return (
+      "#" +
+      Math.floor(Math.random() * 16777216)
+        .toString(16)
+        .toUpperCase()
+    );
+  }
+
+  function getCurrentDateAsString() {
+    const currentDate = new Date();
+    const month = String(currentDate.getMonth() + 1).padStart(2, "0");
+    const day = String(currentDate.getDate()).padStart(2, "0");
+    const year = String(currentDate.getFullYear());
+    return `${month}/${day}/${year}`;
+  }
 
   const handleNotesChange = (event) => {
     setNotes(event.target.value);
@@ -37,7 +50,7 @@ function Cart() {
     const idSet = new Set();
 
     for (const id of ids) {
-      const searchString = `SEARCH("${id}", {StringSearch})`;
+      const searchString = `SEARCH("${id}", {Items You Would Like})`;
       const url = `https://api.airtable.com/v0/appBrTbPbyamI0H6Z/Requests?filterByFormula=${encodeURIComponent(
         searchString
       )}&maxRecords=1`;
@@ -68,6 +81,7 @@ function Cart() {
   };
 
   useEffect(() => {
+    if (!selectedPartner) navigate("/partner");
     idFetcher();
   }, []);
 
@@ -93,13 +107,15 @@ function Cart() {
       if (key !== "partner" && key !== "notes")
         items.push(JSON.parse(value)["Item ID"]);
     });
+    console.log(`${localStorage["partner"]} ${generateRandomHexadecimal()}`);
     const url = `https://api.airtable.com/v0/${BaseID}/${tableName}`;
     const data = {
       records: [
         {
           fields: {
-            Name: "temp value",
+            Name: generateRandomHexadecimal(),
             Partner: localStorage["partner"],
+            Created: getCurrentDateAsString(),
             "Additional Notes": notes,
             "Items You Would Like": items,
           },
@@ -186,7 +202,12 @@ function Cart() {
             className="is-flex is-justify-content-center my-3 loading-effect"
             style={{ animationDelay: "0.66s" }}
           >
-            <button className="button is-rounded" id="partner-button">
+            <button
+              className="button is-rounded"
+              id="partner-button"
+              aria-label="ChangePartner"
+              role="button"
+            >
               Change Partner
             </button>
           </Link>
@@ -212,6 +233,8 @@ function Cart() {
           >
             <button
               id="partner-button"
+              aria-label="Request"
+              role="button"
               className="button mb-1 is-rounded"
               type="button"
               onClick={
