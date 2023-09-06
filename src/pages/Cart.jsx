@@ -39,6 +39,7 @@ function Cart() {
 
   const idFetcher = async () => {
     for (let [key, value] of Object.entries(localStorage)) {
+      console.log(key, value);
       if (key !== "partner" && key !== "notes") {
         const parse = JSON.parse(value);
         const itemID = parse["Item ID"];
@@ -55,6 +56,11 @@ function Cart() {
         searchString
       )}&maxRecords=1`;
 
+      // const searchString = `AND(OR(AND({Requests}=BLANK(),{Shipment Status}=BLANK(),NOT({SKU}=""),{Qty.}=1),AND(NOT({SKU}=""),{Qty.}>1)),{Item ID}='${id}')`;
+      // const url = `https://api.airtable.com/v0/appnx8gtnlQx5b7nI/Inventory?filterByFormula=${encodeURIComponent(
+      //   searchString
+      // )}&maxRecords=1`;
+
       try {
         const response = await fetch(url, {
           headers: {
@@ -67,6 +73,10 @@ function Cart() {
         if (data.records && data.records.length > 0) {
           idSet.add(id);
         }
+
+        // if (data.records && data.records.length === 0) {
+        //   idSet.add(id);
+        // }
       } catch (error) {
         console.error(`Error fetching data for ID ${id}:`, error);
       }
@@ -94,12 +104,18 @@ function Cart() {
     if (stockCheck) {
       Toast({
         message:
-          "Sorry but one or more of your items are out of stock, please remove to checkout.",
+          "Sorry but one or more of your items are unavailable, please remove to checkout.",
         type: "is-danger",
       });
       setIsLoading(false);
       return;
     }
+
+    // we also need to update the quantities
+    // if the quantity is 1, and has never been requested, then quantity is not effected
+    // if quantity is greater than 2, we subtract quanity by 1 and it still appears in the pool
+    // if quantity is equal to 3, we make quanityt 0 and still show up
+    // if quanity is 0 and gets checked out we add 1
     const BaseID = "appBrTbPbyamI0H6Z";
     const tableName = "Requests";
     const items = [];

@@ -25,7 +25,9 @@ main {
   margin: 20px;
   opacity: 0;
   transform: translateY(20px);
-  transition: opacity 1s ease, transform 1s ease;
+  transition: opacity 1s ease, transform 1s ease, box-shadow .2s ease-in;
+  /* transition: opacity 1s ease, transform 1s ease; */
+  /* transition: transform 0.3s ease, box-shadow 0.3s ease; */
   border-radius: 20px;
   /* overflow: hidden; */
 }
@@ -861,4 +863,28 @@ input[type="range"]::-moz-range-thumb {
 .removeFilter:focus:not(:active) {
   box-shadow: 0 0 0 0;
   border-color: #70b9d7;
+}
+
+.card-badge{
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  height: 50px;
+  min-width: 50px;
+  border-radius: 50px;
+  background-color: #fe5b47;
+  margin-left: -57px;
+  margin-top: 8px;
+  z-index: 10;
+}
+
+.card-badge p{
+  padding: 3px;
+}
+
+
+.outer-card{
+  display:flex
 }
