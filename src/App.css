@@ -877,6 +877,7 @@ input[type="range"]::-moz-range-thumb {
   background-color: #fe5b47;
   margin-left: -57px;
   margin-top: 8px;
+  box-shadow: rgba(0, 0, 0, 0.24) 0px 3px 8px;
   z-index: 10;
 }
 
