@@ -1,8 +1,9 @@
-import React, { useContext } from "react";
+import React, { useContext, useState } from "react";
 import PentaContext from "../../context/PentaContext";
 
 const Pagination = ({ bottom, onR }) => {
   const { page, offset, setOffset } = useContext(PentaContext);
+  const [isButtonDisabled, setIsButtonDisabled] = useState(false);
 
   const scrollToTop = () => {
     setTimeout(() => {
@@ -19,12 +20,20 @@ const Pagination = ({ bottom, onR }) => {
   };
 
   const pageClick = (nextPage) => {
+    if (isButtonDisabled) return;
+
+    setIsButtonDisabled(true);
+
     if (nextPage === true) {
       setOffset(offset + 1);
     } else {
       setOffset(offset - 1);
     }
     if (bottom === true) scrollToTop();
+
+    setTimeout(() => {
+      setIsButtonDisabled(false);
+    }, 1000);
   };
 
   return (
@@ -42,7 +51,9 @@ const Pagination = ({ bottom, onR }) => {
             <p>{offset + 1}</p>
           </div>
           <p
-            className="is-size-4 ml-1 is-text-weight-bold pag-btn"
+            className={`is-size-4 ml-1 is-text-weight-bold pag-btn ${
+              isButtonDisabled ? "disabled" : ""
+            }`}
             style={{ cursor: "pointer" }}
             onClick={() => {
               pageClick(true);
@@ -58,7 +69,9 @@ const Pagination = ({ bottom, onR }) => {
           }`}
         >
           <p
-            className="is-size-4 mr-1 is-text-weight-bold pag-btn"
+            className={`is-size-4 mr-1 is-text-weight-bold pag-btn ${
+              isButtonDisabled ? "disabled" : ""
+            }`}
             style={{ cursor: "pointer" }}
             onClick={() => {
               pageClick(false);
@@ -80,7 +93,9 @@ const Pagination = ({ bottom, onR }) => {
           }`}
         >
           <p
-            className="is-size-4 mr-1 is-text-weight-bold pag-btn"
+            className={`is-size-4 mr-1 is-text-weight-bold pag-btn ${
+              isButtonDisabled ? "disabled" : ""
+            }`}
             style={{ cursor: "pointer" }}
             onClick={() => {
               pageClick(false);
@@ -92,7 +107,9 @@ const Pagination = ({ bottom, onR }) => {
             <p>{offset + 1}</p>
           </div>
           <p
-            className="is-size-4 ml-1 is-text-weight-bold pag-btn"
+            className={`is-size-4 ml-1 is-text-weight-bold pag-btn ${
+              isButtonDisabled ? "disabled" : ""
+            }`}
             style={{ cursor: "pointer" }}
             onClick={() => {
               pageClick(true);
