@@ -24,14 +24,6 @@ function Cart() {
     );
   }
 
-  function getCurrentDateAsString() {
-    const currentDate = new Date();
-    const month = String(currentDate.getMonth() + 1).padStart(2, "0");
-    const day = String(currentDate.getDate()).padStart(2, "0");
-    const year = String(currentDate.getFullYear());
-    return `${month}/${day}/${year}`;
-  }
-
   const handleNotesChange = (event) => {
     setNotes(event.target.value);
     localStorage.setItem("notes", event.target.value);
@@ -51,15 +43,9 @@ function Cart() {
     const idSet = new Set();
 
     for (const id of ids) {
-      const searchString = `SEARCH("${id}", {Items You Would Like})`;
-      const url = `https://api.airtable.com/v0/appBrTbPbyamI0H6Z/Requests?filterByFormula=${encodeURIComponent(
-        searchString
-      )}&maxRecords=1`;
-
-      // const searchString = `AND(OR(AND({Requests}=BLANK(),{Shipment Status}=BLANK(),NOT({SKU}=""),{Qty.}=1),AND(NOT({SKU}=""),{Qty.}>1)),{Item ID}='${id}')`;
-      // const url = `https://api.airtable.com/v0/appnx8gtnlQx5b7nI/Inventory?filterByFormula=${encodeURIComponent(
-      //   searchString
-      // )}&maxRecords=1`;
+      const url = `https://api.airtable.com/v0/appHFwcwuXLTNCjtN/Inventory?filterByFormula=AND({Requests}=BLANK(),{Shipment Status}=BLANK(),NOT({SKU}=""),AND({Item ID}='${encodeURIComponent(
+        id
+      )}'))&maxRecords=1`;
 
       try {
         const response = await fetch(url, {
@@ -70,13 +56,9 @@ function Cart() {
 
         const data = await response.json();
 
-        if (data.records && data.records.length > 0) {
+        if (data.records && data.records.length === 0) {
           idSet.add(id);
         }
-
-        // if (data.records && data.records.length === 0) {
-        //   idSet.add(id);
-        // }
       } catch (error) {
         console.error(`Error fetching data for ID ${id}:`, error);
       }
@@ -116,14 +98,14 @@ function Cart() {
     // if quantity is greater than 2, we subtract quanity by 1 and it still appears in the pool
     // if quantity is equal to 3, we make quanityt 0 and still show up
     // if quanity is 0 and gets checked out we add 1
-    const BaseID = "appBrTbPbyamI0H6Z";
+    const BaseID = "appHFwcwuXLTNCjtN";
     const tableName = "Requests";
     const items = [];
     Object.entries(localStorage).forEach(([key, value]) => {
       if (key !== "partner" && key !== "notes")
         items.push(JSON.parse(value)["Item ID"]);
     });
-    console.log(`${localStorage["partner"]} ${generateRandomHexadecimal()}`);
+    // console.log(`${localStorage["partner"]} ${generateRandomHexadecimal()}`);
     const url = `https://api.airtable.com/v0/${BaseID}/${tableName}`;
     const data = {
       records: [
@@ -131,7 +113,6 @@ function Cart() {
           fields: {
             Name: generateRandomHexadecimal(),
             Partner: localStorage["partner"],
-            Created: getCurrentDateAsString(),
             "Additional Notes": notes,
             "Items You Would Like": items,
           },

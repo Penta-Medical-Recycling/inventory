@@ -37,7 +37,7 @@ function PentaProvider({ children }) {
   const [data, setData] = useState();
 
   function urlCreator() {
-    const baseUrl = "https://api.airtable.com/v0/appnx8gtnlQx5b7nI/Inventory?";
+    const baseUrl = "https://api.airtable.com/v0/appHFwcwuXLTNCjtN/Inventory?";
     const sort = `sort%5B0%5D%5Bfield%5D=Item%20ID&sort%5B0%5D%5Bdirection%5D=asc`;
     const pageSize = "pageSize=36";
     let filterFunction = "filterByFormula=";
@@ -197,7 +197,7 @@ function PentaProvider({ children }) {
   }
 
   async function fetchTableRecords(tableName, offset = null) {
-    const baseId = "appBrTbPbyamI0H6Z";
+    const baseId = "appHFwcwuXLTNCjtN";
     const url = `https://api.airtable.com/v0/${baseId}/${tableName}?${
       offset ? `offset=${offset}` : ""
     }`;
@@ -221,7 +221,7 @@ function PentaProvider({ children }) {
   }
 
   async function fetchMaxSize() {
-    const url = `https://api.airtable.com/v0/appnx8gtnlQx5b7nI/Inventory?pageSize=1&sort%5B0%5D%5Bfield%5D=Size&sort%5B0%5D%5Bdirection%5D=desc&filterByFormula=AND(AND({Requests}=%22%22,{Shipment%20Status}=%22%22),NOT({SKU}=%22%22))`;
+    const url = `https://api.airtable.com/v0/appHFwcwuXLTNCjtN/Inventory?pageSize=1&sort%5B0%5D%5Bfield%5D=Size&sort%5B0%5D%5Bdirection%5D=desc&filterByFormula=AND(AND({Requests}=%22%22,{Shipment%20Status}=%22%22),NOT({SKU}=%22%22))`;
 
     const data = await fetchAPI(url);
     if (data && data.records && data.records.length > 0) {
@@ -232,7 +232,6 @@ function PentaProvider({ children }) {
 
   const fetchSelectOptions = async (fieldToMap) => {
     const records = await fetchTableRecordsWithOffset(fieldToMap);
-
     if (fieldToMap === "Manufacturers") {
       return records
         .map((e) => {
@@ -248,8 +247,8 @@ function PentaProvider({ children }) {
       return records
         .map((e) => {
           return {
-            label: e.fields.Description.trimStart(),
-            value: encodeURIComponent(e.fields.Name.trimStart()),
+            label: e.fields.Description || "VOID",
+            value: encodeURIComponent(e.fields["Item Code"].trimStart()),
           };
         })
         .sort((a, b) => {

@@ -13,7 +13,6 @@ const Pagination = ({ bottom, onR }) => {
         const targetPosition = targetDiv.offsetTop - navbarHeight;
         window.scrollTo({
           top: targetPosition,
-          // behavior: "smooth",
         });
       }
     }, 1750);

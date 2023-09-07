@@ -12,9 +12,11 @@ const InStockCard = ({ item, setButton, button, onR, inCart }) => {
   const [discard, setDiscard] = useState(false);
 
   return (
-    <div className={`outer-card fade-in ${
-      onR || (discard && inCart) ? "fade-out" : ""
-    }`}>
+    <div
+      className={`outer-card fade-in ${
+        onR || (discard && inCart) ? "fade-out" : ""
+      }`}
+    >
       <div
         className={`card fade-in ${
           onR || (discard && inCart) ? "fade-out" : ""
@@ -93,7 +95,7 @@ const InStockCard = ({ item, setButton, button, onR, inCart }) => {
         </footer>
       </div>
       {item["Qty."] > 1 ? (
-        <div class="card-badge">{item["Qty."]} pcs</div>
+        <div className="card-badge">{item["Qty."]} pcs</div>
       ) : (
         <></>
       )}
