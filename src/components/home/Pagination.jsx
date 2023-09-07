@@ -33,7 +33,7 @@ const Pagination = ({ bottom, onR }) => {
 
     setTimeout(() => {
       setIsButtonDisabled(false);
-    }, 1000);
+    }, 2000);
   };
 
   return (
