@@ -80,21 +80,39 @@ function PentaProvider({ children }) {
   const [offsetArray, setOffsetArray] = useState([""]);
   ////////////////////////////////////////////////////////////////////////////////////////////////
 
+  /**
+   * Creates a URL for querying data from the AirTable API based on user-selected filters and search criteria.
+   *
+   * @returns {string} The generated URL for data retrieval.
+   */
   function urlCreator() {
+    // Define the base URL for the AirTable API.
     const baseUrl = "https://api.airtable.com/v0/appHFwcwuXLTNCjtN/Inventory?";
-    const sort = `sort%5B0%5D%5Bfield%5D=Item%20ID&sort%5B0%5D%5Bdirection%5D=asc`;
+
+    // Define sorting criteria for the API query by oldest to newest available items.
+    const sort = `sort[0][field]=Item ID&sort[0][direction]=asc`;
+
+    // Define the page size for pagination.
     const pageSize = "pageSize=36";
+
+    // Initialize the filter function for the API query.
     let filterFunction = "filterByFormula=";
+
+    // Define an array of filters to be applied to the query.
+    // Initial filters are for fetching in-stock items
     const filters = [
-      "{Requests}=BLANK()",
-      "{Shipment Status}=BLANK()",
-      'NOT({SKU}="")',
+      "{Requests}=BLANK()", // Filter for items with no requests.
+      "{Shipment Status}=BLANK()", // Filter for items with no shipment status.
+      'NOT({SKU}="")', // Filter for items with a non-empty SKU.
     ];
 
+    // Extract SKUs from selectedSKU and add them to the filters if any are selected.
     const skus = selectedSKU.map((option) => option.value);
     if (skus.length > 0) {
       filters.push(`OR(${skus.map((sku) => `{SKU}='${sku}'`).join(",")})`);
     }
+
+    // Extract manufacturers from selectedManufacturer and add them to the filters if any are selected.
     const manufacturers = selectedManufacturer.map((option) => option.value);
     if (manufacturers.length > 0) {
       filters.push(
@@ -103,6 +121,8 @@ function PentaProvider({ children }) {
           .join(",")})`
       );
     }
+
+    // Extract selected tags and add them to the filters if any are selected.
     const selectedTags = Object.keys(selectedFilter).filter(
       (key) => selectedFilter[key]
     );
@@ -111,27 +131,47 @@ function PentaProvider({ children }) {
         `OR(${selectedTags.map((tag) => `{Tag}='${tag}'`).join(",")})`
       );
     }
+
+    // Add a filter for size range if the size range filter is active.
     if (isRangeOn) {
       filters.push(`AND({Size} >= ${minValue}, {Size} <= ${maxValue})`);
     }
 
+    // If a search query is provided, create search conditions based on user input.
     if (searchInput) {
+      // Split the search input into lowercase words, removing the term "size."
       const searchTerms = searchInput
         .toLowerCase()
         .split(" ")
         .filter((term) => term !== "size");
+
+      // Create search conditions for each word in the search input.
       const searchConditions = searchTerms.map(
         (term) => `SEARCH("${term}", {StringSearch})`
       );
+
+      // Combine the search conditions with an 'AND' operator to search for exact matches in the airTable 'StringSearch' column.
       filters.push(`AND(${searchConditions.join(",")})`);
+      // For reference, this is the StringSearch formula, with all the searchable fields:
+      //LOWER(CONCATENATE({Item ID}, " ", {Model/Type}, " ", Size, " ", Manufacturer, " ", SKU, " ", Tag, " ", {Description (from SKU)}))
     }
 
+    // Concatenate the filter conditions and encode them for the API request.
     filterFunction += `${encodeURIComponent("AND(" + filters.join(",") + ")")}`;
+
+    // Combine all the URL components and return the final URL for data retrieval.
     return baseUrl + [pageSize, sort, filterFunction].join("&");
   }
 
+  // Retrieve the API key from environment variables.
   const APIKey = import.meta.env.VITE_REACT_APP_API_KEY;
 
+  /**
+   * Fetch data from a specified URL using the provided API key for authorization.
+   *
+   * @param {string} url - The URL to fetch data from.
+   * @returns {Promise} A promise that resolves to the fetched data or null in case of an error.
+   */
   async function fetchAPI(url) {
     try {
       const response = await fetch(url, {
@@ -152,6 +192,13 @@ function PentaProvider({ children }) {
     }
   }
 
+  /**
+   * Fetch records from a specified AirTable table with optional pagination offset.
+   *
+   * @param {string} tableName - The name of the AirTable table to fetch records from.
+   * @param {string|null} offset - Optional pagination offset for fetching more records.
+   * @returns {Promise} A promise that resolves to the fetched records or null in case of an error.
+   */
   async function fetchTableRecords(tableName, offset = null) {
     const baseId = "appHFwcwuXLTNCjtN";
     const url = `https://api.airtable.com/v0/${baseId}/${tableName}?${
@@ -161,6 +208,12 @@ function PentaProvider({ children }) {
     return fetchAPI(url);
   }
 
+  /**
+   * Fetch all records from a specified AirTable table with pagination handled automatically.
+   *
+   * @param {string} tableName - The name of the AirTable table to fetch records from.
+   * @returns {Promise} A promise that resolves to an array containing all fetched records or null in case of an error.
+   */
   async function fetchTableRecordsWithOffset(tableName) {
     let allRecords = [];
     let offset = null;
@@ -176,8 +229,13 @@ function PentaProvider({ children }) {
     return allRecords;
   }
 
+  /**
+   * Fetches the maximum size available in the inventory to set the upper limit on the range filter.
+   *
+   * @returns {Promise} A promise that resolves to the maximum size found in the inventory or null if no data is found.
+   */
   async function fetchMaxSize() {
-    const url = `https://api.airtable.com/v0/appHFwcwuXLTNCjtN/Inventory?pageSize=1&sort%5B0%5D%5Bfield%5D=Size&sort%5B0%5D%5Bdirection%5D=desc&filterByFormula=AND(AND({Requests}=%22%22,{Shipment%20Status}=%22%22),NOT({SKU}=%22%22))`;
+    const url = `https://api.airtable.com/v0/appHFwcwuXLTNCjtN/Inventory?pageSize=1&sort[0][field]=Size&sort[0][direction]=desc&filterByFormula=AND(AND({Requests}="",{Shipment Status}=""),NOT({SKU}=""))`;
 
     const data = await fetchAPI(url);
     if (data && data.records && data.records.length > 0) {
@@ -186,8 +244,18 @@ function PentaProvider({ children }) {
     return null;
   }
 
+  /**
+   * Fetch and transform select options based on a specified field from AirTable records.
+   *
+   * @param {string} fieldToMap - The field name to fetch select options from.
+   * @returns {Array} An alphabetized array of select options in the correct formats for dropdowns.
+   */
   const fetchSelectOptions = async (fieldToMap) => {
+    // Fetch records from the specified field in AirTable.
     const records = await fetchTableRecordsWithOffset(fieldToMap);
+
+    // Transform and sort the records based on the specified field.
+    // The format records by trimming whitespace and sorting them alphabetically
     if (fieldToMap === "Manufacturers") {
       return records
         .map((e) => {
@@ -203,7 +271,7 @@ function PentaProvider({ children }) {
       return records
         .map((e) => {
           return {
-            label: e.fields.Description || "VOID",
+            label: e.fields.Description || "VOID", //"VOID" for empty Descriptions
             value: encodeURIComponent(e.fields["Item Code"].trimStart()),
           };
         })
@@ -211,6 +279,7 @@ function PentaProvider({ children }) {
           return a.label.localeCompare(b.label);
         });
     } else {
+      // For Partner Selection
       return records
         .map((e) => e.fields.Name.trimStart())
         .sort((a, b) => a.localeCompare(b));
