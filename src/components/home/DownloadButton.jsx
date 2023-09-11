@@ -8,8 +8,8 @@ const DownloadButton = ({}) => {
   const {
     isDropActive,
     setIsDropActive,
-    loading,
-    setLoading,
+    isDownloading,
+    setIsDownloading,
     urlCreator,
     fetchAPI,
   } = useContext(PentaContext);
@@ -36,7 +36,7 @@ const DownloadButton = ({}) => {
   }, []);
 
   async function createBlob(fileType) {
-    setLoading(true);
+    setIsDownloading(true);
     (async () => {
       const base = urlCreator().replace("pageSize=36&", "");
       let url = base;
@@ -106,7 +106,7 @@ const DownloadButton = ({}) => {
         });
         downloadBlob(blob, "Inventory Data.xlsx");
       }
-      setLoading(false);
+      setIsDownloading(false);
     })();
   }
 
@@ -125,7 +125,7 @@ const DownloadButton = ({}) => {
           aria-controls="dropdown-menu3"
           onClick={toggleDropdown}
         >
-          {loading ? (
+          {isDownloading ? (
             <LittleSpinner size={30} />
           ) : (
             <DownloadLogo></DownloadLogo>

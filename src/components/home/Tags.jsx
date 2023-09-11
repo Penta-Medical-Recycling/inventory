@@ -5,28 +5,28 @@ const Tags = ({}) => {
   const {
     selectedFilter,
     setSelectedFilters,
-    isOn,
+    isRangeOn,
     selectedManufacturer,
     selectedSKU,
-    isActive,
-    setIsActive,
+    isSideBarActive,
+    setIsSideBarActive,
   } = useContext(PentaContext);
 
   const [count, setCount] = useState(0);
 
   useEffect(() => {
     let c = 0;
-    c += isOn ? 1 : 0;
+    c += isRangeOn ? 1 : 0;
     c += selectedManufacturer.length || 0;
     c += selectedSKU.length || 0;
     c += selectedFilter["Prosthesis"] ? 1 : 0;
     c += selectedFilter["Orthosis"] ? 1 : 0;
     c += selectedFilter["Pediatric"] ? 1 : 0;
     setCount(c);
-  }, [selectedFilter, selectedManufacturer, selectedSKU, isOn]);
+  }, [selectedFilter, selectedManufacturer, selectedSKU, isRangeOn]);
 
   const activeToggle = () => {
-    setIsActive(!isActive);
+    setIsSideBarActive(!isSideBarActive);
   };
 
   const filterClick = (key) => {
@@ -69,7 +69,7 @@ const Tags = ({}) => {
         id="filter-button"
         onClick={activeToggle}
         className={
-          isOn ||
+          isRangeOn ||
           selectedManufacturer.length ||
           selectedSKU.length ||
           selectedFilter["Prosthesis"] ||

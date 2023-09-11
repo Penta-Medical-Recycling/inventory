@@ -5,12 +5,12 @@ import PentaContext from "../context/PentaContext";
 import CartLogo from "../assets/CartLogo";
 
 const NavBar = () => {
-  const { selectedPartner, cartCount, isCartPressed, isActive } =
+  const { selectedPartner, cartCount, isCartPressed, isSideBarActive } =
     useContext(PentaContext);
 
   return (
     <div>
-      <nav id="nav" className={isActive ? "sidebar-active" : ""}>
+      <nav id="nav" className={isSideBarActive ? "sidebar-active" : ""}>
         <Link to="/" id="logo">
           <div className="logo-container">
             <img src={logo} className="logo" alt="logo"></img>

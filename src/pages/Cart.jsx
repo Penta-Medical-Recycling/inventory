@@ -31,7 +31,6 @@ function Cart() {
 
   const idFetcher = async () => {
     for (let [key, value] of Object.entries(localStorage)) {
-      console.log(key, value);
       if (key !== "partner" && key !== "notes") {
         const parse = JSON.parse(value);
         const itemID = parse["Item ID"];
@@ -93,11 +92,6 @@ function Cart() {
       return;
     }
 
-    // we also need to update the quantities
-    // if the quantity is 1, and has never been requested, then quantity is not effected
-    // if quantity is greater than 2, we subtract quanity by 1 and it still appears in the pool
-    // if quantity is equal to 3, we make quanityt 0 and still show up
-    // if quanity is 0 and gets checked out we add 1
     const BaseID = "appHFwcwuXLTNCjtN";
     const tableName = "Requests";
     const items = [];
@@ -105,7 +99,6 @@ function Cart() {
       if (key !== "partner" && key !== "notes")
         items.push(JSON.parse(value)["Item ID"]);
     });
-    // console.log(`${localStorage["partner"]} ${generateRandomHexadecimal()}`);
     const url = `https://api.airtable.com/v0/${BaseID}/${tableName}`;
     const data = {
       records: [
@@ -135,7 +128,6 @@ function Cart() {
           console.error("Error:", data.error);
           setErrorMessage("Error: " + data.error.message);
         } else {
-          console.log("Success:", data);
           setNotes("");
           setCartCount(0);
           const partner = localStorage["partner"];

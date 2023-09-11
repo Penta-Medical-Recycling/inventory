@@ -16,7 +16,7 @@ const HomeLister = ({ onR, setR }) => {
     selectedFilter,
     minValue,
     maxValue,
-    isOn,
+    isRangeOn,
     searchInput,
     setIsLoading,
     setPage,
@@ -112,7 +112,7 @@ const HomeLister = ({ onR, setR }) => {
     selectedFilter,
     minValue,
     maxValue,
-    isOn,
+    isRangeOn,
     searchInput,
     offset,
   ]);

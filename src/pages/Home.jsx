@@ -6,12 +6,12 @@ import Tags from "../components/home/Tags";
 import Search from "../components/home/Search";
 
 function Home() {
-  const { isActive } = useContext(PentaContext);
+  const { isSideBarActive } = useContext(PentaContext);
 
   const [onR, setR] = useState(false);
 
   return (
-    <div className={isActive ? "sidebar-active" : ""}>
+    <div className={isSideBarActive ? "sidebar-active" : ""}>
       <div id="text-section">
         <h1
           className="is-size-2 has-text-weight-bold has-text-centered loading-effect"
@@ -24,9 +24,9 @@ function Home() {
           className="my-6 mx-6 is-size-5 has-text-centered loading-effect"
           style={{ width: "60%", animationDelay: "0.214s" }}
         >
-          To submit a request, please click the “add to cart” button on the
-          items card and visit the cart above. Then choose the partner you are
-          and click request items.
+          To submit a request, simply click the 'Add to Cart' button on the
+          item's card and proceed to the cart above. Once there, select your
+          partner affiliation and click 'Request Items.'
         </p>
 
         <div

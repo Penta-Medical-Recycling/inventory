@@ -8,12 +8,12 @@ const SizeSlider = ({}) => {
     maxValue,
     setMaxValue,
     largestSize,
-    isOn,
-    setIsOn,
+    isRangeOn,
+    setIsRangeOn,
   } = useContext(PentaContext);
 
   const toggleSwitch = () => {
-    setIsOn((prevState) => !prevState);
+    setIsRangeOn((prevState) => !prevState);
   };
 
   const handleMinChange = (event) => {
@@ -50,7 +50,7 @@ const SizeSlider = ({}) => {
         <div className="is-flex is-align-items-center is-justify-content-space-between">
           <h2>Size Range</h2>
           <div
-            className={`switch ${isOn ? "on" : "off"}`}
+            className={`switch ${isRangeOn ? "on" : "off"}`}
             onClick={toggleSwitch}
           >
             <div className="circle" />
@@ -58,7 +58,7 @@ const SizeSlider = ({}) => {
         </div>
         <p>Use slider to enter min and max size</p>
       </header>
-      <div className={isOn ? "size-input" : "size-off size-input"}>
+      <div className={isRangeOn ? "size-input" : "size-off size-input"}>
         <div className="field">
           <input
             type="number"
@@ -123,7 +123,7 @@ const SizeSlider = ({}) => {
           </div>
         </div>
       </div>
-      <div className={isOn ? "slider" : "size-off slider"}>
+      <div className={isRangeOn ? "slider" : "size-off slider"}>
         <div
           className="progress"
           style={{
@@ -132,7 +132,7 @@ const SizeSlider = ({}) => {
           }}
         ></div>
       </div>
-      <div className={isOn ? "range-input" : "size-off range-input"}>
+      <div className={isRangeOn ? "range-input" : "size-off range-input"}>
         <input
           type="range"
           className="range-min"

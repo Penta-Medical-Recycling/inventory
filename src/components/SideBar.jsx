@@ -5,33 +5,33 @@ import PentaContext from "../context/PentaContext";
 
 const SideBar = () => {
   const {
-    setIsActive,
-    isActive,
+    setIsSideBarActive,
+    isSideBarActive,
     fetchMaxSize,
     setLargestSize,
     setMaxValue,
     setSelectedManufacturer,
     setSelectedSKU,
-    setIsOn,
+    setIsRangeOn,
     setSelectedFilters,
   } = useContext(PentaContext);
 
   const activeToggle = () => {
-    setIsActive(!isActive);
+    setIsSideBarActive(!isSideBarActive);
   };
 
   const sidebarRef = useRef(null);
 
   const handleClickOutside = (event) => {
     if (sidebarRef.current && !sidebarRef.current.contains(event.target)) {
-      setIsActive(false);
+      setIsSideBarActive(false);
     }
   };
 
   const removeAllFilters = () => {
     setSelectedManufacturer([]);
     setSelectedSKU([]);
-    setIsOn(false);
+    setIsRangeOn(false);
     setSelectedFilters({
       Prosthesis: false,
       Orthosis: false,
@@ -59,7 +59,7 @@ const SideBar = () => {
   return (
     <div
       id="side-bar"
-      className={isActive ? "is-filter-active" : ""}
+      className={isSideBarActive ? "is-filter-active" : ""}
       ref={sidebarRef}
     >
       <div id="side-bar-top">
