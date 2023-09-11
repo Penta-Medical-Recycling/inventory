@@ -1,5 +1,7 @@
-import { useState, useContext } from "react";
+import { useContext } from "react";
 import PentaContext from "../context/PentaContext";
+
+// SizeSlider component for selecting size range using sliders and inputs.
 
 const SizeSlider = ({}) => {
   const {
@@ -12,10 +14,12 @@ const SizeSlider = ({}) => {
     setIsRangeOn,
   } = useContext(PentaContext);
 
+  // Toggle the range switch
   const toggleSwitch = () => {
     setIsRangeOn((prevState) => !prevState);
   };
 
+  // Handle changes in the minimum size input
   const handleMinChange = (event) => {
     const newMinValue = parseInt(event.target.value);
     if (newMinValue <= maxValue && newMinValue >= 1) {
@@ -23,6 +27,7 @@ const SizeSlider = ({}) => {
     }
   };
 
+  // Handle changes in the maximum size input
   const handleMaxChange = (event) => {
     const newMaxValue = parseInt(event.target.value);
     if (newMaxValue >= minValue && newMaxValue <= largestSize) {
@@ -30,6 +35,7 @@ const SizeSlider = ({}) => {
     }
   };
 
+  // Handle changes in the minimum size slider
   const handleMinSliderChange = (event) => {
     const newMinValue = parseInt(event.target.value);
     if (newMinValue <= maxValue && newMinValue >= 1) {
@@ -37,6 +43,7 @@ const SizeSlider = ({}) => {
     }
   };
 
+  // Handle changes in the maximum size slider
   const handleMaxSliderChange = (event) => {
     const newMaxValue = parseInt(event.target.value);
     if (newMaxValue >= minValue && newMaxValue <= largestSize) {
@@ -49,6 +56,7 @@ const SizeSlider = ({}) => {
       <header>
         <div className="is-flex is-align-items-center is-justify-content-space-between">
           <h2>Size Range</h2>
+          {/* Toggles the Range */}
           <div
             className={`switch ${isRangeOn ? "on" : "off"}`}
             onClick={toggleSwitch}
@@ -59,6 +67,7 @@ const SizeSlider = ({}) => {
         <p>Use slider to enter min and max size</p>
       </header>
       <div className={isRangeOn ? "size-input" : "size-off size-input"}>
+        {/* Minimum Size Input */}
         <div className="field">
           <input
             type="number"
@@ -91,6 +100,7 @@ const SizeSlider = ({}) => {
           </div>
         </div>
         <div className="separator">⇄</div>
+        {/* Maximum Size Input */}
         <div className="field">
           <input
             type="number"
@@ -123,6 +133,7 @@ const SizeSlider = ({}) => {
           </div>
         </div>
       </div>
+      {/* Size Range Slider */}
       <div className={isRangeOn ? "slider" : "size-off slider"}>
         <div
           className="progress"
@@ -132,6 +143,7 @@ const SizeSlider = ({}) => {
           }}
         ></div>
       </div>
+      {/* Range Input Slider */}
       <div className={isRangeOn ? "range-input" : "size-off range-input"}>
         <input
           type="range"

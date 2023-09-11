@@ -11,15 +11,20 @@ const NavBar = () => {
   return (
     <div>
       <nav id="nav" className={isSideBarActive ? "sidebar-active" : ""}>
+        {/* Link to the home page or cart page */}
         <Link to="/" id="logo">
           <div className="logo-container">
+            {/* Display the Penta logo */}
             <img src={logo} className="logo" alt="logo"></img>
           </div>
         </Link>
 
+        {/* Link to the cart page if a partner is selected, or partner selection page otherwise */}
         <Link to={selectedPartner ? "/cart" : "/partner"} id="shopping-cart">
+          {/* Display the cart icon */}
           <CartLogo></CartLogo>
           <div className={`badge ${isCartPressed ? "animate" : ""}`}>
+            {/* Display the cart count with badge animation if cart is pressed */}
             <p>{cartCount}</p>
           </div>
         </Link>
