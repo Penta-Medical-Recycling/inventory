@@ -3,6 +3,8 @@ import PentaContext from "../../context/PentaContext";
 import BigSpinner from "../../assets/BigSpinner";
 import InStockCard from "../cards/InStockCard";
 
+// HomeLister lists the cards for the home page.
+
 const HomeLister = ({ onRemove, setOnRemove }) => {
   const {
     isLoading,

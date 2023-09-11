@@ -1,9 +1,13 @@
 import React from "react";
 
+// CardBody component displays the details of an inventory item
+
 const CardBody = ({ item, centered }) => {
+  // Centered prop is used in the case the item is out of stock, there is an overlayed banner that shifts the text.
   return (
     <>
       <header className="card-header">
+        {/* Display item description and ID */}
         <div
           className={centered ? "has-text-centered" : "has-text-right mr-5"}
           style={
@@ -21,6 +25,7 @@ const CardBody = ({ item, centered }) => {
           </p>
         </div>
       </header>
+      {/* Display item tag */}
       <p
         className="has-text-weight-bold has-text-centered mt-4"
         style={{ fontSize: "18px" }}
@@ -30,6 +35,7 @@ const CardBody = ({ item, centered }) => {
       <hr className="mb-4 mt-3" style={{ margin: "0 auto", width: "80%" }}></hr>
       <div className="content mx-5 mb-5">
         {item["Manufacturer"] && (
+          // Display item manufacturer if available
           <div className="mb-4 has-text-centered" style={{ width: "50%" }}>
             <p className="has-text-weight-bold" style={{ margin: "0" }}>
               Manufacturer
@@ -38,6 +44,7 @@ const CardBody = ({ item, centered }) => {
           </div>
         )}
         {item["Size"] && (
+          // Display item size if available
           <div className="has-text-centered" style={{ width: "50%" }}>
             <p
               className="has-text-weight-bold has-text-centered"
@@ -49,6 +56,7 @@ const CardBody = ({ item, centered }) => {
           </div>
         )}
         {item["Model/Type"] && (
+          // Display item model/type if available
           <div className="has-text-centered" style={{ width: "50%" }}>
             <p
               className="has-text-weight-bold has-text-centered"

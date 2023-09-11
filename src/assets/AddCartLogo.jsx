@@ -1,5 +1,7 @@
 import * as React from "react";
 
+// For card footer cart buttons
+
 function AddCartLogo() {
   return (
     <svg
@@ -20,4 +22,4 @@ function AddCartLogo() {
   );
 }
 
-export default AddCartLogo; 
+export default AddCartLogo;

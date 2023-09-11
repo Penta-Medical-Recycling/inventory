@@ -4,6 +4,8 @@ import LittleSpinner from "../../assets/LittleSpinner";
 import DownloadLogo from "../../assets/DownloadLogo";
 import * as XLSX from "xlsx";
 
+// DownloadButton component is used for downloading the current inventory
+
 const DownloadButton = () => {
   const {
     isDropActive,

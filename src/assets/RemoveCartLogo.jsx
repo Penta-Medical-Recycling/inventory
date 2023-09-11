@@ -1,5 +1,7 @@
 import * as React from "react";
 
+// For card footer cart buttons
+
 function RemoveCartLogo() {
   return (
     <svg

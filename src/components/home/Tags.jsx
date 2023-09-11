@@ -2,6 +2,8 @@ import React, { useContext, useState, useEffect } from "react";
 import PentaContext from "../../context/PentaContext";
 import FilterLogo from "../../assets/FilterLogo";
 
+// Controls the filters on the front page.
+
 const Tags = ({}) => {
   const {
     selectedFilter,

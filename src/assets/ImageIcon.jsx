@@ -1,5 +1,7 @@
 import * as React from "react";
 
+// For card footer image search button
+
 function Image({ color }) {
   return (
     <svg

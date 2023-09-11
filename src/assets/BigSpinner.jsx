@@ -1,6 +1,8 @@
 import * as React from "react";
 import LittleSpinner from "./LittleSpinner";
 
+// extends LittleSpinner for homepage loading with fading animations
+
 function BigSpinner({ size }) {
   return (
     <div className="loading-container fade-in-out-Spin">

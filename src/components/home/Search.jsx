@@ -2,6 +2,8 @@ import React, { useContext } from "react";
 import PentaContext from "../../context/PentaContext";
 import DownloadButton from "./DownloadButton";
 
+// Search component used for searching through the inventory.
+
 const Search = () => {
   const { searchInput, setSearchInput } = useContext(PentaContext);
 

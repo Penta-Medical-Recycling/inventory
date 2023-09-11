@@ -1,6 +1,8 @@
 import React, { useContext, useState } from "react";
 import PentaContext from "../../context/PentaContext";
 
+// Pagination component sets the buttons for page navigation.
+
 const Pagination = ({ bottom, onRemove }) => {
   const { page, offset, setOffset } = useContext(PentaContext);
 
