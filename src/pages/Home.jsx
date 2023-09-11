@@ -20,7 +20,7 @@ function Home() {
           id="penta-title"
           style={{ animationDelay: "0.107s" }}
         >
-          Penta Prosthetics Current Inventory
+          Penta Medical Recycling Inventory
         </h1>
         {/* Introduction Text */}
         <p
