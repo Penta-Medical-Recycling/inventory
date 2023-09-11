@@ -1,14 +1,17 @@
 import RemoveCartLogo from "../../assets/RemoveCartLogo";
 import AddCartLogo from "../../assets/AddCartLogo";
 import PentaContext from "../../context/PentaContext";
-import React, { useContext, useState, useEffect } from "react";
+import React, { useContext, useState } from "react";
 import ImageIcon from "../../assets/ImageIcon";
 import CardBody from "./CardBody";
 
-const InStockCard = ({ item, setButton, button, onRemove, inCart }) => {
-  const { setCartCount, cartCount, setIsCartPressed, isLoading } =
+// InStockCard component renders individual item cards
+
+const InStockCard = ({ item, onRemove, inCart }) => {
+  const { setCartCount, cartCount, setIsCartPressed } =
     useContext(PentaContext);
 
+  // Local state to manage card discard animation
   const [discard, setDiscard] = useState(false);
 
   return (
@@ -23,8 +26,12 @@ const InStockCard = ({ item, setButton, button, onRemove, inCart }) => {
         }`}
         key={item["Item ID"]}
       >
+        {/* Render the card body with item details */}
         <CardBody item={item} centered={true}></CardBody>
+        {/* Footer holds Google Image Search, and Add/Remove to Cart Buttons */}
+        {/* Button colors swap depending on whether items is in cart or not */}
         <footer className="card-footer">
+          {/* Button to open a Google image search based on item's information */}
           <a
             className={`button card-footer-item ${
               !localStorage.getItem([item["Item ID"]])
@@ -39,7 +46,9 @@ const InStockCard = ({ item, setButton, button, onRemove, inCart }) => {
           >
             <ImageIcon color={"black"}></ImageIcon>
           </a>
-          {!localStorage.getItem([item["Item ID"]]) && button ? (
+
+          {/* Conditional rendering of Add to Cart or Remove from Cart button */}
+          {!localStorage.getItem([item["Item ID"]]) ? (
             <button
               className="button card-footer-item add-button"
               aria-label="AddToCart"
@@ -48,9 +57,11 @@ const InStockCard = ({ item, setButton, button, onRemove, inCart }) => {
                 color: "white",
               }}
               onClick={() => {
+                // Add item to local storage cart
                 localStorage.setItem(item["Item ID"], JSON.stringify(item));
-                setButton(button + 1);
+                // Update cart count
                 setCartCount(cartCount + 1);
+                // Trigger cart animation
                 setIsCartPressed(true);
                 setTimeout(() => {
                   setIsCartPressed(false);
@@ -69,7 +80,7 @@ const InStockCard = ({ item, setButton, button, onRemove, inCart }) => {
               }}
               onClick={() => {
                 if (inCart) {
-                  setButton(button + 1);
+                  // If user is on cart page, remove it with animation
                   setCartCount(cartCount - 1);
                   setDiscard(true);
                   setIsCartPressed(true);
@@ -78,8 +89,8 @@ const InStockCard = ({ item, setButton, button, onRemove, inCart }) => {
                     setIsCartPressed(false);
                   }, 1000);
                 } else {
+                  // If user is on home page, remove it immediately
                   localStorage.removeItem(item["Item ID"]);
-                  setButton(button + 1);
                   setCartCount(cartCount - 1);
                   setDiscard(true);
                   setIsCartPressed(true);
@@ -94,6 +105,8 @@ const InStockCard = ({ item, setButton, button, onRemove, inCart }) => {
           )}
         </footer>
       </div>
+
+      {/* Badge to display item quantity if greater than 1 */}
       {item["Qty."] > 1 ? (
         <div className="card-badge">{item["Qty."]} pcs</div>
       ) : (

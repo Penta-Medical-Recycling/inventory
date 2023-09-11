@@ -1,8 +1,8 @@
 import RemoveCartLogo from "../../assets/RemoveCartLogo";
 import PentaContext from "../../context/PentaContext";
 import CardBody from "./CardBody";
-import React, { useContext, useState, useEffect } from "react";
-const OutOfStockCard = ({ item, setButton, button }) => {
+import React, { useContext, useState } from "react";
+const OutOfStockCard = ({ item }) => {
   const { setCartCount, cartCount, setIsCartPressed } =
     useContext(PentaContext);
 
@@ -25,7 +25,6 @@ const OutOfStockCard = ({ item, setButton, button }) => {
             color: "white",
           }}
           onClick={() => {
-            setButton(button + 1);
             setCartCount(cartCount - 1);
             setDiscard(true);
             setIsCartPressed(true);

@@ -1,9 +1,8 @@
-import React, { useState } from "react";
+import React from "react";
 import OutOfStockCard from "./cards/OutOfStockCard";
 import InStockCard from "./cards/InStockCard";
 
 const CartLister = ({ outOfStock, setOutOfStock }) => {
-  const [button, setButton] = useState(1);
   return (
     <div id="cardDiv">
       {Object.entries(localStorage).map(([key, value]) => {
@@ -16,19 +15,11 @@ const CartLister = ({ outOfStock, setOutOfStock }) => {
           (outOfStock.has(item["Item ID"]) ? (
             <OutOfStockCard
               item={item}
-              button={button}
-              setButton={setButton}
               setOutOfStock={setOutOfStock}
               key={item["Item ID"]}
             />
           ) : (
-            <InStockCard
-              item={item}
-              button={button}
-              setButton={setButton}
-              key={item["Item ID"]}
-              inCart={true}
-            />
+            <InStockCard item={item} key={item["Item ID"]} inCart={true} />
           ))
         );
       })}
