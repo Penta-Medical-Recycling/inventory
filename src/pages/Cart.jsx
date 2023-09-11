@@ -8,13 +8,19 @@ import PentaContext from "../context/PentaContext";
 function Cart() {
   const { selectedPartner, setCartCount } = useContext(PentaContext);
 
+  // Initialize an array to store item IDs that are out of stock
   const ids = [];
+
+  // State variables to manage out-of-stock items, notes, and loading status
   const [outOfStock, setOutOfStock] = useState();
   const navigate = useNavigate();
   const [notes, setNotes] = useState(localStorage.getItem("notes") || "");
   const [isLoading, setIsLoading] = useState(false);
+
+  // API key obtained from environment variables
   const APIKey = import.meta.env.VITE_REACT_APP_API_KEY;
 
+  // Function to generate a random hexadecimal code
   function generateRandomHexadecimal() {
     return (
       "#" +
@@ -24,12 +30,15 @@ function Cart() {
     );
   }
 
+  // Handle changes to the additional notes textarea
   const handleNotesChange = (event) => {
     setNotes(event.target.value);
     localStorage.setItem("notes", event.target.value);
   };
 
+  // Function to fetch and check the stock status of item IDs in localStorage
   const idFetcher = async () => {
+    // Iterate through localStorage to extract item IDs
     for (let [key, value] of Object.entries(localStorage)) {
       if (key !== "partner" && key !== "notes") {
         const parse = JSON.parse(value);
@@ -41,6 +50,7 @@ function Cart() {
     }
     const idSet = new Set();
 
+    // Check the stock status of each item ID
     for (const id of ids) {
       const url = `https://api.airtable.com/v0/appHFwcwuXLTNCjtN/Inventory?filterByFormula=AND({Requests}=BLANK(),{Shipment Status}=BLANK(),NOT({SKU}=""),AND({Item ID}='${encodeURIComponent(
         id
@@ -54,7 +64,7 @@ function Cart() {
         });
 
         const data = await response.json();
-
+        // if a record is not returned, it means that it became unavailable since it was added to the cart, its id will be added to the set
         if (data.records && data.records.length === 0) {
           idSet.add(id);
         }
@@ -63,7 +73,10 @@ function Cart() {
       }
     }
 
+    // Adds out of stock banner to those item cards
     setOutOfStock(idSet);
+
+    // When requesting, stops post request if false is returned.
     if (idSet.size > 0) {
       return true;
     } else {
@@ -71,17 +84,20 @@ function Cart() {
     }
   };
 
+  // Ensure that a partner is selected and checks all cart item availability status when the component mounts
   useEffect(() => {
     if (!selectedPartner) navigate("/partner");
     idFetcher();
   }, []);
 
+  // Function to handle the request button click
   const requestButton = async (event) => {
     setIsLoading(true);
     event.preventDefault();
     setOutOfStock(new Set());
     const stockCheck = await idFetcher();
 
+    // if any item is out of stock, toast is displayed and request is cancelled
     if (stockCheck) {
       Toast({
         message:
@@ -92,6 +108,7 @@ function Cart() {
       return;
     }
 
+    // Otherwise construct the request data
     const BaseID = "appHFwcwuXLTNCjtN";
     const tableName = "Requests";
     const items = [];
@@ -104,7 +121,7 @@ function Cart() {
       records: [
         {
           fields: {
-            Name: generateRandomHexadecimal(),
+            Name: generateRandomHexadecimal(), // unique temporary name for the request for AirTable management and stock checking purposes
             Partner: localStorage["partner"],
             "Additional Notes": notes,
             "Items You Would Like": items,
@@ -114,6 +131,7 @@ function Cart() {
       typecast: true,
     };
 
+    // Send the request data to the AirTable
     fetch(url, {
       method: "POST",
       headers: {
@@ -128,6 +146,7 @@ function Cart() {
           console.error("Error:", data.error);
           setErrorMessage("Error: " + data.error.message);
         } else {
+          // Clear notes and cart after successful request
           setNotes("");
           setCartCount(0);
           const partner = localStorage["partner"];
@@ -147,6 +166,7 @@ function Cart() {
       });
   };
 
+  // Function to handle missing information when requesting
   const missingInfo = () => {
     !notes &&
     Object.keys(localStorage).filter((k) => k !== "partner" && k !== "notes")
@@ -169,6 +189,7 @@ function Cart() {
   return (
     <>
       <div id="text-section">
+        {/* Title */}
         <h1
           className="title has-text-centered mt-6 loading-effect"
           style={{ animationDelay: "0.23s" }}
@@ -177,6 +198,7 @@ function Cart() {
         </h1>
       </div>
       {isLoading ? (
+        // Display a loading spinner while loading
         <BigSpinner size={75} />
       ) : (
         <>
@@ -191,6 +213,7 @@ function Cart() {
             className="is-flex is-justify-content-center my-3 loading-effect"
             style={{ animationDelay: "0.66s" }}
           >
+            {/* Button to change navigate to Partner Select */}
             <button
               className="button is-rounded"
               id="partner-button"
@@ -201,12 +224,15 @@ function Cart() {
             </button>
           </Link>
 
+          {/* Render the CartLister component with out-of-stock items */}
           {outOfStock ? (
             <CartLister outOfStock={outOfStock} setOutOfStock={setOutOfStock} />
           ) : (
+            // Display a loading spinner while loading
             <BigSpinner size={75} />
           )}
           <div style={{ width: "60vw", margin: "auto" }}>
+            {/* Additional notes textarea */}
             <textarea
               id="cart-textarea"
               className="textarea my-4 is-rounded loading-effect"
@@ -220,6 +246,7 @@ function Cart() {
             className="is-flex is-justify-content-center loading-effect"
             style={{ animationDelay: "1s" }}
           >
+            {/* Request button */}
             <button
               id="partner-button"
               aria-label="Request"
