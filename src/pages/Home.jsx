@@ -1,5 +1,5 @@
 import HomeLister from "../components/home/HomeLister";
-import { useEffect, useContext, useRef, useState } from "react";
+import { useContext, useState } from "react";
 import PentaContext from "../context/PentaContext";
 import Pagination from "../components/home/Pagination";
 import Tags from "../components/home/Tags";
@@ -8,11 +8,13 @@ import Search from "../components/home/Search";
 function Home() {
   const { isSideBarActive } = useContext(PentaContext);
 
-  const [onR, setR] = useState(false);
+  // State to control card removal animation.
+  const [onRemove, setOnRemove] = useState(false);
 
   return (
     <div className={isSideBarActive ? "sidebar-active" : ""}>
       <div id="text-section">
+        {/* Page Title */}
         <h1
           className="is-size-2 has-text-weight-bold has-text-centered loading-effect"
           id="penta-title"
@@ -20,6 +22,7 @@ function Home() {
         >
           Penta Prosthetics Current Inventory
         </h1>
+        {/* Introduction Text */}
         <p
           className="my-6 mx-6 is-size-5 has-text-centered loading-effect"
           style={{ width: "60%", animationDelay: "0.214s" }}
@@ -29,6 +32,7 @@ function Home() {
           partner affiliation and click 'Request Items.'
         </p>
 
+        {/* Search Bar */}
         <div
           style={{
             display: "flex",
@@ -38,7 +42,9 @@ function Home() {
         >
           <Search></Search>
         </div>
+        {/* Tags Filter */}
         <Tags></Tags>
+        {/* Download Instructions */}
         <p
           className="my-6 mx-6 has-text-centered loading-effect"
           id="scroll-to"
@@ -48,9 +54,12 @@ function Home() {
           icon to the right of the search bar.
         </p>
       </div>
-      <Pagination bottom={false} onR={onR}></Pagination>
-      <HomeLister onR={onR} setR={setR} />
-      <Pagination bottom={true} onR={onR}></Pagination>
+      {/* Top Pagination*/}
+      <Pagination bottom={false} onRemove={onRemove}></Pagination>
+      {/* List of Inventory Items */}
+      <HomeLister onRemove={onRemove} setOnRemove={setOnRemove} />
+      {/* Bottom Pagination */}
+      <Pagination bottom={true} onRemove={onRemove}></Pagination>
     </div>
   );
 }

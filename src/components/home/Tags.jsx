@@ -1,5 +1,6 @@
 import React, { useContext, useState, useEffect } from "react";
 import PentaContext from "../../context/PentaContext";
+import FilterLogo from "../../assets/FilterLogo";
 
 const Tags = ({}) => {
   const {
@@ -14,21 +15,24 @@ const Tags = ({}) => {
 
   const [count, setCount] = useState(0);
 
+  // Update the count of active filters whenever filter selections change, filter count is displayed on frontend if greater than 0.
   useEffect(() => {
-    let c = 0;
-    c += isRangeOn ? 1 : 0;
-    c += selectedManufacturer.length || 0;
-    c += selectedSKU.length || 0;
-    c += selectedFilter["Prosthesis"] ? 1 : 0;
-    c += selectedFilter["Orthosis"] ? 1 : 0;
-    c += selectedFilter["Pediatric"] ? 1 : 0;
-    setCount(c);
+    let num = 0;
+    num += isRangeOn ? 1 : 0;
+    num += selectedManufacturer.length || 0;
+    num += selectedSKU.length || 0;
+    num += selectedFilter["Prosthesis"] ? 1 : 0;
+    num += selectedFilter["Orthosis"] ? 1 : 0;
+    num += selectedFilter["Pediatric"] ? 1 : 0;
+    setCount(num);
   }, [selectedFilter, selectedManufacturer, selectedSKU, isRangeOn]);
 
+  // Toggle the sidebar's active state.
   const activeToggle = () => {
     setIsSideBarActive(!isSideBarActive);
   };
 
+  // Handle clicks on filter buttons by updating the selected filter state.
   const filterClick = (key) => {
     const newObj = { ...selectedFilter };
     newObj[key] = !selectedFilter[key];
@@ -41,6 +45,7 @@ const Tags = ({}) => {
       className="loading-effect"
       style={{ animationDelay: "0.535s" }}
     >
+      {/* Filter buttons for different prosthetic categories */}
       <div
         className={
           selectedFilter["Prosthesis"] ? "filter-selected filter-3" : "filter-3"
@@ -65,6 +70,8 @@ const Tags = ({}) => {
       >
         <p>Pediatric</p>
       </div>
+
+      {/* Filter button to toggle sidebar */}
       <div
         id="filter-button"
         onClick={activeToggle}
@@ -79,15 +86,12 @@ const Tags = ({}) => {
             : ""
         }
       >
+        {/* Display the count of active filters */}
         <p className="filterCount">{`${count > 0 ? count + " " : ""}`}</p>
+        {/* Display "Filter" or "Filters" based on the count */}
         <p>{`${count !== 1 ? "Filters" : "Filter"}`}</p>
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          height=".65em"
-          viewBox="0 0 512 512"
-        >
-          <path d="M0 416c0 17.7 14.3 32 32 32l54.7 0c12.3 28.3 40.5 48 73.3 48s61-19.7 73.3-48L480 448c17.7 0 32-14.3 32-32s-14.3-32-32-32l-246.7 0c-12.3-28.3-40.5-48-73.3-48s-61 19.7-73.3 48L32 384c-17.7 0-32 14.3-32 32zm128 0a32 32 0 1 1 64 0 32 32 0 1 1 -64 0zM320 256a32 32 0 1 1 64 0 32 32 0 1 1 -64 0zm32-80c-32.8 0-61 19.7-73.3 48L32 224c-17.7 0-32 14.3-32 32s14.3 32 32 32l246.7 0c12.3 28.3 40.5 48 73.3 48s61-19.7 73.3-48l54.7 0c17.7 0 32-14.3 32-32s-14.3-32-32-32l-54.7 0c-12.3-28.3-40.5-48-73.3-48zM192 128a32 32 0 1 1 0-64 32 32 0 1 1 0 64zm73.3-64C253 35.7 224.8 16 192 16s-61 19.7-73.3 48L32 64C14.3 64 0 78.3 0 96s14.3 32 32 32l86.7 0c12.3 28.3 40.5 48 73.3 48s61-19.7 73.3-48L480 128c17.7 0 32-14.3 32-32s-14.3-32-32-32L265.3 64z" />
-        </svg>
+        {/* Component for the filter icon */}
+        <FilterLogo></FilterLogo>
       </div>
     </div>
   );

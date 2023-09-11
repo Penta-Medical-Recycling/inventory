@@ -5,7 +5,7 @@ import React, { useContext, useState, useEffect } from "react";
 import ImageIcon from "../../assets/ImageIcon";
 import CardBody from "./CardBody";
 
-const InStockCard = ({ item, setButton, button, onR, inCart }) => {
+const InStockCard = ({ item, setButton, button, onRemove, inCart }) => {
   const { setCartCount, cartCount, setIsCartPressed, isLoading } =
     useContext(PentaContext);
 
@@ -14,12 +14,12 @@ const InStockCard = ({ item, setButton, button, onR, inCart }) => {
   return (
     <div
       className={`outer-card fade-in ${
-        onR || (discard && inCart) ? "fade-out" : ""
+        onRemove || (discard && inCart) ? "fade-out" : ""
       }`}
     >
       <div
         className={`card fade-in ${
-          onR || (discard && inCart) ? "fade-out" : ""
+          onRemove || (discard && inCart) ? "fade-out" : ""
         }`}
         key={item["Item ID"]}
       >

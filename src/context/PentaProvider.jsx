@@ -23,7 +23,7 @@ function PentaProvider({ children }) {
   // Define the largestSize as fetched from the inventory, used to validate the size range toggle.
   const [largestSize, setLargestSize] = useState(60);
 
-  // Set the frontend page number based on the offset.
+  // Controls the which pagination buttons should be displayed, 'Next', 'Previous', 'Next/Previous' and 'None'
   const [page, setPage] = useState();
 
   // Manage loading animation state for .csv and .xlsx downloads.

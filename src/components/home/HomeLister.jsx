@@ -3,7 +3,7 @@ import PentaContext from "../../context/PentaContext";
 import BigSpinner from "../../assets/BigSpinner";
 import InStockCard from "../cards/InStockCard";
 
-const HomeLister = ({ onR, setR }) => {
+const HomeLister = ({ onRemove, setOnRemove }) => {
   const {
     isLoading,
     data,
@@ -93,13 +93,13 @@ const HomeLister = ({ onR, setR }) => {
   useEffect(() => {
     async function onStart() {
       if (cardDiv.current) {
-        setR(true);
+        setOnRemove(true);
         await removingCard();
       }
     }
     onStart();
     const debounceTimeout = setTimeout(async () => {
-      setR(false);
+      setOnRemove(false);
       await loadNewPage();
       await addingCard();
     }, 750);
@@ -131,8 +131,8 @@ const HomeLister = ({ onR, setR }) => {
                   button={button}
                   setButton={setButton}
                   key={item.fields["Item ID"]}
-                  onR={onR}
-                  setR={setR}
+                  onRemove={onRemove}
+                  setOnRemove={setOnRemove}
                 />
               )
           )}

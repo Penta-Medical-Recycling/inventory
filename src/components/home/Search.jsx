@@ -2,13 +2,15 @@ import React, { useContext } from "react";
 import PentaContext from "../../context/PentaContext";
 import DownloadButton from "./DownloadButton";
 
-const Search = ({}) => {
+const Search = () => {
   const { searchInput, setSearchInput } = useContext(PentaContext);
 
+  // Handler for input changes in the search bar.
   const onSearchChange = (e) => {
     setSearchInput(e.target.value);
   };
 
+  // Clear the search input.
   const clearSearchInput = () => {
     setSearchInput("");
   };
@@ -21,6 +23,7 @@ const Search = ({}) => {
             className="control has-icons-left has-icons-right loading-effect"
             style={{ animationDelay: "0.321s" }}
           >
+            {/* Search Input */}
             <input
               className="input is-rounded mr-3 search-bar"
               type="text"
@@ -28,9 +31,11 @@ const Search = ({}) => {
               value={searchInput}
               onChange={onSearchChange}
             />
+            {/* Search Icon */}
             <span className="icon is-small is-left">
               <i className="fas fa-search"></i>
             </span>
+            {/* Clear Search Button */}
             {searchInput && (
               <span
                 className="icon is-small is-right"
@@ -43,6 +48,7 @@ const Search = ({}) => {
           </div>
         </div>
       </form>
+      {/* Download Button Component */}
       <DownloadButton></DownloadButton>
     </div>
   );
