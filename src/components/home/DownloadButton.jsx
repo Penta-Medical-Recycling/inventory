@@ -76,7 +76,7 @@ const DownloadButton = () => {
         e.fields["Description (from SKU)"] || "",
         e.fields["Size"] || "",
         e.fields["Model/Type"] || "",
-        e.fields["Manufacturer"] || "",
+        e.fields["Name (from Manufacturer)"] || "",
       ]);
 
       // Formats the data for download as stringified CSV format.
