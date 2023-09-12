@@ -34,13 +34,13 @@ const CardBody = ({ item, centered }) => {
       </p>
       <hr className="mb-4 mt-3" style={{ margin: "0 auto", width: "80%" }}></hr>
       <div className="content mx-5 mb-5">
-        {item["Manufacturer"] && (
+        {item["Name (from Manufacturer)"] && (
           // Display item manufacturer if available
           <div className="mb-4 has-text-centered" style={{ width: "50%" }}>
             <p className="has-text-weight-bold" style={{ margin: "0" }}>
               Manufacturer
             </p>
-            <p>{item["Manufacturer"]}</p>
+            <p>{item["Name (from Manufacturer)"]}</p>
           </div>
         )}
         {item["Size"] && (

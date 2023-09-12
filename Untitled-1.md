@@ -40,123 +40,64 @@ Merrell
 Royal Knit
 Mauch
 Century Innovations
-
 Promenade
-
 Comfortland
-
 MedChoice
-
 Molnlycke
-
 Encore
-
 Alsp
-
 BioSkin
-
 ESP
-
 Fillauer
-
 TiMed
-
 Orthomerica
-
 Maverick
-
 Proteor
-
 Elan
-
 Avalon
-
 New Balance
-
 SPS
-
 Sketchers
-
 Hanger
-
 ST&G
-
 IN Prosthetics
-
 IN Prosthetic Components
-
 Rooke
-
 DAW
-
 KISS
-
 Origin
-
 Evolution Industries
-
 Silipos
-
 Endolite
-
 Allard
-
 Procare
-
 Aryse
-
 Jack Mart
-
 Hosmer
-
 Various
-
 Townsend
-
 Drive
-
 Blatchford
-
 Teh Lin Pros. & Ortho.
-
 Aircast
-
 Breg
-
 Juzo
-
 Swede-O
-
 UNIPROX
-
 Freeman
-
 DeRoyal
-
 PMT
-
 RCAI
-
 Durasleeve
-
 New Options Sports
-
 Donjoy
-
 SRT P&O
-
 TruVue
-
 Streifeneder
-
 Becker
-
 Syncor
-
 BraceSox
-
 US Orthotics
-
 Cascade
 
 orr
@@ -216,11 +157,7 @@ Fabtech
 Trend Medical
 
 Ortocare
-
 Flo-Tech
-
 pss
-
 Alp
-
 M+ Select Alpha Hubrid
