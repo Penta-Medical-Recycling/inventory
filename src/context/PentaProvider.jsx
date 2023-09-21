@@ -158,7 +158,6 @@ function PentaProvider({ children }) {
 
     // Concatenate the filter conditions and encode them for the API request.
     filterFunction += `${encodeURIComponent("AND(" + filters.join(",") + ")")}`;
-    console.log(baseUrl + [pageSize, sort, filterFunction].join("&"));
     // Combine all the URL components and return the final URL for data retrieval.
     return baseUrl + [pageSize, sort, filterFunction].join("&");
   }
