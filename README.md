@@ -19,10 +19,11 @@
   - [Requesting Items](#requesting-items)
   - [Navigation](#navigation)
   - [Interacting with the Inventory](#interacting-with-the-inventory)
+  - [Resources](#resources)
 
 ## Introduction
 
-The **Penta Prosthetics Inventory Request System** is a web-based application developed to address specific challenges related to inventory requesting for Penta’s Partners. This project aims to provide an intuitive, feature-rich solution that streamlines the inventory requesting process. The primary objectives include:
+The **Penta Medical Recycling Inventory Request System** is a web-based application developed to address specific challenges related to inventory requesting for Penta’s Partners. This project aims to provide an intuitive, feature-rich solution that streamlines the inventory requesting process. The primary objectives include:
 
 - **Enhanced Inventory Search**: Create a system that allows users to easily search for items within the inventory.
 - **Detailed Item Information**: Provide comprehensive and searchable item details.
@@ -44,13 +45,13 @@ Before you begin, ensure you have met the following requirements:
 1. **Clone the repository:**
 
    ```bash
-   git clone https://github.com/jcp215033/penta-prosthetics.git
+   git clone https://github.com/Penta-Medical-Recycling/inventory.git
    ```
 
 2. **Install Dependencies:** Navigate to the project folder and install the required dependencies.
 
    ```bash
-   cd penta-prosthetics
+   cd inventory
    npm install
    ```
 
@@ -70,7 +71,7 @@ Before you begin, ensure you have met the following requirements:
    npm run dev
    ```
 
-7. **Access the Application:** Open your web browser and access the application at localhost:5173/penta-prosthetics/.
+7. **Access the Application:** Open your web browser and access the application at localhost:5173/inventory/.
 
 ### Committing Changes, Building, and Deploying
 
@@ -115,18 +116,18 @@ After making changes to the Penta Inventory Request System, you'll need to commi
 5. **Access the Deployed Application:** Once the deployment is complete, you can access your deployed application on GitHub Pages at the following URL:
 
    ```arduino
-   https://jcp215033.github.io/penta-prosthetics/
+   https://penta-medical-recycling.github.io/inventory/
    ```
 
    Now your changes are committed, built, and deployed to GitHub Pages, making them accessible to others. Make sure to follow these steps whenever you want to update the live version of the web app.
 
 ## Code Documentation
 
-This section provides an overview of the key components and structure of the Penta Prosthetics Inventory Request System codebase. Understanding the code structure will help you navigate and make modifications if needed.
+This section provides an overview of the key components and structure of the Penta Medical Recycling Inventory Request System codebase. Understanding the code structure will help you navigate and make modifications if needed.
 
 ### Project Structure
 
-The codebase of the Penta Prosthetics Inventory Request System is organized into several main directories:
+The codebase of the Penta Medical Recycling Inventory Request System is organized into several main directories:
 
 - **src**: Contains the main source code for the application.
   - **assets**: Stores static assets like images and logos.
@@ -163,7 +164,7 @@ The application fetches data from Airtable using the Airtable API. Data fetching
 
 This user manual will guide you through each step of using our solution. Whether you're searching for items or managing your cart, we've got you covered.
 
-1. **Open the Site**: Simply open the Inventory Request System website. [https://[Penta-GitHub-Username].github.io/penta-prosthetics/](https://jcp215033.github.io/penta-prosthetics/)
+1. **Open the Site**: Simply open the Inventory Request System website. [https://penta-medical-recycling.github.io/inventory/](https://penta-medical-recycling.github.io/inventory/)
 2. **Loading Items**: The system will automatically load items sorted from oldest to newest.
 3. **Multiple Quantity Items**: Items with multiple pieces available will be indicated with a badge on the upper right.
 4. **Item Cards**: Each item card provides all the available data. Some cards may have more information than others.
@@ -194,3 +195,11 @@ This user manual will guide you through each step of using our solution. Whether
 2. **Using the Search**: To find specific items, use the search feature located at the top of the page to narrow down your search. Enter keywords included in an item’s ID, manufacturer, SKU, description, and size.
 3. **Combining Search and Filters**: For even more precise results, combine the search and filters.
 4. **Downloading Inventory**: Partners can download inventory results in .csv or .xlsx formats for personal access to the data. If no filters are selected, the entire inventory is downloaded. Otherwise whatever filters, and/or search you have will be the criteria for what is downloaded.
+
+### Resources
+
+- [Project Delivery Document for Penta (Notion)](https://foggy-honeycrisp-28f.notion.site/Project-Delivery-Document-for-Penta-e480b7c031d24fe5a7e15e09c41a4d04)
+- [Project Delivery Document for Penta (Google Docs Copy)](https://docs.google.com/document/d/1brTvMb7pHvW61nMtSbklJTaqueX8QmUwFImlkaqEMaM/)
+- [Solution Sign-Off for Penta](https://foggy-honeycrisp-28f.notion.site/Solution-Sign-Off-for-Penta-a473ac4efe264a2fa6da1ae8b4a848da)
+- [GitHub Repository](https://github.com/Penta-Medical-Recycling/inventory)
+- [Deployed GitHub Pages](https://penta-medical-recycling.github.io/inventory/)
