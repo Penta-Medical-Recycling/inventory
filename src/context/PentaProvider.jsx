@@ -7,6 +7,14 @@ function PentaProvider({ children }) {
     localStorage.getItem("partner") || ""
   );
 
+  // Checking for first-visit of user on webpage and state for toggling the pop-up content
+  const [showModal, setShowModal] = useState(false);
+  const hasVisited = localStorage.getItem('hasVisited');
+  if (!hasVisited) {
+    setShowModal(true);
+    localStorage.setItem('hasVisited', true)
+  }
+
   // Count the number of items in the cart. Items are stored as stringified JSON objects with Item IDs as keys.
   // Exclude 'partner' and 'notes' keys from localStorage when counting.
   const [cartCount, setCartCount] = useState(
@@ -330,6 +338,8 @@ function PentaProvider({ children }) {
     fetchMaxSize,
     data,
     setData,
+    showModal,
+    setShowModal
   };
 
   return (
