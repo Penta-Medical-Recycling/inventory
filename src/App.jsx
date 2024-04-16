@@ -4,6 +4,8 @@ import Cart from "./pages/Cart";
 import SideBar from "./components/SideBar";
 import NavBar from "./components/NavBar";
 import Partner from "./pages/Partner";
+import Maintenance from "./pages/Maintenance";
+import { useEffect, useState } from "react";
 
 /**
  * Main application component.
@@ -17,7 +19,48 @@ import Partner from "./pages/Partner";
  */
 
 function App() {
-  return (
+  // // Checking the status of the site from the database
+  // const [serverStatus, setServerStatus] = useState("Online")
+  // //fetching server status
+  // const apiKey = "patn9gZ37SyMZFlpA.a905836b6861c9e07e7672e4a35d021f62fd188a5e6a179e012039f1548f0c1c";
+  // const apiUrl = "https://api.airtable.com/v0/appVq0I1h8SzD5K39/tblAmKhDQR8YxQeqG";
+  // fetch(apiUrl, {
+  //   method: "GET",
+  //   headers: {
+  //       "Content-Type": "application/json",
+  //       "authorization": `Bearer ${apiKey}`
+  //   }
+  // }).then(response => response.json()).then(msg => setServerStatus(msg.records[0].fields.Status))
+
+  const [serverStatus, setServerStatus] = useState("Online")
+
+  useEffect(() => {
+    const apiKey = "patn9gZ37SyMZFlpA.a905836b6861c9e07e7672e4a35d021f62fd188a5e6a179e012039f1548f0c1c";
+    const fetchStatus = async () => {
+      const data = await fetch("https://api.airtable.com/v0/appVq0I1h8SzD5K39/tblAmKhDQR8YxQeqG", {
+          method: "GET",
+          headers: {
+              "Content-Type": "application/json",
+              "authorization": `Bearer ${apiKey}`
+          }
+        }
+      )
+
+      const response = await data.json()
+      setServerStatus(response.records[0].fields.Status)
+      console.log(serverStatus)
+    }
+
+    fetchStatus()
+  })
+  
+  return serverStatus === "Offline" ?
+  (
+    <Routes>
+        <Route path="*" element={<Maintenance />}></Route>
+    </Routes>
+  ) :
+  (
     <>
       <SideBar />
       <main>
