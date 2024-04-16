@@ -1,5 +1,6 @@
 import { useState } from "react";
 import PentaContext from "./PentaContext";
+import Cookies from "js-cookie";
 
 function PentaProvider({ children }) {
   // Initialize selectedPartner from localStorage if available; otherwise, default to an empty string.
@@ -9,10 +10,10 @@ function PentaProvider({ children }) {
 
   // Checking for first-visit of user on webpage and state for toggling the pop-up content
   const [showModal, setShowModal] = useState(false);
-  const hasVisited = localStorage.getItem('hasVisited');
+  const hasVisited = Cookies.get('hasVisited');
   if (!hasVisited) {
     setShowModal(true);
-    localStorage.setItem('hasVisited', true)
+    Cookies.set('hasVisited', true, { expires : 1 })
   }
 
   // Count the number of items in the cart. Items are stored as stringified JSON objects with Item IDs as keys.
