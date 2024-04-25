@@ -52,9 +52,14 @@ function Cart() {
 
     // Check the stock status of each item ID
     for (const id of ids) {
-      const url = `https://api.airtable.com/v0/appHFwcwuXLTNCjtN/Inventory?filterByFormula=AND({Requests}=BLANK(),{Shipment Status}=BLANK(),NOT({SKU}=""),AND({Item ID}='${encodeURIComponent(
+      //ChangeGP
+      const url = `https://api.airtable.com/v0/appZM47xckWRqZ8RH/Inventory?filterByFormula=AND({Requests}=BLANK(),{Shipment Status}=BLANK(),NOT({SKU}=""),AND({Item ID}='${encodeURIComponent(
         id
       )}'))&maxRecords=1`;
+      //ORIGINAL
+      // const url = `https://api.airtable.com/v0/appHFwcwuXLTNCjtN/Inventory?filterByFormula=AND({Requests}=BLANK(),{Shipment Status}=BLANK(),NOT({SKU}=""),AND({Item ID}='${encodeURIComponent(
+      //   id
+      // )}'))&maxRecords=1`;
 
       try {
         const response = await fetch(url, {
@@ -109,7 +114,8 @@ function Cart() {
     }
 
     // Otherwise construct the request data
-    const BaseID = "appHFwcwuXLTNCjtN";
+    // const BaseID = "appHFwcwuXLTNCjtN"; => ORIGINAL
+    const BaseID = "appZM47xckWRqZ8RH"
     const tableName = "Requests";
     const items = [];
     Object.entries(localStorage).forEach(([key, value]) => {
@@ -231,6 +237,20 @@ function Cart() {
             // Display a loading spinner while loading
             <BigSpinner size={75} />
           )}
+          <div style={{ width: "60vw", margin: "auto" }}>
+            <p>How many patients do you plan to help with this request?</p>
+            <input
+              class="input is-normal"
+              type="text"
+              placeholder="Normal input"
+            />
+            <p>What percentage of these patients are children (under 21 years old)?</p>
+            <input
+              class="input is-normal"
+              type="text"
+              placeholder="Normal input"
+            />
+          </div>
           <div style={{ width: "60vw", margin: "auto" }}>
             {/* Additional notes textarea */}
             <textarea

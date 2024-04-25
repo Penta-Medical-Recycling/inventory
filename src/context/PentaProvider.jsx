@@ -96,7 +96,9 @@ function PentaProvider({ children }) {
    */
   function urlCreator() {
     // Define the base URL for the AirTable API.
-    const baseUrl = "https://api.airtable.com/v0/appHFwcwuXLTNCjtN/Inventory?";
+    //changeGP
+    // const baseUrl = "https://api.airtable.com/v0/appHFwcwuXLTNCjtN/Inventory?";  => ORIGINAL DATABASE
+    const baseUrl = "https://api.airtable.com/v0/appZM47xckWRqZ8RH/Inventory?";
 
     // Define sorting criteria for the API query by oldest to newest available items.
     const sort = `sort[0][field]=Item ID&sort[0][direction]=asc`;
@@ -168,11 +170,14 @@ function PentaProvider({ children }) {
     // Concatenate the filter conditions and encode them for the API request.
     filterFunction += `${encodeURIComponent("AND(" + filters.join(",") + ")")}`;
     // Combine all the URL components and return the final URL for data retrieval.
+    console.log(baseUrl + [pageSize, sort, filterFunction].join("&"))
     return baseUrl + [pageSize, sort, filterFunction].join("&");
   }
 
   // Retrieve the API key from environment variables.
-  const APIKey = import.meta.env.VITE_REACT_APP_API_KEY;
+  // const APIKey = import.meta.env.VITE_REACT_APP_API_KEY; => MIGHT BE USED FOR VITE DEPLOYMENT
+  //ChangeGP
+  const APIKey = "patEd00q4REEnaMAs.893047f939ee5d324f5c26d1b5cb4491e1ec6e86ce78ce2cf604b47f0cb98631"
 
   /**
    * Fetch data from a specified URL using the provided API key for authorization.
@@ -185,9 +190,10 @@ function PentaProvider({ children }) {
       const response = await fetch(url, {
         headers: {
           Authorization: `Bearer ${APIKey}`,
+          "content-type": "application/json",
         },
       });
-
+      console.log(response)
       if (!response.ok) {
         throw new Error("Network response was not ok");
       }
@@ -208,7 +214,9 @@ function PentaProvider({ children }) {
    * @returns {Promise} A promise that resolves to the fetched records or null in case of an error.
    */
   async function fetchTableRecords(tableName, offset = null) {
-    const baseId = "appHFwcwuXLTNCjtN";
+    // const baseId = "appHFwcwuXLTNCjtN"; => ORIGINAL BASE ID
+    //changeGP
+    const baseId = "appZM47xckWRqZ8RH"
     const url = `https://api.airtable.com/v0/${baseId}/${tableName}?${
       offset ? `offset=${offset}` : ""
     }`;
@@ -243,7 +251,10 @@ function PentaProvider({ children }) {
    * @returns {Promise} A promise that resolves to the maximum size found in the inventory or null if no data is found.
    */
   async function fetchMaxSize() {
-    const url = `https://api.airtable.com/v0/appHFwcwuXLTNCjtN/Inventory?pageSize=1&sort[0][field]=Size&sort[0][direction]=desc&filterByFormula=AND(AND({Requests}="",{Shipment Status}=""),NOT({SKU}=""))`;
+    //ChangeGP
+    const url = `https://api.airtable.com/v0/appZM47xckWRqZ8RH/Inventory?pageSize=1&sort[0][field]=Size&sort[0][direction]=desc&filterByFormula=AND(AND({Requests}="",{Shipment Status}=""),NOT({SKU}=""))`;
+    //ORIGINAL
+    // const url = `https://api.airtable.com/v0/appHFwcwuXLTNCjtN/Inventory?pageSize=1&sort[0][field]=Size&sort[0][direction]=desc&filterByFormula=AND(AND({Requests}="",{Shipment Status}=""),NOT({SKU}=""))`;
 
     const data = await fetchAPI(url);
     if (data && data.records && data.records.length > 0) {

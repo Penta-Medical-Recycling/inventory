@@ -11,8 +11,9 @@ const PopUpCard = () => {
     }
     
     //fetching message for pop-up
-    const apiKey = "patn9gZ37SyMZFlpA.a905836b6861c9e07e7672e4a35d021f62fd188a5e6a179e012039f1548f0c1c";
-    const apiUrl = "https://api.airtable.com/v0/appVq0I1h8SzD5K39/tblAmKhDQR8YxQeqG";
+    //changeGP
+    const apiKey = "patEd00q4REEnaMAs.893047f939ee5d324f5c26d1b5cb4491e1ec6e86ce78ce2cf604b47f0cb98631";
+    const apiUrl = "https://api.airtable.com/v0/appZM47xckWRqZ8RH/Site-Status";
     fetch(apiUrl, {
         method: "GET",
         headers: {
@@ -24,21 +25,21 @@ const PopUpCard = () => {
 
     return (
         <>
-            <div class="modal is-active">
-            <div class="modal-background"></div>
-            <div class="modal-content has-text-centered ">
-                <div class="columns">
-                    <div class="column has-background-white">
-                        <figure class="image is-square">
+            <div className="modal is-active">
+            <div className="modal-background"></div>
+            <div className="modal-content has-text-centered ">
+                <div className="columns">
+                    <div className="column has-background-white">
+                        <figure className="image is-square">
                             <img src={logo} />
                         </figure>
                     </div>
-                    <div class="column has-background-light">
+                    <div className="column has-background-light">
                         <article>{message}</article>
                     </div>
                 </div>
             </div>
-            <button class="modal-close is-large" aria-label="close" onClick={() => setShowModal(false)}></button>
+            <button className="modal-close is-large" aria-label="close" onClick={() => setShowModal(false)}></button>
             </div>
         </>
     )

@@ -19,25 +19,14 @@ import { useEffect, useState } from "react";
  */
 
 function App() {
-  // // Checking the status of the site from the database
-  // const [serverStatus, setServerStatus] = useState("Online")
-  // //fetching server status
-  // const apiKey = "patn9gZ37SyMZFlpA.a905836b6861c9e07e7672e4a35d021f62fd188a5e6a179e012039f1548f0c1c";
-  // const apiUrl = "https://api.airtable.com/v0/appVq0I1h8SzD5K39/tblAmKhDQR8YxQeqG";
-  // fetch(apiUrl, {
-  //   method: "GET",
-  //   headers: {
-  //       "Content-Type": "application/json",
-  //       "authorization": `Bearer ${apiKey}`
-  //   }
-  // }).then(response => response.json()).then(msg => setServerStatus(msg.records[0].fields.Status))
 
   const [serverStatus, setServerStatus] = useState("Online")
 
   useEffect(() => {
-    const apiKey = "patn9gZ37SyMZFlpA.a905836b6861c9e07e7672e4a35d021f62fd188a5e6a179e012039f1548f0c1c";
+    const apiKey = "patEd00q4REEnaMAs.893047f939ee5d324f5c26d1b5cb4491e1ec6e86ce78ce2cf604b47f0cb98631";
     const fetchStatus = async () => {
-      const data = await fetch("https://api.airtable.com/v0/appVq0I1h8SzD5K39/tblAmKhDQR8YxQeqG", {
+      //changeGP
+      const data = await fetch("https://api.airtable.com/v0/appZM47xckWRqZ8RH/Site-Status", {
           method: "GET",
           headers: {
               "Content-Type": "application/json",
