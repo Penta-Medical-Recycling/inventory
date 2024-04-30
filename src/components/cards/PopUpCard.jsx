@@ -26,20 +26,26 @@ const PopUpCard = () => {
     return (
         <>
             <div className="modal is-active">
-            <div className="modal-background"></div>
-            <div className="modal-content has-text-centered ">
-                <div className="columns">
-                    <div className="column has-background-white">
-                        <figure className="image is-square">
-                            <img src={logo} />
-                        </figure>
-                    </div>
-                    <div className="column has-background-light">
-                        <article>{message}</article>
+                <div className="modal-background"></div>
+                <div 
+                    className="modal-card has-text-centered"
+                    style={{ borderRadius: 20, width: 800}}
+                >
+                    <div className="columns">
+                        <div className="column has-background-white">
+                            <figure className="image is-square">
+                                <img src={logo} />
+                            </figure>
+                        </div>
+                        <div className="column has-background-light">
+                            <header class="modal-card-head">
+                                <p class="modal-card-title">Message</p>
+                                <button class="delete" aria-label="close" onClick={() => setShowModal(false)}></button>
+                            </header>
+                            <article style={{ padding: 20 }}>{message}</article>
+                        </div>
                     </div>
                 </div>
-            </div>
-            <button className="modal-close is-large" aria-label="close" onClick={() => setShowModal(false)}></button>
             </div>
         </>
     )
