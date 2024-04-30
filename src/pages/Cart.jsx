@@ -15,10 +15,15 @@ function Cart() {
   const [outOfStock, setOutOfStock] = useState();
   const navigate = useNavigate();
   const [notes, setNotes] = useState(localStorage.getItem("notes") || "");
+  const [numOfPatients, setNumOfPatients] = useState(0);
+  const [numOfChildren, setNumOfChildren] = useState(0);
   const [isLoading, setIsLoading] = useState(false);
 
   // API key obtained from environment variables
-  const APIKey = import.meta.env.VITE_REACT_APP_API_KEY;
+  // const APIKey = import.meta.env.VITE_REACT_APP_API_KEY;
+
+  //CHANGEGP
+  const APIKey = "patEd00q4REEnaMAs.893047f939ee5d324f5c26d1b5cb4491e1ec6e86ce78ce2cf604b47f0cb98631";
 
   // Function to generate a random hexadecimal code
   function generateRandomHexadecimal() {
@@ -35,6 +40,16 @@ function Cart() {
     setNotes(event.target.value);
     localStorage.setItem("notes", event.target.value);
   };
+
+  //handle change to response of question 1
+  const handlePatientsChange = (event) => {
+    setNumOfPatients(event.target.value)
+  }
+
+  //handle change to response of question 2
+  const handleChildrenChange = (event) => {
+    setNumOfChildren(event.target.value)
+  }
 
   // Function to fetch and check the stock status of item IDs in localStorage
   const idFetcher = async () => {
@@ -131,6 +146,8 @@ function Cart() {
             Partner: localStorage["partner"],
             "Additional Notes": notes,
             "Items You Would Like": items,
+            "Patients helped" : numOfPatients,
+            "Percentage of children helped" : ((numOfChildren/numOfPatients) * 100).toFixed(1)
           },
         },
       ],
@@ -240,15 +257,19 @@ function Cart() {
           <div style={{ width: "60vw", margin: "auto" }}>
             <p>How many patients do you plan to help with this request?</p>
             <input
-              class="input is-normal"
-              type="text"
-              placeholder="Normal input"
+              className="input is-normal"
+              type="number"
+              placeholder="Please input a number"
+              value={numOfPatients}
+              onChange={handlePatientsChange}
             />
-            <p>What percentage of these patients are children (under 21 years old)?</p>
+            <p>How many of the patients are children (under 21 years old)?</p>
             <input
-              class="input is-normal"
-              type="text"
-              placeholder="Normal input"
+              className="input is-normal"
+              type="number"
+              placeholder="Please input a number"
+              value={numOfChildren}
+              onChange={handleChildrenChange}
             />
           </div>
           <div style={{ width: "60vw", margin: "auto" }}>
