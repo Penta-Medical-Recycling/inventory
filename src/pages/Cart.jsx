@@ -20,10 +20,8 @@ function Cart() {
   const [isLoading, setIsLoading] = useState(false);
 
   // API key obtained from environment variables
-  // const APIKey = import.meta.env.VITE_REACT_APP_API_KEY;
+  const APIKey = import.meta.env.VITE_REACT_APP_API_KEY;
 
-  //CHANGEGP
-  const APIKey = "patEd00q4REEnaMAs.893047f939ee5d324f5c26d1b5cb4491e1ec6e86ce78ce2cf604b47f0cb98631";
 
   // Function to generate a random hexadecimal code
   function generateRandomHexadecimal() {
@@ -67,14 +65,10 @@ function Cart() {
 
     // Check the stock status of each item ID
     for (const id of ids) {
-      //ChangeGP
-      const url = `https://api.airtable.com/v0/appZM47xckWRqZ8RH/Inventory?filterByFormula=AND({Requests}=BLANK(),{Shipment Status}=BLANK(),NOT({SKU}=""),AND({Item ID}='${encodeURIComponent(
+
+      const url = `https://api.airtable.com/v0/appHFwcwuXLTNCjtN/Inventory?filterByFormula=AND({Requests}=BLANK(),{Shipment Status}=BLANK(),NOT({SKU}=""),AND({Item ID}='${encodeURIComponent(
         id
       )}'))&maxRecords=1`;
-      //ORIGINAL
-      // const url = `https://api.airtable.com/v0/appHFwcwuXLTNCjtN/Inventory?filterByFormula=AND({Requests}=BLANK(),{Shipment Status}=BLANK(),NOT({SKU}=""),AND({Item ID}='${encodeURIComponent(
-      //   id
-      // )}'))&maxRecords=1`;
 
       try {
         const response = await fetch(url, {

@@ -1,6 +1,5 @@
 import { useState, useEffect } from "react";
 import PentaContext from "./PentaContext";
-import Cookies from "js-cookie";
 
 function PentaProvider({ children }) {
   // Initialize selectedPartner from localStorage if available; otherwise, default to an empty string.
@@ -8,6 +7,8 @@ function PentaProvider({ children }) {
     localStorage.getItem("partner") || ""
   );
 
+  // Retrieve the API key from environment variables.
+  const APIKey = import.meta.env.VITE_REACT_APP_API_KEY;
   
   //checking for server status and updating the corresponding state
   const [serverStatus, setServerStatus] = useState("Offline")
@@ -16,14 +17,12 @@ function PentaProvider({ children }) {
   const [message, setMessage] = useState("")
   
   useEffect(() => {
-    const apiKey = "patEd00q4REEnaMAs.893047f939ee5d324f5c26d1b5cb4491e1ec6e86ce78ce2cf604b47f0cb98631";
     const fetchStatus = async () => {
-      //changeGP
-      const data = await fetch("https://api.airtable.com/v0/appZM47xckWRqZ8RH/Site-Status", {
+      const data = await fetch("https://api.airtable.com/v0/appHFwcwuXLTNCjtN/Site-Status", {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
-          "authorization": `Bearer ${apiKey}`
+          "authorization": `Bearer ${APIKey}`
         }
       })
     
@@ -119,9 +118,7 @@ function PentaProvider({ children }) {
    */
   function urlCreator() {
     // Define the base URL for the AirTable API.
-    //changeGP
-    // const baseUrl = "https://api.airtable.com/v0/appHFwcwuXLTNCjtN/Inventory?";  => ORIGINAL DATABASE
-    const baseUrl = "https://api.airtable.com/v0/appZM47xckWRqZ8RH/Inventory?";
+    const baseUrl = "https://api.airtable.com/v0/appHFwcwuXLTNCjtN/Inventory?";
 
     // Define sorting criteria for the API query by oldest to newest available items.
     const sort = `sort[0][field]=Item ID&sort[0][direction]=asc`;
@@ -196,10 +193,6 @@ function PentaProvider({ children }) {
     return baseUrl + [pageSize, sort, filterFunction].join("&");
   }
 
-  // Retrieve the API key from environment variables.
-  // const APIKey = import.meta.env.VITE_REACT_APP_API_KEY; => MIGHT BE USED FOR VITE DEPLOYMENT
-  //ChangeGP
-  const APIKey = "patEd00q4REEnaMAs.893047f939ee5d324f5c26d1b5cb4491e1ec6e86ce78ce2cf604b47f0cb98631"
 
   /**
    * Fetch data from a specified URL using the provided API key for authorization.
@@ -235,9 +228,7 @@ function PentaProvider({ children }) {
    * @returns {Promise} A promise that resolves to the fetched records or null in case of an error.
    */
   async function fetchTableRecords(tableName, offset = null) {
-    // const baseId = "appHFwcwuXLTNCjtN"; => ORIGINAL BASE ID
-    //changeGP
-    const baseId = "appZM47xckWRqZ8RH"
+    const baseId = "appHFwcwuXLTNCjtN";
     const url = `https://api.airtable.com/v0/${baseId}/${tableName}?${
       offset ? `offset=${offset}` : ""
     }`;
@@ -272,10 +263,8 @@ function PentaProvider({ children }) {
    * @returns {Promise} A promise that resolves to the maximum size found in the inventory or null if no data is found.
    */
   async function fetchMaxSize() {
-    //ChangeGP
-    const url = `https://api.airtable.com/v0/appZM47xckWRqZ8RH/Inventory?pageSize=1&sort[0][field]=Size&sort[0][direction]=desc&filterByFormula=AND(AND({Requests}="",{Shipment Status}=""),NOT({SKU}=""))`;
     //ORIGINAL
-    // const url = `https://api.airtable.com/v0/appHFwcwuXLTNCjtN/Inventory?pageSize=1&sort[0][field]=Size&sort[0][direction]=desc&filterByFormula=AND(AND({Requests}="",{Shipment Status}=""),NOT({SKU}=""))`;
+    const url = `https://api.airtable.com/v0/appHFwcwuXLTNCjtN/Inventory?pageSize=1&sort[0][field]=Size&sort[0][direction]=desc&filterByFormula=AND(AND({Requests}="",{Shipment Status}=""),NOT({SKU}=""))`;
 
     const data = await fetchAPI(url);
     if (data && data.records && data.records.length > 0) {
