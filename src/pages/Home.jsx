@@ -5,17 +5,16 @@ import Pagination from "../components/home/Pagination";
 import Tags from "../components/home/Tags";
 import Search from "../components/home/Search";
 import PopUpCard from "../components/cards/PopUpCard";
-import PentaProvider from "../context/PentaProvider";
 
 function Home() {
-  const { isSideBarActive, showModal} = useContext(PentaContext);
+  const { isSideBarActive, popUpStatus } = useContext(PentaContext);
 
   // State to control card removal animation.
   const [onRemove, setOnRemove] = useState(false);
 
   return (
     <>
-      {showModal && <PopUpCard />}
+      {popUpStatus === "Online" && <PopUpCard />}
       <div className={isSideBarActive ? "sidebar-active" : ""}>
         <div id="text-section">
           {/* Page Title */}

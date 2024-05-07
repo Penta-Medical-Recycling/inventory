@@ -1,35 +1,19 @@
 import React, { useContext, useState } from "react";
 import logo from '../../assets/Penta.png'
 import PentaContext from "../../context/PentaContext";
+import Cookies from "js-cookie";
 
 const PopUpCard = () => {
-    const { showModal, setShowModal } = useContext(PentaContext)
-    const [message, setMessage] = useState("")
-
-    const toggleModal = () => {
-        setShowModal(!setShowModal)
-    }
-    
-    //fetching message for pop-up
-    //changeGP
-    const apiKey = "patEd00q4REEnaMAs.893047f939ee5d324f5c26d1b5cb4491e1ec6e86ce78ce2cf604b47f0cb98631";
-    const apiUrl = "https://api.airtable.com/v0/appZM47xckWRqZ8RH/Site-Status";
-    fetch(apiUrl, {
-        method: "GET",
-        headers: {
-            "Content-Type": "application/json",
-            "authorization": `Bearer ${apiKey}`
-        }
-    }).then(response => response.json()).then(msg => setMessage(msg.records[0].fields.Message))
-
+    const { message } = useContext(PentaContext)
+    const [showModal, setShowModal] = useState(Cookies.get("hasVisited") ? false : true)
 
     return (
         <>
-            <div className="modal is-active">
-                <div className="modal-background"></div>
+            <div className= {showModal ? "modal is-active" : "modal"}>
+                <div className="modal-background" onClick={() => setShowModal(false)}></div>
                 <div 
                     className="modal-card has-text-centered"
-                    style={{ borderRadius: 20, width: 800}}
+                    style={{ borderRadius: 20, width: "50%" }}
                 >
                     <div className="columns">
                         <div className="column has-background-white">
@@ -38,9 +22,9 @@ const PopUpCard = () => {
                             </figure>
                         </div>
                         <div className="column has-background-light">
-                            <header class="modal-card-head">
-                                <p class="modal-card-title">Message</p>
-                                <button class="delete" aria-label="close" onClick={() => setShowModal(false)}></button>
+                            <header className="modal-card-head">
+                                <p className="modal-card-title">Hi, quick update</p>
+                                <button className="delete" aria-label="close" onClick={() => setShowModal(false)}></button>
                             </header>
                             <article style={{ padding: 20 }}>{message}</article>
                         </div>

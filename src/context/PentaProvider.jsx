@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import PentaContext from "./PentaContext";
 import Cookies from "js-cookie";
 
@@ -8,14 +8,44 @@ function PentaProvider({ children }) {
     localStorage.getItem("partner") || ""
   );
 
-  // Checking for first-visit of user on webpage and state for toggling the pop-up content
-  const [showModal, setShowModal] = useState(false);
-  const hasVisited = Cookies.get('hasVisited');
-  if (!hasVisited) {
-    setShowModal(true);
-    Cookies.set('hasVisited', true, { expires : 1 })
-  }
+  
+  //checking for server status and updating the corresponding state
+  const [serverStatus, setServerStatus] = useState("Online")
+  const [serverMessage, setServerMessage] = useState("")
+  const [popUpStatus, setPopUpStatus] = useState("Online")
+  const [message, setMessage] = useState("")
+  
+  useEffect(() => {
+    const apiKey = "patEd00q4REEnaMAs.893047f939ee5d324f5c26d1b5cb4491e1ec6e86ce78ce2cf604b47f0cb98631";
+    const fetchStatus = async () => {
+      //changeGP
+      const data = await fetch("https://api.airtable.com/v0/appZM47xckWRqZ8RH/Site-Status", {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          "authorization": `Bearer ${apiKey}`
+        }
+      })
+    
+      const response = await data.json()
+      setServerStatus(response.records[0].fields.Status)
+      setServerMessage(response.records[0].fields.Message)
+      setPopUpStatus(response.records[1].fields.Status)
+      setMessage(response.records[1].fields.Message)
+    } 
+  
+    fetchStatus();
 
+    // Checking for first-visit of user on webpage and state for toggling the pop-up content
+    const hasVisited = Cookies.get('hasVisited');
+    if (!hasVisited) {
+      let in1Hour = 1/24;
+      Cookies.set('hasVisited', true, { expires : in1Hour })
+    }
+  },[]);
+
+  
+  
   // Count the number of items in the cart. Items are stored as stringified JSON objects with Item IDs as keys.
   // Exclude 'partner' and 'notes' keys from localStorage when counting.
   const [cartCount, setCartCount] = useState(
@@ -170,7 +200,6 @@ function PentaProvider({ children }) {
     // Concatenate the filter conditions and encode them for the API request.
     filterFunction += `${encodeURIComponent("AND(" + filters.join(",") + ")")}`;
     // Combine all the URL components and return the final URL for data retrieval.
-    console.log(baseUrl + [pageSize, sort, filterFunction].join("&"))
     return baseUrl + [pageSize, sort, filterFunction].join("&");
   }
 
@@ -193,7 +222,6 @@ function PentaProvider({ children }) {
           "content-type": "application/json",
         },
       });
-      console.log(response)
       if (!response.ok) {
         throw new Error("Network response was not ok");
       }
@@ -350,8 +378,14 @@ function PentaProvider({ children }) {
     fetchMaxSize,
     data,
     setData,
-    showModal,
-    setShowModal
+    serverMessage,
+    setServerMessage,
+    serverStatus, 
+    setServerStatus,
+    popUpStatus, 
+    setPopUpStatus,
+    message,
+    setMessage
   };
 
   return (

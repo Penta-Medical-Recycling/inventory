@@ -1,7 +1,8 @@
 import React from "react"
 import logo from "../assets/PentaLogo.png"
 
-function Maintenance () {
+function Maintenance ({ message }) {
+    console.log(message)
     return (
         <div style={{ textAlign: 'center', marginTop: '50px' }}>
             <img
@@ -9,8 +10,8 @@ function Maintenance () {
                 alt="Company Logo"
                 style={{ width: '200px', marginBottom: '20px' }}
             />
-            <h2>Server Maintenance</h2>
-            <p>Please check back later.</p>
+            <p>{message}</p>
+            
         </div>
     )
 }

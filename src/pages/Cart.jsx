@@ -147,7 +147,7 @@ function Cart() {
             "Additional Notes": notes,
             "Items You Would Like": items,
             "Patients helped" : numOfPatients,
-            "Percentage of children helped" : ((numOfChildren/numOfPatients) * 100).toFixed(1)
+            "Number of children helped" : numOfChildren
           },
         },
       ],

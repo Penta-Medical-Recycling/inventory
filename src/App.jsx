@@ -5,7 +5,10 @@ import SideBar from "./components/SideBar";
 import NavBar from "./components/NavBar";
 import Partner from "./pages/Partner";
 import Maintenance from "./pages/Maintenance";
-import { useEffect, useState } from "react";
+import { useContext } from "react";
+import PentaContext from "./context/PentaContext";
+
+
 
 /**
  * Main application component.
@@ -20,33 +23,13 @@ import { useEffect, useState } from "react";
 
 function App() {
 
-  const [serverStatus, setServerStatus] = useState("Online")
+  const { serverStatus, serverMessage } = useContext(PentaContext)
+  console.log(serverMessage)
 
-  useEffect(() => {
-    const apiKey = "patEd00q4REEnaMAs.893047f939ee5d324f5c26d1b5cb4491e1ec6e86ce78ce2cf604b47f0cb98631";
-    const fetchStatus = async () => {
-      //changeGP
-      const data = await fetch("https://api.airtable.com/v0/appZM47xckWRqZ8RH/Site-Status", {
-          method: "GET",
-          headers: {
-              "Content-Type": "application/json",
-              "authorization": `Bearer ${apiKey}`
-          }
-        }
-      )
-
-      const response = await data.json()
-      setServerStatus(response.records[0].fields.Status)
-      console.log(serverStatus)
-    }
-
-    fetchStatus()
-  })
-  
   return serverStatus === "Offline" ?
   (
     <Routes>
-        <Route path="*" element={<Maintenance />}></Route>
+        <Route path="*" element={<Maintenance message = {serverMessage} />}></Route>
     </Routes>
   ) :
   (
