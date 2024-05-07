@@ -24,7 +24,6 @@ import PentaContext from "./context/PentaContext";
 function App() {
 
   const { serverStatus, serverMessage } = useContext(PentaContext)
-  console.log(serverMessage)
 
   return serverStatus === "Offline" ?
   (
