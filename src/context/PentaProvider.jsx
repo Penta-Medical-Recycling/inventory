@@ -10,9 +10,9 @@ function PentaProvider({ children }) {
 
   
   //checking for server status and updating the corresponding state
-  const [serverStatus, setServerStatus] = useState("Online")
+  const [serverStatus, setServerStatus] = useState("Offline")
   const [serverMessage, setServerMessage] = useState("")
-  const [popUpStatus, setPopUpStatus] = useState("Online")
+  const [popUpStatus, setPopUpStatus] = useState("Offline")
   const [message, setMessage] = useState("")
   
   useEffect(() => {
@@ -35,13 +35,6 @@ function PentaProvider({ children }) {
     } 
   
     fetchStatus();
-
-    // Checking for first-visit of user on webpage and state for toggling the pop-up content
-    const hasVisited = Cookies.get('hasVisited');
-    if (!hasVisited) {
-      let in1Hour = 1/24;
-      Cookies.set('hasVisited', true, { expires : in1Hour })
-    }
   },[]);
 
   

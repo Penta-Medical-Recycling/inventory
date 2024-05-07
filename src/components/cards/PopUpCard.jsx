@@ -3,9 +3,8 @@ import logo from '../../assets/Penta.png'
 import PentaContext from "../../context/PentaContext";
 import Cookies from "js-cookie";
 
-const PopUpCard = () => {
+const PopUpCard = ({ showModal, setShowModal }) => {
     const { message } = useContext(PentaContext)
-    const [showModal, setShowModal] = useState(Cookies.get("hasVisited") ? false : true)
 
     return (
         <>
@@ -23,7 +22,7 @@ const PopUpCard = () => {
                         </div>
                         <div className="column has-background-light">
                             <header className="modal-card-head">
-                                <p className="modal-card-title">Hi, quick update</p>
+                                <p className="modal-card-title">Please note, </p>
                                 <button className="delete" aria-label="close" onClick={() => setShowModal(false)}></button>
                             </header>
                             <article style={{ padding: 20 }}>{message}</article>
