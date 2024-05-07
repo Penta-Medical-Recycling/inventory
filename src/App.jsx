@@ -4,6 +4,11 @@ import Cart from "./pages/Cart";
 import SideBar from "./components/SideBar";
 import NavBar from "./components/NavBar";
 import Partner from "./pages/Partner";
+import Maintenance from "./pages/Maintenance";
+import { useContext } from "react";
+import PentaContext from "./context/PentaContext";
+
+
 
 /**
  * Main application component.
@@ -17,7 +22,16 @@ import Partner from "./pages/Partner";
  */
 
 function App() {
-  return (
+
+  const { serverStatus, serverMessage } = useContext(PentaContext)
+
+  return serverStatus === "Offline" ?
+  (
+    <Routes>
+        <Route path="*" element={<Maintenance message = {serverMessage} />}></Route>
+    </Routes>
+  ) :
+  (
     <>
       <SideBar />
       <main>

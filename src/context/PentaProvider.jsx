@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import PentaContext from "./PentaContext";
 
 function PentaProvider({ children }) {
@@ -7,6 +7,37 @@ function PentaProvider({ children }) {
     localStorage.getItem("partner") || ""
   );
 
+  // Retrieve the API key from environment variables.
+  const APIKey = import.meta.env.VITE_REACT_APP_API_KEY;
+  
+  //checking for server status and updating the corresponding state
+  const [serverStatus, setServerStatus] = useState("Offline")
+  const [serverMessage, setServerMessage] = useState("")
+  const [popUpStatus, setPopUpStatus] = useState("Offline")
+  const [message, setMessage] = useState("")
+  
+  useEffect(() => {
+    const fetchStatus = async () => {
+      const data = await fetch("https://api.airtable.com/v0/appHFwcwuXLTNCjtN/Site-Status", {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          "authorization": `Bearer ${APIKey}`
+        }
+      })
+    
+      const response = await data.json()
+      setServerStatus(response.records[0].fields.Status)
+      setServerMessage(response.records[0].fields.Message)
+      setPopUpStatus(response.records[1].fields.Status)
+      setMessage(response.records[1].fields.Message)
+    } 
+  
+    fetchStatus();
+  },[]);
+
+  
+  
   // Count the number of items in the cart. Items are stored as stringified JSON objects with Item IDs as keys.
   // Exclude 'partner' and 'notes' keys from localStorage when counting.
   const [cartCount, setCartCount] = useState(
@@ -162,8 +193,6 @@ function PentaProvider({ children }) {
     return baseUrl + [pageSize, sort, filterFunction].join("&");
   }
 
-  // Retrieve the API key from environment variables.
-  const APIKey = import.meta.env.VITE_REACT_APP_API_KEY;
 
   /**
    * Fetch data from a specified URL using the provided API key for authorization.
@@ -176,9 +205,9 @@ function PentaProvider({ children }) {
       const response = await fetch(url, {
         headers: {
           Authorization: `Bearer ${APIKey}`,
+          "content-type": "application/json",
         },
       });
-
       if (!response.ok) {
         throw new Error("Network response was not ok");
       }
@@ -234,6 +263,7 @@ function PentaProvider({ children }) {
    * @returns {Promise} A promise that resolves to the maximum size found in the inventory or null if no data is found.
    */
   async function fetchMaxSize() {
+    //ORIGINAL
     const url = `https://api.airtable.com/v0/appHFwcwuXLTNCjtN/Inventory?pageSize=1&sort[0][field]=Size&sort[0][direction]=desc&filterByFormula=AND(AND({Requests}="",{Shipment Status}=""),NOT({SKU}=""))`;
 
     const data = await fetchAPI(url);
@@ -330,6 +360,14 @@ function PentaProvider({ children }) {
     fetchMaxSize,
     data,
     setData,
+    serverMessage,
+    setServerMessage,
+    serverStatus, 
+    setServerStatus,
+    popUpStatus, 
+    setPopUpStatus,
+    message,
+    setMessage
   };
 
   return (
