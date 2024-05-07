@@ -15,13 +15,10 @@ function Cart() {
   const [outOfStock, setOutOfStock] = useState();
   const navigate = useNavigate();
   const [notes, setNotes] = useState(localStorage.getItem("notes") || "");
-  const [numOfPatients, setNumOfPatients] = useState(0);
-  const [numOfChildren, setNumOfChildren] = useState(0);
   const [isLoading, setIsLoading] = useState(false);
 
   // API key obtained from environment variables
   const APIKey = import.meta.env.VITE_REACT_APP_API_KEY;
-
 
   // Function to generate a random hexadecimal code
   function generateRandomHexadecimal() {
@@ -39,16 +36,6 @@ function Cart() {
     localStorage.setItem("notes", event.target.value);
   };
 
-  //handle change to response of question 1
-  const handlePatientsChange = (event) => {
-    setNumOfPatients(event.target.value)
-  }
-
-  //handle change to response of question 2
-  const handleChildrenChange = (event) => {
-    setNumOfChildren(event.target.value)
-  }
-
   // Function to fetch and check the stock status of item IDs in localStorage
   const idFetcher = async () => {
     // Iterate through localStorage to extract item IDs
@@ -65,7 +52,6 @@ function Cart() {
 
     // Check the stock status of each item ID
     for (const id of ids) {
-
       const url = `https://api.airtable.com/v0/appHFwcwuXLTNCjtN/Inventory?filterByFormula=AND({Requests}=BLANK(),{Shipment Status}=BLANK(),NOT({SKU}=""),AND({Item ID}='${encodeURIComponent(
         id
       )}'))&maxRecords=1`;
@@ -123,8 +109,7 @@ function Cart() {
     }
 
     // Otherwise construct the request data
-    // const BaseID = "appHFwcwuXLTNCjtN"; => ORIGINAL
-    const BaseID = "appZM47xckWRqZ8RH"
+    const BaseID = "appHFwcwuXLTNCjtN";
     const tableName = "Requests";
     const items = [];
     Object.entries(localStorage).forEach(([key, value]) => {
@@ -140,8 +125,6 @@ function Cart() {
             Partner: localStorage["partner"],
             "Additional Notes": notes,
             "Items You Would Like": items,
-            "Patients helped" : numOfPatients,
-            "Number of children helped" : numOfChildren
           },
         },
       ],
@@ -248,24 +231,6 @@ function Cart() {
             // Display a loading spinner while loading
             <BigSpinner size={75} />
           )}
-          <div style={{ width: "60vw", margin: "auto" }}>
-            <p>How many patients do you plan to help with this request?</p>
-            <input
-              className="input is-normal"
-              type="number"
-              placeholder="Please input a number"
-              value={numOfPatients}
-              onChange={handlePatientsChange}
-            />
-            <p>How many of the patients are children (under 21 years old)?</p>
-            <input
-              className="input is-normal"
-              type="number"
-              placeholder="Please input a number"
-              value={numOfChildren}
-              onChange={handleChildrenChange}
-            />
-          </div>
           <div style={{ width: "60vw", margin: "auto" }}>
             {/* Additional notes textarea */}
             <textarea
