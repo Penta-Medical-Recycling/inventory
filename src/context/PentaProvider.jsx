@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import PentaContext from "./PentaContext";
 
 function PentaProvider({ children }) {
@@ -7,12 +7,20 @@ function PentaProvider({ children }) {
     localStorage.getItem("partner") || ""
   );
 
+  // Retrieve the API key from environment variables.
+  const APIKey = import.meta.env.VITE_REACT_APP_API_KEY;
+
   // Count the number of items in the cart. Items are stored as stringified JSON objects with Item IDs as keys.
   // Exclude 'partner' and 'notes' keys from localStorage when counting.
   const [cartCount, setCartCount] = useState(
     Object.keys(localStorage).filter((k) => k !== "partner" && k !== "notes")
       .length
   );
+  //checking for server status and updating the corresponding state
+  const [serverStatus, setServerStatus] = useState("Offline")
+  const [serverMessage, setServerMessage] = useState("")
+  const [popUpStatus, setPopUpStatus] = useState("Offline")
+  const [message, setMessage] = useState("")
 
   // Set the animation state for when an item is added to the cart.
   const [isCartPressed, setIsCartPressed] = useState(false);
@@ -79,6 +87,28 @@ function PentaProvider({ children }) {
   // Maintain an offsetArray to keep track of pagination.
   const [offsetArray, setOffsetArray] = useState([""]);
   ////////////////////////////////////////////////////////////////////////////////////////////////
+
+  //fetches the initial data of pop message and server status
+  useEffect(() => {
+    const fetchStatus = async () => {
+      //changeGP
+      const data = await fetch("https://api.airtable.com/v0/appHFwcwuXLTNCjtN/Site-Status", {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          "authorization": `Bearer ${APIKey}`
+        }
+      })
+
+      const response = await data.json()
+      setPopUpStatus(response.records[0].fields.Status)
+      setMessage(response.records[0].fields.Message)
+      setServerStatus(response.records[1].fields.Status)
+      setServerMessage(response.records[1].fields.Message)
+    }
+
+    fetchStatus()
+  }, [])
 
   /**
    * Creates a URL for querying data from the AirTable API based on user-selected filters and search criteria.
@@ -161,9 +191,6 @@ function PentaProvider({ children }) {
     // Combine all the URL components and return the final URL for data retrieval.
     return baseUrl + [pageSize, sort, filterFunction].join("&");
   }
-
-  // Retrieve the API key from environment variables.
-  const APIKey = import.meta.env.VITE_REACT_APP_API_KEY;
 
   /**
    * Fetch data from a specified URL using the provided API key for authorization.
@@ -330,6 +357,14 @@ function PentaProvider({ children }) {
     fetchMaxSize,
     data,
     setData,
+    serverMessage,
+    setServerMessage,
+    serverStatus, 
+    setServerStatus,
+    popUpStatus, 
+    setPopUpStatus,
+    message,
+    setMessage
   };
 
   return (
