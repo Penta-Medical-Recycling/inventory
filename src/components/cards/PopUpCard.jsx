@@ -21,7 +21,7 @@ const PopUpCard = ({ showModal, setShowModal }) => {
                         </div>
                         <div className="column has-background-light">
                             <header className="modal-card-head">
-                                <p className="modal-card-title">Please note, </p>
+                                <p className="modal-card-title">Please note</p>
                                 <button className="delete" aria-label="close" onClick={() => setShowModal(false)}></button>
                             </header>
                             <article style={{ padding: 20 }}>{message}</article>
