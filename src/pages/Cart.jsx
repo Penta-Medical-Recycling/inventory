@@ -16,6 +16,8 @@ function Cart() {
   const navigate = useNavigate();
   const [notes, setNotes] = useState(localStorage.getItem("notes") || "");
   const [isLoading, setIsLoading] = useState(false);
+  const [numOfPatients, setNumOfPatients] = useState(0);
+  const [numOfChildren, setNumOfChildren] = useState(0);
 
   // API key obtained from environment variables
   const APIKey = import.meta.env.VITE_REACT_APP_API_KEY;
@@ -125,6 +127,8 @@ function Cart() {
             Partner: localStorage["partner"],
             "Additional Notes": notes,
             "Items You Would Like": items,
+            "Number of patients helped": numOfPatients,
+            "Number of children helped": numOfChildren
           },
         },
       ],
@@ -149,6 +153,8 @@ function Cart() {
           // Clear notes and cart after successful request
           setNotes("");
           setCartCount(0);
+          setNumOfChildren(0);
+          setNumOfPatients(0);
           const partner = localStorage["partner"];
           localStorage.clear();
           localStorage.setItem("partner", partner);
@@ -231,6 +237,24 @@ function Cart() {
             // Display a loading spinner while loading
             <BigSpinner size={75} />
           )}
+          <div style={{ width: "60vw", margin: "auto" }}>
+            <p>How many patients do you plan to help with this request?</p>
+            <input
+              className="input is-normal"
+              type="number"
+              placeholder="Please input a number"
+              value={numOfPatients}
+              onChange={(e) => setNumOfPatients(e.target.value)}
+            />
+            <p>How many of the patients are children (under 21 years old)?</p>
+            <input
+              className="input is-normal"
+              type="number"
+              placeholder="Please input a number"
+              value={numOfChildren}
+              onChange={(e) => setNumOfChildren(e.target.value)}
+            />
+          </div>
           <div style={{ width: "60vw", margin: "auto" }}>
             {/* Additional notes textarea */}
             <textarea
