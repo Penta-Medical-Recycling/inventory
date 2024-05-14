@@ -9,7 +9,7 @@ import PopUpCard from "../components/cards/PopUpCard";
 
 const NavBar = () => {
   const { selectedPartner, cartCount, isCartPressed, isSideBarActive, popUpStatus } = useContext(PentaContext);
-  const [showModal, setShowModal] = useState(popUpStatus === "Online" && Cookies.get("hasVisited") ? false : true);
+  const [showModal, setShowModal] = useState(popUpStatus === "Offline" ? false : Cookies.get('hasVisited') ? false : true);
 
   // Checking for first-visit of user on webpage and state for toggling the pop-up content
   const hasVisited = Cookies.get('hasVisited');
