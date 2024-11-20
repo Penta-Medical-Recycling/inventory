@@ -307,7 +307,7 @@ function PentaProvider({ children }) {
     } else {
       // For Partner Selection
       return records
-        .map((e) => e.fields.Name.trimStart())
+        .map((e) => e.fields.Partner.trimStart())
         .sort((a, b) => a.localeCompare(b));
     }
   };
