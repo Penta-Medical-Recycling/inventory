@@ -5,42 +5,79 @@ import CartLister from "../components/CartLister";
 import Toast from "../components/Toast";
 import PentaContext from "../context/PentaContext";
 
+// You should implement or import this method properly
+const getTotalInStockBySKU = async (sku) => {
+  // TODO: Replace with actual API call
+  return 10;
+};
+
 function Cart() {
-  const { selectedPartner, setCartCount } = useContext(PentaContext);
-
-  // Initialize an array to store item IDs that are out of stock
-  const ids = [];
-
-  // State variables to manage out-of-stock items, notes, and loading status
+  const { fulfillCartItems, selectedPartner, setCartCount } = useContext(PentaContext);
+  const [quantities, setQuantities] = useState({});
   const [outOfStock, setOutOfStock] = useState();
   const navigate = useNavigate();
   const [notes, setNotes] = useState(localStorage.getItem("notes") || "");
   const [isLoading, setIsLoading] = useState(false);
   const [numOfPatients, setNumOfPatients] = useState(0);
   const [numOfChildren, setNumOfChildren] = useState(0);
-
-  // API key obtained from environment variables
+  const [showResetModal, setShowResetModal] = useState(false);
   const APIKey = import.meta.env.VITE_REACT_APP_API_KEY;
 
-  // Function to generate a random hexadecimal code
-  function generateRandomHexadecimal() {
-    return (
-      "#" +
-      Math.floor(Math.random() * 16777216)
-        .toString(16)
-        .toUpperCase()
-    );
-  }
+  const handleQuantityChange = (id, value) => {
+    setQuantities(prev => ({ ...prev, [id]: value }));
+  };
 
-  // Handle changes to the additional notes textarea
+  const validateCartQuantities = async () => {
+    for (let [sku, quantity] of Object.entries(quantities)) {
+      const totalAvailable = await getTotalInStockBySKU(sku);
+      if (quantity > totalAvailable) {
+        alert(
+          `Cannot order ${quantity} for ${decodeURIComponent(sku)}. Only ${totalAvailable} in stock.`
+        );
+        return false;
+      }
+    }
+    return true;
+  };
+
+  const handleConfirmOrder = async () => {
+    const cartItems = Object.entries(quantities).map(([sku, quantity]) => ({
+      sku,
+      quantity: parseInt(quantity)
+    }));
+
+    if (await validateCartQuantities() && window.confirm("Are you sure you want to place this order?")) {
+      fulfillCartItems(cartItems);
+    }
+  };
+
+  const handleResetCart = () => {
+  setShowResetModal(true); // 🆕 trigger confirmation modal
+};
+
+const confirmResetCart = () => {
+  const partner = localStorage.getItem("partner");
+  localStorage.clear();
+  if (partner) {
+    localStorage.setItem("partner", partner);
+  }
+  setCartCount(0);
+  Toast({ message: "Cart has been reset.", type: "is-info" });
+  setShowResetModal(false); // close modal
+  navigate("/"); // 🆕 redirect to homepage
+};
+
+
+  const generateRandomHexadecimal = () =>
+    "#" + Math.floor(Math.random() * 16777216).toString(16).toUpperCase();
+
   const handleNotesChange = (event) => {
     setNotes(event.target.value);
     localStorage.setItem("notes", event.target.value);
   };
 
-  // Function to fetch and check the stock status of item IDs in localStorage
   const idFetcher = async () => {
-    // Iterate through localStorage to extract item IDs
+    const ids = [];
     for (let [key, value] of Object.entries(localStorage)) {
       if (key !== "partner" && key !== "notes") {
         const parse = JSON.parse(value);
@@ -50,9 +87,9 @@ function Cart() {
         }
       }
     }
+
     const idSet = new Set();
 
-    // Check the stock status of each item ID
     for (const id of ids) {
       const url = `https://api.airtable.com/v0/appHFwcwuXLTNCjtN/Inventory?filterByFormula=AND({Requests}=BLANK(),{Shipment Status}=BLANK(),NOT({SKU}=""),AND({Item ID}='${encodeURIComponent(
         id
@@ -66,7 +103,6 @@ function Cart() {
         });
 
         const data = await response.json();
-        // if a record is not returned, it means that it became unavailable since it was added to the cart, its id will be added to the set
         if (data.records && data.records.length === 0) {
           idSet.add(id);
         }
@@ -75,31 +111,21 @@ function Cart() {
       }
     }
 
-    // Adds out of stock banner to those item cards
     setOutOfStock(idSet);
-
-    // When requesting, stops post request if false is returned.
-    if (idSet.size > 0) {
-      return true;
-    } else {
-      return false;
-    }
+    return idSet.size > 0;
   };
 
-  // Ensure that a partner is selected and checks all cart item availability status when the component mounts
   useEffect(() => {
     if (!selectedPartner) navigate("/partner");
     idFetcher();
   }, []);
 
-  // Function to handle the request button click
   const requestButton = async (event) => {
     setIsLoading(true);
     event.preventDefault();
     setOutOfStock(new Set());
     const stockCheck = await idFetcher();
 
-    // if any item is out of stock, toast is displayed and request is cancelled
     if (stockCheck) {
       Toast({
         message:
@@ -110,7 +136,6 @@ function Cart() {
       return;
     }
 
-    // Otherwise construct the request data
     const BaseID = "appHFwcwuXLTNCjtN";
     const tableName = "Requests";
     const items = [];
@@ -123,7 +148,7 @@ function Cart() {
       records: [
         {
           fields: {
-            Name: generateRandomHexadecimal(), // unique temporary name for the request for AirTable management and stock checking purposes
+            Name: generateRandomHexadecimal(),
             Partner: localStorage["partner"],
             "Additional Notes": notes,
             "Items You Would Like": items,
@@ -135,7 +160,6 @@ function Cart() {
       typecast: true,
     };
 
-    // Send the request data to the AirTable
     fetch(url, {
       method: "POST",
       headers: {
@@ -148,9 +172,7 @@ function Cart() {
       .then((data) => {
         if (data.error) {
           console.error("Error:", data.error);
-          setErrorMessage("Error: " + data.error.message);
         } else {
-          // Clear notes and cart after successful request
           setNotes("");
           setCartCount(0);
           setNumOfChildren(0);
@@ -172,7 +194,6 @@ function Cart() {
       });
   };
 
-  // Function to handle missing information when requesting
   const missingInfo = () => {
     !notes &&
     Object.keys(localStorage).filter((k) => k !== "partner" && k !== "notes")
@@ -195,46 +216,25 @@ function Cart() {
   return (
     <>
       <div id="text-section">
-        {/* Title */}
-        <h1
-          className="title has-text-centered mt-6 loading-effect"
-          style={{ animationDelay: "0.23s" }}
-        >
+        <h1 className="title has-text-centered mt-6 loading-effect" style={{ animationDelay: "0.23s" }}>
           MY CART
         </h1>
       </div>
       {isLoading ? (
-        // Display a loading spinner while loading
         <BigSpinner size={75} />
       ) : (
         <>
-          <h1
-            className="has-text-centered is-size-5 my-4 loading-effect"
-            style={{ animationDelay: "0.46s" }}
-          >
+          <h1 className="has-text-centered is-size-5 my-4 loading-effect" style={{ animationDelay: "0.46s" }}>
             Hello, {selectedPartner} Member!
           </h1>
-          <Link
-            to="/partner"
-            className="is-flex is-justify-content-center my-3 loading-effect"
-            style={{ animationDelay: "0.66s" }}
-          >
-            {/* Button to change navigate to Partner Select */}
-            <button
-              className="button is-rounded"
-              id="partner-button"
-              aria-label="ChangePartner"
-              role="button"
-            >
+          <Link to="/partner" className="is-flex is-justify-content-center my-3 loading-effect" style={{ animationDelay: "0.66s" }}>
+            <button className="button is-rounded" id="partner-button" aria-label="ChangePartner" role="button">
               Change Partner
             </button>
           </Link>
-
-          {/* Render the CartLister component with out-of-stock items */}
           {outOfStock ? (
             <CartLister outOfStock={outOfStock} setOutOfStock={setOutOfStock} />
           ) : (
-            // Display a loading spinner while loading
             <BigSpinner size={75} />
           )}
           <div style={{ width: "60vw", margin: "auto" }}>
@@ -256,7 +256,6 @@ function Cart() {
             />
           </div>
           <div style={{ width: "60vw", margin: "auto" }}>
-            {/* Additional notes textarea */}
             <textarea
               id="cart-textarea"
               className="textarea my-4 is-rounded loading-effect"
@@ -266,29 +265,62 @@ function Cart() {
               onChange={handleNotesChange}
             ></textarea>
           </div>
-          <div
-            className="is-flex is-justify-content-center loading-effect"
-            style={{ animationDelay: "1s" }}
-          >
-            {/* Request button */}
+          <div className="is-flex is-justify-content-center loading-effect" style={{ animationDelay: "1.2s" }}>
             <button
-              id="partner-button"
-              aria-label="Request"
+              id="confirm-button"
+              aria-label="Confirm"
               role="button"
-              className="button mb-1 is-rounded"
+              className="button mb-1 is-rounded is-primary"
               type="button"
-              onClick={
-                notes &&
-                Object.keys(localStorage).filter(
-                  (k) => k !== "partner" && k !== "notes"
-                ).length >= 1
-                  ? requestButton
-                  : missingInfo
-              }
+              style={{
+              backgroundColor: "#78d3fb"
+              }}
+              onClick={handleConfirmOrder}
             >
-              Request Items
+             Request Items
             </button>
           </div>
+          <div className="is-flex is-justify-content-center loading-effect" style={{ animationDelay: "1.3s" }}>
+  <button
+    id="reset-button"
+    aria-label="ResetCart"
+    role="button"
+    className="button mb-4 is-rounded is-danger"
+    type="button"
+    style={{
+    minWidth: "142px", // match width
+    padding: "0.75rem 1.5rem", // match padding
+    fontSize: "1rem",
+    backgroundColor: "#ff5c47e8" // match font size
+  }}
+    onClick={handleResetCart}
+  >
+    Reset Cart
+  </button>
+  </div>
+  {showResetModal && (
+  <div className="modal-overlay">
+    <div className="modal-box">
+      <p className="mb-3">Are you sure you want to reset your cart?</p>
+      <div
+  className="is-flex is-justify-content-center"
+  style={{ gap: "1.5rem", marginTop: "1rem" }}
+>
+  <button
+  className="button is-danger is-light custom-reset"
+  onClick={confirmResetCart}
+>
+  Reset
+</button>
+
+  <button className="button is-light" onClick={() => setShowResetModal(false)}>
+    Cancel
+  </button>
+</div>
+
+    </div>
+  </div>
+)}
         </>
       )}
     </>

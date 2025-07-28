@@ -312,7 +312,68 @@ function PentaProvider({ children }) {
     }
   };
 
-  let contextValues = {
+  
+/**
+ * Get all cart items from Airtable sorted by FIFO (oldest Date Added first)
+ */
+const getCartItemsSortedFIFO = async () => {
+  const url = `https://api.airtable.com/v0/appHFwcwuXLTNCjtN/Inventory?sort[0][field]=Date Added&sort[0][direction]=asc&filterByFormula=AND(NOT({Requests}!=""), {Quantity In Stock}>0)`;
+  const data = await fetchAPI(url);
+  return data?.records || [];
+};
+
+/**
+ * Fulfill all cart items using FIFO logic
+ * @param {Array} cartItems - array of cart items with {sku, quantity}
+ */
+const fulfillCartItems = async (cartItems) => {
+  for (let item of cartItems) {
+    let quantityToFulfill = item.quantity;
+    const inventory = await getCartItemsSortedFIFO();
+    for (let record of inventory) {
+      if (record.fields.SKU === item.sku && quantityToFulfill > 0) {
+        const availableQty = record.fields["Quantity In Stock"] || 0;
+        const fulfillQty = Math.min(availableQty, quantityToFulfill);
+        await fetch(`https://api.airtable.com/v0/appHFwcwuXLTNCjtN/Inventory/${record.id}`, {
+          method: "PATCH",
+          headers: {
+            "Authorization": `Bearer ${APIKey}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            fields: {
+              "Quantity In Stock": availableQty - fulfillQty,
+              "Quantity Fulfilled": (record.fields["Quantity Fulfilled"] || 0) + fulfillQty,
+              "Requests": selectedPartner,
+            },
+          }),
+        });
+        quantityToFulfill -= fulfillQty;
+      }
+    }
+  }
+};
+
+
+  /**
+   * Calculates the total in-stock quantity of a given SKU across all eligible inventory items.
+   *
+   * @param {string} sku - The SKU to check.
+   * @returns {Promise<number>} The total quantity in stock for the given SKU.
+   */
+  const getTotalInStockBySKU = async (sku) => {
+    const baseId = "appHFwcwuXLTNCjtN";
+    const url = `https://api.airtable.com/v0/${baseId}/Inventory?filterByFormula=AND({SKU} = '${sku}', {Requests} = BLANK(), {Shipment Status} = BLANK())`;
+
+    const data = await fetchAPI(url);
+    if (!data || !data.records) return 0;
+
+    return data.records.reduce((total, record) => {
+      return total + (record.fields["Quantity In Stock"] || 0);
+    }, 0);
+  };
+
+let contextValues = {
     selectedPartner,
     setSelectedPartner,
     cartCount,
