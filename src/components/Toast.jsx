@@ -7,8 +7,8 @@ const Toast = ({ message, type }) => {
     message: message,
     type: type,
     position: "top-center",
-    duration: 4000, // Duration to display the toast (in milliseconds)
-    dismissible: true, // Allows the user to dismiss the toast
+    duration: 4000, 
+    dismissible: true, 
   };
 
   bulmaToast.toast(toastConfig);
