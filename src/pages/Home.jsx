@@ -1,5 +1,5 @@
 import HomeLister from "../components/home/HomeLister";
-import { useContext, useState } from "react";
+import { useEffect, useContext, useState } from "react";
 import PentaContext from "../context/PentaContext";
 import Pagination from "../components/home/Pagination";
 import Tags from "../components/home/Tags";

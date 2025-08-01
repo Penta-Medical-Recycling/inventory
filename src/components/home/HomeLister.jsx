@@ -33,34 +33,33 @@ const HomeLister = ({ onRemove, setOnRemove }) => {
 
   // ✅ Background fetch of all inventory pages
   useEffect(() => {
-  async function fetchAllInventory() {
-    let allRecords = [];
-    let nextOffset = "";
-    let pageCounter = 0;
-    const maxPages = 50; // safeguard against infinite loops
+    async function fetchAllInventory() {
+      let allRecords = [];
+      let nextOffset = "";
+      let pageCounter = 0;
+      const maxPages = 50;
 
-    const baseUrl = urlCreator().split("&offset=")[0]; // remove existing offset param
+      const baseUrl = urlCreator().split("&offset=")[0];
 
-    while (pageCounter < maxPages) {
-      const url = baseUrl + nextOffset;
-      const res = await fetchAPI(url);
+      while (pageCounter < maxPages) {
+        const url = baseUrl + nextOffset;
+        const res = await fetchAPI(url);
 
-      if (res.records) {
-        allRecords.push(...res.records.map((r) => r.fields));
+        if (res.records) {
+          allRecords.push(...res.records.map((r) => r.fields));
+        }
+
+        if (!res.offset) break;
+        nextOffset = `&offset=${res.offset}`;
+        pageCounter++;
       }
 
-      if (!res.offset) break;
-      nextOffset = `&offset=${res.offset}`;
-      pageCounter++;
+      sessionStorage.setItem("allInventoryItems", JSON.stringify(allRecords));
+      console.log(`✅ Fetched ${allRecords.length} total items from inventory.`);
     }
 
-    sessionStorage.setItem("allInventoryItems", JSON.stringify(allRecords));
-    console.log(`✅ Fetched ${allRecords.length} total items from inventory.`);
-  }
-
-  fetchAllInventory();
-}, []);
-
+    fetchAllInventory();
+  }, []);
 
   async function loadNewPage() {
     const newUrl = urlCreator();
@@ -69,10 +68,10 @@ const HomeLister = ({ onRemove, setOnRemove }) => {
     if (globalUrl.current !== newUrl) {
       const res = await fetchAPI(newUrl);
 
-      if (res.offset && res.offset !== undefined) {
+      if (res.offset) {
         setOffsetArray(["", res.offset]);
         setPage("Next");
-      } else if (res.offset === undefined) {
+      } else {
         setOffsetArray([""]);
         setPage("None");
       }
@@ -81,25 +80,14 @@ const HomeLister = ({ onRemove, setOnRemove }) => {
       globalUrl.current = newUrl;
       setOffset(0);
       setData(res.records);
-
-      // ✅ Save current page items too (optional but good for local view logic)
       sessionStorage.setItem("allItems", JSON.stringify(res.records.map((r) => r.fields)));
     } else if (globalUrl.current === newUrl && offsetKey.current !== newOffset) {
       const res = await fetchAPI(newUrl + newOffset);
 
-      if (
-        res.offset &&
-        res.offset !== undefined &&
-        offsetArray[offset - 1] !== undefined &&
-        offset !== 0
-      ) {
+      if (res.offset && offsetArray[offset - 1] !== undefined && offset !== 0) {
         setOffsetArray([...offsetArray, res.offset]);
         setPage("Next/Previous");
-      } else if (
-        res.offset === undefined &&
-        offsetArray[offset - 1] !== undefined &&
-        offset !== 0
-      ) {
+      } else if (!res.offset && offsetArray[offset - 1] !== undefined && offset !== 0) {
         setPage("Previous");
       } else {
         setPage("Next");
@@ -107,8 +95,6 @@ const HomeLister = ({ onRemove, setOnRemove }) => {
 
       offsetKey.current = newOffset;
       setData(res.records);
-
-      // ✅ Save current page items
       sessionStorage.setItem("allItems", JSON.stringify(res.records.map((r) => r.fields)));
     }
   }
@@ -173,7 +159,7 @@ const HomeLister = ({ onRemove, setOnRemove }) => {
               key={item.fields["Item ID"]}
               onRemove={onRemove}
               setOnRemove={setOnRemove}
-              allVisibleItems={data.map((i) => i.fields)} // optional but still fine
+              allVisibleItems={data.map((i) => i.fields)}
             />
           ))}
         </div>
