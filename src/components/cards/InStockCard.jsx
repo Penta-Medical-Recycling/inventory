@@ -58,6 +58,14 @@ const InStockCard = ({ item, onRemove, inCart, allVisibleItems }) => {
   }
 
   const allItems = JSON.parse(sessionStorage.getItem("allInventoryItems") || "[]");
+    if (!Array.isArray(allItems) || allItems.length === 0) {
+  setMessageContent(
+    `"${itemName}" inventory is still loading. Please wait a moment and try again.`
+  );
+  setShowMessage(true);
+  setShowModal(false);
+  return;
+}
 
   const matchingItems = allItems.filter(
     (entry) =>
@@ -71,9 +79,8 @@ const InStockCard = ({ item, onRemove, inCart, allVisibleItems }) => {
 
   const availableItems = matchingItems.filter((entry) => {
     const saved = localStorage.getItem(entry["Item ID"]);
-    if (saved) return false; // skip if already in cart
+    if (saved) return false;
 
-    // Size filtering
     const itemSize = parseFloat(entry?.["Size"]);
 
     if (selectedSize?.exact) {
@@ -101,9 +108,27 @@ const InStockCard = ({ item, onRemove, inCart, allVisibleItems }) => {
 
   let addedCount = 0;
 
+  // ✅ STEP 1: Add the clicked item first (regardless of FIFO)
+  const clickedItem = availableItems.find((entry) => entry["Item ID"] === currentItemId);
+  if (clickedItem) {
+    localStorage.setItem(
+      currentItemId,
+      JSON.stringify({
+        ...clickedItem,
+        ["Qty."]: 1,
+        ...(selectedSize && { ["Selected Size"]: selectedSize })
+      })
+    );
+    setCartCount((prev) => prev + 1);
+    addedCount++;
+  }
+
+  // ✅ STEP 2: Continue with FIFO for the remaining quantity
   for (let i = 0; i < availableItems.length && addedCount < unitsRequested; i++) {
     const entry = availableItems[i];
     const entryId = entry["Item ID"];
+
+    if (entryId === currentItemId || localStorage.getItem(entryId)) continue; // Skip already added item or duplicates
 
     localStorage.setItem(
       entryId,
@@ -113,7 +138,6 @@ const InStockCard = ({ item, onRemove, inCart, allVisibleItems }) => {
         ...(selectedSize && { ["Selected Size"]: selectedSize })
       })
     );
-
     setCartCount((prev) => prev + 1);
     addedCount++;
   }
@@ -123,6 +147,7 @@ const InStockCard = ({ item, onRemove, inCart, allVisibleItems }) => {
   setTimeout(() => setIsCartPressed(false), 1000);
   Toast({ message: `"${itemName}" added to cart`, type: "is-success" });
 };
+
 
 
 
