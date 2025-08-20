@@ -151,28 +151,31 @@ function PentaProvider({ children }) {
   }
 
   const fetchSelectOptions = async (fieldToMap) => {
-    const records = await fetchTableRecordsWithOffset(fieldToMap);
+  const records = await fetchTableRecordsWithOffset(fieldToMap);
 
-    if (fieldToMap === "Manufacturers") {
-      return records
-        .map((e) => ({
-          label: e.fields.Name.trimStart(),
-          value: encodeURIComponent(e.fields.Name.trimStart()),
-        }))
-        .sort((a, b) => a.label.localeCompare(b.label));
-    } else if (fieldToMap === "SKUs") {
-      return records
-        .map((e) => ({
-          label: e.fields.Description || "VOID",
-          value: encodeURIComponent(e.fields["Item Code"].trimStart()),
-        }))
-        .sort((a, b) => a.label.localeCompare(b.label));
-    } else {
-      return records
-        .map((e) => e.fields.Partner.trimStart())
-        .sort((a, b) => a.localeCompare(b));
-    }
-  };
+  if (fieldToMap === "Manufacturers") {
+    return records
+      .map((e) => ({
+        label: e.fields.Name.trimStart(),
+        value: encodeURIComponent(e.fields.Name.trimStart()),
+      }))
+      .sort((a, b) => a.label.localeCompare(b.label));
+  } else if (fieldToMap === "SKUs") {
+    const skuList = records.map((e) => e.fields.SKU); // assuming 'SKU' is the field name
+    const mappedData = skuList
+      .filter((item) => typeof item === "string" && item.trim() !== "")
+      .map((item) => ({
+        label: item.trimStart().replace(/["]/g, ""),
+        value: item,
+      }));
+
+    return mappedData.sort((a, b) => a.label.localeCompare(b.label));
+  } else {
+    return records
+      .map((e) => e.fields.Partner.trimStart())
+      .sort((a, b) => a.localeCompare(b));
+  }
+};
 
   const getCartItemsSortedFIFO = async () => {
     const url = `https://api.airtable.com/v0/appHFwcwuXLTNCjtN/Inventory?sort[0][field]=Date Added&sort[0][direction]=asc&filterByFormula=AND(NOT({Requests}!=""), {Quantity In Stock}>0)`;

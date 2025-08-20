@@ -21,6 +21,32 @@ function Cart() {
   const [numOfPatients, setNumOfPatients] = useState(0);
   const [numOfChildren, setNumOfChildren] = useState(0);
   const [showResetModal, setShowResetModal] = useState(false);
+  const [itemValidationStatus, setItemValidationStatus] = useState({});
+  const [loadingItems, setLoadingItems] = useState(true);
+  const [isCartReady, setIsCartReady] = useState(false);
+// Filter valid cart item keys (skip notes/partner/etc)
+const itemKeys = Object.keys(localStorage).filter(
+  (key) => key !== "notes" && key !== "partner"
+);
+
+// Check if every item is validated
+const validatedItemCount = itemKeys.filter((key) => {
+  const item = JSON.parse(localStorage.getItem(key));
+  const status = itemValidationStatus[item["Item ID"]];
+  console.log(`Item ID ${item["Item ID"]} validation status:`, status);
+  return status === "done";
+}).length;
+
+const allItemsValidated = validatedItemCount === itemKeys.length;
+
+console.log("🧾 Total items:", itemKeys.length);
+console.log("✅ Validated items:", validatedItemCount);
+console.log("🌀 All items validated:", allItemsValidated);
+
+
+
+
+
   const APIKey = import.meta.env.VITE_REACT_APP_API_KEY;
 
   const handleQuantityChange = (id, value) => {
@@ -47,8 +73,9 @@ function Cart() {
     }));
 
     if (await validateCartQuantities() && window.confirm("Are you sure you want to place this order?")) {
-      fulfillCartItems(cartItems);
-    }
+  await requestButton(); // ✅ submit and redirect
+}
+
   };
 
   const handleResetCart = () => {
@@ -77,52 +104,60 @@ const confirmResetCart = () => {
   };
 
   const idFetcher = async () => {
-    const ids = [];
-    for (let [key, value] of Object.entries(localStorage)) {
-      if (key !== "partner" && key !== "notes") {
-        const parse = JSON.parse(value);
-        const itemID = parse["Item ID"];
-        if (itemID !== undefined) {
-          ids.push(itemID);
-        }
+  const ids = [];
+  const validationStatus = {};
+
+  for (let [key, value] of Object.entries(localStorage)) {
+    if (key !== "partner" && key !== "notes") {
+      const parse = JSON.parse(value);
+      const itemID = parse["Item ID"];
+      if (itemID !== undefined) {
+        ids.push(itemID);
+        validationStatus[itemID] = "pending";
       }
     }
+  }
 
-    const idSet = new Set();
+  const idSet = new Set();
+  const fetches = ids.map(async (id) => {
+    const url = `https://api.airtable.com/v0/appHFwcwuXLTNCjtN/Inventory?filterByFormula=AND({Requests}=BLANK(),{Shipment Status}=BLANK(),NOT({SKU}=""),AND({Item ID}='${encodeURIComponent(
+      id
+    )}'))&maxRecords=1`;
 
-    for (const id of ids) {
-      const url = `https://api.airtable.com/v0/appHFwcwuXLTNCjtN/Inventory?filterByFormula=AND({Requests}=BLANK(),{Shipment Status}=BLANK(),NOT({SKU}=""),AND({Item ID}='${encodeURIComponent(
-        id
-      )}'))&maxRecords=1`;
-
-      try {
-        const response = await fetch(url, {
-          headers: {
-            Authorization: `Bearer ${APIKey}`,
-          },
-        });
-
-        const data = await response.json();
-        if (data.records && data.records.length === 0) {
-          idSet.add(id);
-        }
-      } catch (error) {
-        console.error(`Error fetching data for ID ${id}:`, error);
+    try {
+      const response = await fetch(url, {
+        headers: { Authorization: `Bearer ${APIKey}` },
+      });
+      const data = await response.json();
+      if (data.records && data.records.length === 0) {
+        idSet.add(id);
       }
+      validationStatus[id] = "done";
+    } catch (error) {
+      console.error(`Error fetching data for ID ${id}:`, error);
+      validationStatus[id] = "error";
     }
+  });
 
-    setOutOfStock(idSet);
-    return idSet.size > 0;
-  };
+  await Promise.all(fetches);
+  setItemValidationStatus(validationStatus);
+  setOutOfStock(idSet);
+  setIsCartReady(true);
+};
 
-  useEffect(() => {
-    if (!selectedPartner) navigate("/partner");
-    idFetcher();
-  }, []);
+
+
+
+useEffect(() => {
+  if (!selectedPartner) navigate("/partner");
+  idFetcher();
+}, []);
+
+
 
   const requestButton = async (event) => {
     setIsLoading(true);
-    event.preventDefault();
+    
     setOutOfStock(new Set());
     const stockCheck = await idFetcher();
 
@@ -170,24 +205,26 @@ const confirmResetCart = () => {
     })
       .then((response) => response.json())
       .then((data) => {
-        if (data.error) {
-          console.error("Error:", data.error);
-        } else {
-          setNotes("");
-          setCartCount(0);
-          setNumOfChildren(0);
-          setNumOfPatients(0);
-          const partner = localStorage["partner"];
-          localStorage.clear();
-          localStorage.setItem("partner", partner);
-          setIsLoading(false);
-          Toast({
-            message:
-              "Thank you for your time, we will get back to you as soon as possible!",
-            type: "is-info",
-          });
-        }
-      })
+  if (data.error) {
+    console.error("Error:", data.error);
+  } else {
+    setNotes("");
+    setCartCount(0);
+    setNumOfChildren(0);
+    setNumOfPatients(0);
+    const partner = localStorage["partner"];
+    localStorage.clear();
+    localStorage.setItem("partner", partner);
+    setIsLoading(false);
+    Toast({
+      message:
+        "Thank you for your time, we will get back to you as soon as possible!",
+      type: "is-info",
+    });
+    navigate("/"); // ✅ Redirect to main page
+  }
+})
+
       .catch((error) => {
         console.error("Error:", error);
         setNotes("Error");
@@ -213,30 +250,35 @@ const confirmResetCart = () => {
         });
   };
 
-  return (
+    return (
     <>
       <div id="text-section">
-        <h1 className="title has-text-centered mt-6 loading-effect" style={{ animationDelay: "0.23s" }}>
+        <h1
+          className="title has-text-centered mt-6 loading-effect"
+          style={{ animationDelay: "0.23s" }}
+        >
           MY CART
         </h1>
       </div>
-      {isLoading ? (
-        <BigSpinner size={75} />
-      ) : (
-        <>
-          <h1 className="has-text-centered is-size-5 my-4 loading-effect" style={{ animationDelay: "0.46s" }}>
-            Hello, {selectedPartner} Member!
-          </h1>
-          <Link to="/partner" className="is-flex is-justify-content-center my-3 loading-effect" style={{ animationDelay: "0.66s" }}>
-            <button className="button is-rounded" id="partner-button" aria-label="ChangePartner" role="button">
-              Change Partner
-            </button>
-          </Link>
-          {outOfStock ? (
-            <CartLister outOfStock={outOfStock} setOutOfStock={setOutOfStock} />
-          ) : (
-            <BigSpinner size={75} />
-          )}
+
+      {(!isCartReady || isLoading || !allItemsValidated) ? (
+  <BigSpinner size={75} />
+) : (
+  <>
+    <h1 className="has-text-centered is-size-5 my-4 loading-effect" style={{ animationDelay: "0.46s" }}>
+      Hello, {selectedPartner} Member!
+    </h1>
+
+    <Link to="/partner" className="is-flex is-justify-content-center my-3 loading-effect" style={{ animationDelay: "0.66s" }}>
+      <button className="button is-rounded" id="partner-button">Change Partner</button>
+    </Link>
+
+    <CartLister
+      outOfStock={outOfStock}
+      setOutOfStock={setOutOfStock}
+      itemValidationStatus={itemValidationStatus}
+    />
+
           <div style={{ width: "60vw", margin: "auto" }}>
             <p>How many patients do you plan to help with this request?</p>
             <input
@@ -255,6 +297,7 @@ const confirmResetCart = () => {
               onChange={(e) => setNumOfChildren(e.target.value)}
             />
           </div>
+
           <div style={{ width: "60vw", margin: "auto" }}>
             <textarea
               id="cart-textarea"
@@ -265,62 +308,73 @@ const confirmResetCart = () => {
               onChange={handleNotesChange}
             ></textarea>
           </div>
-          <div className="is-flex is-justify-content-center loading-effect" style={{ animationDelay: "1.2s" }}>
+
+          <div
+            className="is-flex is-justify-content-center loading-effect"
+            style={{ animationDelay: "1.2s" }}
+          >
             <button
               id="confirm-button"
               aria-label="Confirm"
               role="button"
               className="button mb-1 is-rounded is-primary"
               type="button"
-              style={{
-              backgroundColor: "#78d3fb"
-              }}
+              style={{ backgroundColor: "#78d3fb" }}
               onClick={handleConfirmOrder}
             >
-             Request Items
+              Request Items
             </button>
           </div>
-          <div className="is-flex is-justify-content-center loading-effect" style={{ animationDelay: "1.3s" }}>
-  <button
-    id="reset-button"
-    aria-label="ResetCart"
-    role="button"
-    className="button mb-4 is-rounded is-danger"
-    type="button"
-    style={{
-    minWidth: "142px", // match width
-    padding: "0.75rem 1.5rem", // match padding
-    fontSize: "1rem",
-    backgroundColor: "#ff5c47e8" // match font size
-  }}
-    onClick={handleResetCart}
-  >
-    Reset Cart
-  </button>
-  </div>
-  {showResetModal && (
-  <div className="modal-overlay">
-    <div className="modal-box">
-      <p className="mb-3">Are you sure you want to reset your cart?</p>
-      <div
-  className="is-flex is-justify-content-center"
-  style={{ gap: "1.5rem", marginTop: "1rem" }}
->
-  <button
-  className="button is-danger is-light custom-reset"
-  onClick={confirmResetCart}
->
-  Reset
-</button>
 
-  <button className="button is-light" onClick={() => setShowResetModal(false)}>
-    Cancel
-  </button>
-</div>
+          <div
+            className="is-flex is-justify-content-center loading-effect"
+            style={{ animationDelay: "1.3s" }}
+          >
+            <button
+              id="reset-button"
+              aria-label="ResetCart"
+              role="button"
+              className="button mb-4 is-rounded is-danger"
+              type="button"
+              style={{
+                minWidth: "142px",
+                padding: "0.75rem 1.5rem",
+                fontSize: "1rem",
+                backgroundColor: "#ff5c47e8",
+              }}
+              onClick={handleResetCart}
+            >
+              Reset Cart
+            </button>
+          </div>
 
-    </div>
-  </div>
-)}
+          {showResetModal && (
+            <div className="modal-overlay">
+              <div className="modal-box">
+                <p className="mb-3">
+                  Are you sure you want to reset your cart?
+                </p>
+                <div
+                  className="is-flex is-justify-content-center"
+                  style={{ gap: "1.5rem", marginTop: "1rem" }}
+                >
+                  <button
+                    className="button is-danger is-light custom-reset"
+                    onClick={confirmResetCart}
+                  >
+                    Reset
+                  </button>
+
+                  <button
+                    className="button is-light"
+                    onClick={() => setShowResetModal(false)}
+                  >
+                    Cancel
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
         </>
       )}
     </>

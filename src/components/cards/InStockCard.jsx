@@ -58,6 +58,14 @@ const InStockCard = ({ item, onRemove, inCart, allVisibleItems }) => {
   }
 
   const allItems = JSON.parse(sessionStorage.getItem("allInventoryItems") || "[]");
+    if (!Array.isArray(allItems) || allItems.length === 0) {
+  setMessageContent(
+    `"${itemName}" inventory is still loading. Please wait a moment and try again.`
+  );
+  setShowMessage(true);
+  setShowModal(false);
+  return;
+}
 
   const matchingItems = allItems.filter(
     (entry) =>

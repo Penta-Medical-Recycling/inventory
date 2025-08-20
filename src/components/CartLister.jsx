@@ -2,32 +2,43 @@ import React from "react";
 import OutOfStockCard from "./cards/OutOfStockCard";
 import InStockCard from "./cards/InStockCard";
 
-const CartLister = ({ outOfStock, setOutOfStock }) => {
+const CartLister = ({ outOfStock, setOutOfStock, itemValidationStatus }) => {
   return (
     <div id="cardDiv">
       {Object.entries(localStorage).map(([key, value]) => {
         let item = "";
         if (key !== "partner" && key !== "notes") {
-          // Parse the stored JSON items from localStorage
           item = JSON.parse(value);
         }
+
+        const itemId = item?.["Item ID"];
+        const loading = itemValidationStatus[itemId] !== "done";
+
+        const cardStyle = {
+          opacity: loading ? 0.4 : 1,
+          pointerEvents: loading ? "none" : "auto",
+          transition: "opacity 0.3s ease"
+        };
+
         return (
           item &&
-          (outOfStock.has(item["Item ID"]) ? (
-            // Render an OutOfStockCard if the item is unavailable
-            <OutOfStockCard
-              item={item}
-              setOutOfStock={setOutOfStock}
-              key={item["Item ID"]}
-            />
+          (outOfStock.has(itemId) ? (
+            <div style={cardStyle} key={itemId}>
+              <OutOfStockCard
+                item={item}
+                setOutOfStock={setOutOfStock}
+              />
+            </div>
           ) : (
-            // Render an InStockCard if the item is in stock
-            <InStockCard item={item} key={item["Item ID"]} inCart={true} />
+            <div style={cardStyle} key={itemId}>
+              <InStockCard item={item} inCart={true} />
+            </div>
           ))
         );
       })}
     </div>
   );
 };
+
 
 export default CartLister;
