@@ -3,8 +3,6 @@ import SizeSlider from "./SizeSlider";
 import React, { useEffect, useRef, useContext } from "react";
 import PentaContext from "../context/PentaContext";
 
-// SideBar used for advanced filtering
-
 const SideBar = () => {
   const {
     setIsSideBarActive,
