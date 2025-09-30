@@ -7,7 +7,7 @@ import Partner from "./pages/Partner";
 import Maintenance from "./pages/Maintenance";
 import { useContext } from "react";
 import PentaContext from "./context/PentaContext";
-import ProstheticLegGraphic from "./components/ProstheticLegGraphic";
+
 
 /**
  * Main application component.
