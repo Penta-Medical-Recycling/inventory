@@ -1,3 +1,6 @@
+/* App.css */
+@import "tailwindcss";
+
 html {
   background-color: #f7f7f9;
 }
@@ -915,4 +918,3 @@ button.modal-button-primary:hover {
   background-color: #e33626e8 !important;
 
 }
-
