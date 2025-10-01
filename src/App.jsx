@@ -7,8 +7,8 @@ import Partner from "./pages/Partner";
 import Maintenance from "./pages/Maintenance";
 import { useContext } from "react";
 import PentaContext from "./context/PentaContext";
-import ProstheticLegGraphic from "./components/ProstheticLegGraphic";
-
+import Card from "./components/cards/CardComponent";
+import ProstheticLegGraphic from "./components/leg/ProstheticLegGraphic";
 /**
  * Main application component.
  *
@@ -23,7 +23,11 @@ import ProstheticLegGraphic from "./components/ProstheticLegGraphic";
 function App() {
 
   const { serverStatus, serverMessage } = useContext(PentaContext)
-
+// return (
+//   <Routes>
+//     <Route path="/" element={<Card />}></Route>
+//     </Routes>
+// )
 
   return serverStatus ===  "Offline" ? (
     <Routes>
@@ -38,7 +42,9 @@ function App() {
         <Routes>
           <Route path="/" element={<Home />}></Route>
           <Route path="/cart" element={<Cart />}></Route>
+          <Route path="/card" element={<Card />}></Route>
           <Route path="/partner" element={<Partner />}></Route>
+          <Route path="/leg" element={<ProstheticLegGraphic />}></Route>
         </Routes>
       </main>
     </>
