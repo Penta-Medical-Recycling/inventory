@@ -7,6 +7,7 @@ import Partner from "./pages/Partner";
 import Maintenance from "./pages/Maintenance";
 import { useContext } from "react";
 import PentaContext from "./context/PentaContext";
+import Card from "./components/cards/CardComponent";
 
 /**
  * Main application component.
@@ -22,7 +23,11 @@ import PentaContext from "./context/PentaContext";
 function App() {
 
   const { serverStatus, serverMessage } = useContext(PentaContext)
-
+// return (
+//   <Routes>
+//     <Route path="/" element={<Card />}></Route>
+//     </Routes>
+// )
 
   return serverStatus ===  "Offline" ? (
     <Routes>
@@ -37,6 +42,7 @@ function App() {
         <Routes>
           <Route path="/" element={<Home />}></Route>
           <Route path="/cart" element={<Cart />}></Route>
+          <Route path="/card" element={<Card />}></Route>
           <Route path="/partner" element={<Partner />}></Route>
         </Routes>
       </main>
