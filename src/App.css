@@ -209,24 +209,15 @@ main {
   border-bottom-right-radius: 30px;
   background: rgba(255, 255, 255, 0.2);
   backdrop-filter: blur(15px);
-  width: 350px;
+  width: 550px;
   height: 100%;
-  left: -350px;
+  left: -550px;
   transition: all .3s ease-in;
   z-index: 26;
 }
 .is-filter-active {
   box-shadow: 0 0 0 99999px rgba(0, 0, 0, .5);
-  margin-left: 350px;
-}
-#side-bar-top {
-  width: 100%;
-  display: flex;
-  justify-content: flex-end;
-  align-items: center;
-}
-#side-bar-top p:hover {
-  cursor: pointer 
+  margin-left: 550px;
 }
 .sidebar-active {
   pointer-events: none;
@@ -513,15 +504,6 @@ input[type="range"]::-moz-range-thumb {
   transition: all .1s ease-in;
 }
 .crease-click:hover{
-  background-color: rgb(226, 226, 226);
-}
-#filter-x{
-  height: 40px;
-  width: 40px;
-  border-radius: 40px;
-  transition: all .1s ease-in;
-}
-#filter-x:hover{
   background-color: rgb(226, 226, 226);
 }
 .card-footer-item{
