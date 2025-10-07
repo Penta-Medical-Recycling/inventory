@@ -3,7 +3,8 @@ import React from "react";
 const Pediatric = ({ pediatric, setPediatric }) => {
   return (
     <div className="filter-section">
-      <span className="mr-3 text-[#4A4A4A] text-2xl">Pediatric</span>
+      <label className="mr-3 font-bold text-[#4A4A4A] text-2xl">Pediatric</label>
+
       <label className="cursor-pointer">
         <div
           onClick={() => setPediatric(!pediatric)}
