@@ -3,7 +3,7 @@ import PentaContext from "../../context/PentaContext";
 
 // SizeSlider component for selecting size range using sliders and inputs.
 
-const Size = ({}) => {
+const Size = ({ }) => {
   const {
     minValue,
     setMinValue,
@@ -52,19 +52,26 @@ const Size = ({}) => {
   };
 
   return (
-    <div className="wrapper">
+    <div>
       <header>
-        <div className="is-flex is-align-items-center is-justify-content-space-between">
-          <h2>Size Range</h2>
-          {/* Toggles the Range */}
-          <div
-            className={`switch ${isRangeOn ? "on" : "off"}`}
-            onClick={toggleSwitch}
-          >
-            <div className="circle" />
-          </div>
+        <div className="flex items-center justify-between">
+          <label className="text-2xl font-bold">Size Range</label>
+
+          {/* Toggle switch with tailwind */}
+          <label className="cursor-pointer">
+            <div
+              onClick={toggleSwitch}
+              className={`relative w-14 h-8 rounded-full bg-gray-300`}
+            >
+              <div
+                className={`absolute top-1 left-1 w-6 h-6 rounded-full shadow-md transition-all duration-300
+          ${isRangeOn ? "translate-x-6 bg-[#64C8FF]" : "translate-x-0 bg-white"}`}
+              />
+            </div>
+          </label>
         </div>
-        <p>Use slider to enter min and max size</p>
+
+        <p className="text-gray-600 text-md">Use slider to enter min and max size</p>
       </header>
       <div className={isRangeOn ? "size-input" : "size-off size-input"}>
         {/* Minimum Size Input */}
