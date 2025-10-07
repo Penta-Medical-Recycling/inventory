@@ -73,8 +73,8 @@ const SideBar = () => {
       ref={sidebarRef}
     >
       {/* Header */}
-      <div className="flex items-center justify-between mt-3">
-        <h1 className="is-size-3 text-center flex-1">Filters</h1>
+      <div className="flex items-center justify-between mx-3">
+        <label className="is-size-3 text-center flex-1 font-bold">Filters</label>
         <button
           onClick={activeToggle}
           className="p-2 rounded-full hover:scale-120"
@@ -92,9 +92,8 @@ const SideBar = () => {
         </button>
       </div>
 
-      <hr style={{ width: "70%", margin: "10px auto", backgroundColor: "#F5F5F5" }} />
-
-      <div className="flex flex-col gap-14 mx-5">
+      <hr style={{ width: "70%", margin: "20px auto", backgroundColor: "#F5F5F5" }} />
+      <div className="flex flex-col gap-8 mx-5">
         <AssistiveDevice
           assistiveDevice={assistiveDevice}
           setAssistiveDevice={setAssistiveDevice}
@@ -111,7 +110,7 @@ const SideBar = () => {
             <Manufacturer/>
             <Size/>
           </>
-        )}
+        )} 
 
         <ResetFilters removeAllFilters={removeAllFilters} />
       </div>
