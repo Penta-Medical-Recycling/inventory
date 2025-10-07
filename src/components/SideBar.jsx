@@ -1,10 +1,12 @@
 import React, { useEffect, useRef, useContext, useState } from "react";
 import PentaContext from "../context/PentaContext";
-import AssistiveDevice from "./sidebar/AssistiveDevice";
-import Extremity from "./sidebar/Extremity";
-import Parts from "./sidebar/Parts";
-import Pediatric from "./sidebar/Pediatric";
-import ResetFilters from "./sidebar/ResetFilters";
+import AssistiveDevice from "./sidebar-filters/AssistiveDeviceFilter";
+import Extremity from "./sidebar-filters/ExtremityFilter";
+import Parts from "./sidebar-filters/PartsFilter";
+import Pediatric from "./sidebar-filters/PediatricFilter";
+import Manufacturer from "./sidebar-filters/ManufacturerFilter";
+import Size from "./sidebar-filters/SizeFilter";
+import ResetFilters from "./sidebar-filters/ResetFilters";
 
 const SideBar = () => {
   const {
@@ -106,6 +108,8 @@ const SideBar = () => {
           <>
             <Parts description={description} setDescription={setDescription} />
             <Pediatric pediatric={pediatric} setPediatric={setPediatric} />
+            <Manufacturer/>
+            <Size/>
           </>
         )}
 
