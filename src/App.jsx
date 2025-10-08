@@ -38,6 +38,7 @@ function App() {
     <>
       <SideBar />
       <main>
+        
         <NavBar />
         <Routes>
           <Route path="/" element={<Home />}></Route>
