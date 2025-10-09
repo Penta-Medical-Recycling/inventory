@@ -1,5 +1,5 @@
 import { useContext } from "react";
-import PentaContext from "../context/PentaContext";
+import PentaContext from "../../context/PentaContext";
 
 // SizeSlider component for selecting size range using sliders and inputs.
 
