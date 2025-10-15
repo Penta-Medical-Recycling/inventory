@@ -1,11 +1,11 @@
 import React, { useEffect, useRef, useContext, useState } from "react";
 import PentaContext from "../context/PentaContext";
-import AssistiveDevice from "./sidebar-filters/AssistiveDeviceFilter";
-import Extremity from "./sidebar-filters/ExtremityFilter";
-import Parts from "./sidebar-filters/PartsFilter";
-import Pediatric from "./sidebar-filters/PediatricFilter";
-import Manufacturer from "./sidebar-filters/ManufacturerFilter";
-import Size from "./sidebar-filters/SizeFilter";
+import AssistiveDevice from "./sidebar-filters/AssistiveDevice";
+import Extremity from "./sidebar-filters/Extremity";
+import Parts from "./sidebar-filters/Parts";
+import Pediatric from "./sidebar-filters/Pediatric";
+import Manufacturer from "./sidebar-filters/Manufacturer";
+import Size from "./sidebar-filters/Size";
 import ResetFilters from "./sidebar-filters/ResetFilters";
 
 const SideBar = () => {
