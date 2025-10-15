@@ -1,12 +1,12 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useRef } from "react";
 
-import abutmentScrew from "../../assets/selectedLegGraphic/AbutmentScrew.svg";
-import Socket from "../../assets/selectedLegGraphic/Socket.svg";
-import Knee from "../../assets/selectedLegGraphic/Knee.svg";
-import Calf from "../../assets/selectedLegGraphic/Calf.svg";
-import Pylon from "../../assets/selectedLegGraphic/Pylon.svg";
-import Ankle from "../../assets/selectedLegGraphic/Ankle.svg";
-import Foot from "../../assets/selectedLegGraphic/Foot.svg";
+import abutmentScrew from "../../assets/leg-images/AbutmentScrew.svg";
+import Socket from "../../assets/leg-images/Socket.svg";
+import Knee from "../../assets/leg-images/Knee.svg";
+import Calf from "../../assets/leg-images/Calf.svg";
+import Pylon from "../../assets/leg-images/Pylon.svg"
+import Ankle from "../../assets/leg-images/Ankle.svg"
+import Foot from "../../assets/leg-images/Foot.svg";
 
 
 /*
