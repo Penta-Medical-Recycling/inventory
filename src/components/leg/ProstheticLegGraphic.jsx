@@ -1,12 +1,12 @@
 import { useState, useEffect, useRef } from "react";
 
-import abundmentScrew from "../../assets/selectedLegGraphic/theAbundmentScrew.svg";
-import theSocket from "../../assets/selectedLegGraphic/theSocket.svg";
-import theKnee from "../../assets/selectedLegGraphic/theKnee.svg";
-import theCalf from "../../assets/selectedLegGraphic/theCalf.svg";
-import thePylon from "../../assets/selectedLegGraphic/thePylon.svg";
-import theAnkle from "../../assets/selectedLegGraphic/theAnkle.svg";
-import theFoot from "../../assets/selectedLegGraphic/theFoot.svg";
+import abutmentScrew from "../../assets/selectedLegGraphic/AbutmentScrew.svg";
+import Socket from "../../assets/selectedLegGraphic/Socket.svg";
+import Knee from "../../assets/selectedLegGraphic/Knee.svg";
+import Calf from "../../assets/selectedLegGraphic/Calf.svg";
+import Pylon from "../../assets/selectedLegGraphic/Pylon.svg";
+import Ankle from "../../assets/selectedLegGraphic/Ankle.svg";
+import Foot from "../../assets/selectedLegGraphic/Foot.svg";
 
 
 /*
@@ -58,7 +58,7 @@ const ProstheticLegGraphic = () => {
           </svg>
         )}
         <img
-          src={abundmentScrew}
+          src={abutmentScrew}
           alt="Abutment Screw"
           onClick={() => handleClick("screw")}
           className={`relative w-[58px] h-[99px] cursor-pointer transition-all ${fade(
@@ -89,7 +89,7 @@ const ProstheticLegGraphic = () => {
           </svg>
         )}
         <img
-          src={theSocket}
+          src={Socket}
           alt="Socket"
           onClick={() => handleClick("socket")}
           className={`relative w-[50px] h-[102px] cursor-pointer transition-all ${fade(
@@ -120,7 +120,7 @@ const ProstheticLegGraphic = () => {
           </svg>
         )}
         <img
-          src={theKnee}
+          src={Knee}
           alt="Knee"
           onClick={() => handleClick("knee")}
           className={`relative w-[23px] h-[12px] cursor-pointer transition-all ${fade(
@@ -152,7 +152,7 @@ const ProstheticLegGraphic = () => {
           </svg>
         )}
         <img
-          src={theCalf}
+          src={Calf}
           alt="Calf"
           onClick={() => handleClick("calf")}
           className={`relative w-[33px] h-[64px] cursor-pointer transition-all ${fade(
@@ -183,7 +183,7 @@ const ProstheticLegGraphic = () => {
           </svg>
         )}
         <img
-          src={thePylon}
+          src={Pylon}
           alt="Pylon"
           onClick={() => handleClick("pylon")}
           className={`relative w-[11px] h-[51px] cursor-pointer transition-all ${fade(
@@ -214,7 +214,7 @@ const ProstheticLegGraphic = () => {
           </svg>
         )}
         <img
-          src={theAnkle}
+          src={Ankle}
           alt="Ankle"
           onClick={() => handleClick("ankle")}
           className={`relative w-[12px] h-[13px] cursor-pointer transition-all ${fade(
@@ -245,7 +245,7 @@ const ProstheticLegGraphic = () => {
           </svg>
         )}
         <img
-          src={theFoot}
+          src={Foot}
           alt="Foot"
           onClick={() => handleClick("foot")}
           className={`relative w-[52px] h-[28px] cursor-pointer transition-all ${fade(
