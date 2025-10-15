@@ -41,15 +41,15 @@ const ProstheticLegGraphic = () => {
       <div className="absolute left-[862px] top-[888px]">
         {selected === "screw" && (
           <svg
-            className="absolute pointer-events-none left-[-20px] top-[-20px]"
+            className="absolute pointer-events-none left-[-20px] top-[-20px] overflow-visible"
             width="98"
             height="139"
           >
             <ellipse
               cx="49"
               cy="69.5"
-              rx="49"
-              ry="60"
+              rx="69"
+              ry="55"
               fill="#64c8ff"
               stroke="#64c8ff"
               strokeWidth="0.8"
@@ -72,15 +72,15 @@ const ProstheticLegGraphic = () => {
       <div className="absolute left-[887px] top-[984px]">
         {selected === "socket" && (
           <svg
-            className="absolute pointer-events-none left-[-25px] top-[-20px]"
+            className="absolute pointer-events-none left-[-25px] top-[-20px] overflow-visible"
             width="100"
             height="142"
           >
             <ellipse
               cx="50"
-              cy="71"
-              rx="50"
-              ry="55"
+              cy="75"
+              rx="58"
+              ry="59"
               fill="#64c8ff"
               stroke="#64c8ff"
               strokeWidth="0.8"
@@ -103,7 +103,7 @@ const ProstheticLegGraphic = () => {
       <div className="absolute left-[900px] top-[1092px]">
         {selected === "knee" && (
           <svg
-            className="absolute pointer-events-none left-[-20px] top-[-15px]"
+            className="absolute pointer-events-none left-[-20px] top-[-15px] overflow-visible"
             width="63"
             height="42"
           >
@@ -111,7 +111,7 @@ const ProstheticLegGraphic = () => {
               cx="31.5"
               cy="21"
               rx="31.5"
-              ry="14"
+              ry="21"
              fill="#64c8ff"
               stroke="#64c8ff"
               strokeWidth="0.8"
@@ -131,42 +131,41 @@ const ProstheticLegGraphic = () => {
       </div>
 
       {/* ───────── Calf ───────── */}
-      <div className="absolute left-[895px] top-[1106px]">
-        {selected === "calf" && (
-          <svg
-            className="absolute pointer-events-none left-[-20px] top-[-20px]"
-            width="140"
-            height="180"
-            viewBox="0 0 140 180"
-          >
-            <ellipse
-              cx="36.5"
-              cy="52"
-              rx="40"
-              ry="35"
-             fill="#64c8ff"
-              stroke="#64c8ff"
-              strokeWidth="0.8"
-              style={{ transition: "all 0.3s ease-in-out" }}
-            />
-          </svg>
-        )}
-        <img
-          src={Calf}
-          alt="Calf"
-          onClick={() => handleClick("calf")}
-          className={`relative w-[33px] h-[64px] cursor-pointer transition-all ${fade(
-            "calf"
-          )} ${highlight("calf")}`}
-          draggable={false}
-        />
-      </div>
+<div className="absolute left-[895px] top-[1106px]">
+  {selected === "calf" && (
+    <svg
+      className="absolute pointer-events-none left-[-20px] top-[-20px] overflow-visible"
+      width="140"
+      height="180"
+      viewBox="0 0 140 180"
+    >
+      <ellipse
+        cx="36.5" 
+        cy="52"
+        rx="40"
+        ry="40"
+        fill="#64c8ff"
+        stroke="#64c8ff"
+        strokeWidth="0.8"
+        style={{ transition: "all 0.3s ease-in-out" }}
+      />
+    </svg>
+  )}
+  <img
+    src={Calf}
+    alt="Calf"
+    onClick={() => handleClick("calf")}
+    className={`relative w-[33px] h-[64px] cursor-pointer transition-all ${fade("calf")} ${highlight("calf")}`}
+    draggable={false}
+  />
+</div>
+
 
       {/* ───────── Pylon ───────── */}
       <div className="absolute left-[907px] top-[1171px]">
         {selected === "pylon" && (
           <svg
-            className="absolute pointer-events-none left-[-20px] top-[-20px]"
+            className="absolute pointer-events-none left-[-20px] top-[-20px] overflow-visible"
             width="51"
             height="91"
           >
@@ -174,7 +173,7 @@ const ProstheticLegGraphic = () => {
               cx="25.5"
               cy="45.5"
               rx="25.5"
-              ry="20"
+              ry="25.5"
               fill="rgba(100, 200, 255, 1)"
               stroke="#2563eb"
               strokeWidth="0.8"
@@ -197,7 +196,7 @@ const ProstheticLegGraphic = () => {
       <div className="absolute left-[905px] top-[1220px]">
         {selected === "ankle" && (
           <svg
-            className="absolute pointer-events-none left-[-20px] top-[-20px]"
+            className="absolute pointer-events-none left-[-20px] top-[-20px] overflow-visible"
             width="52"
             height="53"
           >
@@ -228,15 +227,15 @@ const ProstheticLegGraphic = () => {
       <div className="absolute left-[872px] top-[1233px]">
         {selected === "foot" && (
           <svg
-            className="absolute pointer-events-none left-[-20px] top-[-20px]"
+            className="absolute pointer-events-none left-[-20px] top-[-20px] overflow-visible"
             width="92"
             height="68"
           >
             <ellipse
               cx="46"
               cy="34"
-              rx="46"
-              ry="22"
+              rx="45"
+              ry="19"
               fill="rgba(100, 200, 255, 1)"
               stroke="#2563eb"
               strokeWidth="0.8"
