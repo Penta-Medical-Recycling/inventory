@@ -67,7 +67,7 @@ const ProstheticLegGraphic = () => {
             width="98"
             height="139"
           >
-            <ellipse cx="49" cy="69.5" rx="69" ry="55" fill="#64c8ff" />
+            <ellipse cx="49" cy="69.5" rx="69" ry="55" fill="#64c8ff" fillOpacity={.65} />
           </svg>
         )}
         <img
@@ -89,7 +89,7 @@ const ProstheticLegGraphic = () => {
             width="100"
             height="142"
           >
-            <ellipse cx="50" cy="75" rx="58" ry="59" fill="#64c8ff" />
+            <ellipse cx="50" cy="75" rx="58" ry="59" fill="#64c8ff" fillOpacity={.65} />
           </svg>
         )}
         <img
@@ -111,7 +111,7 @@ const ProstheticLegGraphic = () => {
             width="63"
             height="42"
           >
-            <ellipse cx="31.5" cy="21" rx="31.5" ry="21" fill="#64c8ff" />
+            <ellipse cx="31.5" cy="21" rx="31.5" ry="21" fill="#64c8ff" fillOpacity={.65} />
           </svg>
         )}
         <img
@@ -134,7 +134,7 @@ const ProstheticLegGraphic = () => {
             height="180"
             viewBox="0 0 140 180"
           >
-            <ellipse cx="36.5" cy="52" rx="40" ry="40" fill="#64c8ff" />
+            <ellipse cx="36.5" cy="52" rx="40" ry="40" fill="#64c8ff" fillOpacity={.65} />
           </svg>
         )}
         <img
@@ -156,7 +156,7 @@ const ProstheticLegGraphic = () => {
             width="51"
             height="91"
           >
-            <ellipse cx="25.5" cy="45.5" rx="25.5" ry="25.5" fill="#64c8ff" />
+            <ellipse cx="25.5" cy="45.5" rx="25.5" ry="25.5" fill="#64c8ff" fillOpacity={.65} />
           </svg>
         )}
         <img
@@ -178,7 +178,7 @@ const ProstheticLegGraphic = () => {
             width="52"
             height="53"
           >
-            <ellipse cx="26" cy="26.5" rx="26" ry="18" fill="#64c8ff" />
+            <ellipse cx="26" cy="26.5" rx="26" ry="18" fill="#64c8ff" fillOpacity={.65} />
           </svg>
         )}
         <img
@@ -200,7 +200,7 @@ const ProstheticLegGraphic = () => {
             width="92"
             height="68"
           >
-            <ellipse cx="46" cy="34" rx="45" ry="19" fill="#64c8ff" />
+            <ellipse cx="46" cy="35" rx="45" ry="25" fill="#64c8ff" fillOpacity={.65} />
           </svg>
         )}
         <img
