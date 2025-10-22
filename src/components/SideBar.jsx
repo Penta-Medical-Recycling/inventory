@@ -97,7 +97,9 @@ const SideBar = () => {
         <AssistiveDevice
           assistiveDevice={assistiveDevice}
           setAssistiveDevice={setAssistiveDevice}
+          setSelectedFilters={setSelectedFilters}
         />
+
 
         {assistiveDevice && (
           <Extremity extremity={extremity} setExtremity={setExtremity} />
@@ -107,10 +109,10 @@ const SideBar = () => {
           <>
             <Parts description={description} setDescription={setDescription} />
             <Pediatric pediatric={pediatric} setPediatric={setPediatric} />
-            <Manufacturer/>
-            <Size/>
+            <Manufacturer />
+            <Size />
           </>
-        )} 
+        )}
 
         <ResetFilters removeAllFilters={removeAllFilters} />
       </div>
