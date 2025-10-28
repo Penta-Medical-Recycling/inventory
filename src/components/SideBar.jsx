@@ -1,7 +1,12 @@
-import MultipleSelect from "./MultipleSelect";
-import SizeSlider from "./SizeSlider";
-import React, { useEffect, useRef, useContext } from "react";
+import React, { useEffect, useRef, useContext, useState } from "react";
 import PentaContext from "../context/PentaContext";
+import AssistiveDevice from "./sidebar-filters/AssistiveDevice";
+import Extremity from "./sidebar-filters/Extremity";
+import Parts from "./sidebar-filters/Parts";
+import Pediatric from "./sidebar-filters/Pediatric";
+import Manufacturer from "./sidebar-filters/Manufacturer";
+import Size from "./sidebar-filters/Size";
+import ResetFilters from "./sidebar-filters/ResetFilters";
 
 const SideBar = () => {
   const {
@@ -16,31 +21,26 @@ const SideBar = () => {
     setSelectedFilters,
   } = useContext(PentaContext);
 
-  // Function to toggle sidebar visibility
-  const activeToggle = () => {
-    setIsSideBarActive(!isSideBarActive);
-  };
+  const [assistiveDevice, setAssistiveDevice] = useState("");
+  const [extremity, setExtremity] = useState("");
+  const [description, setDescription] = useState("");
+  const [pediatric, setPediatric] = useState(false);
 
-  // Create a ref for the sidebar container
+  const activeToggle = () => setIsSideBarActive(!isSideBarActive);
+
+  // Sidebar ref for outside click
   const sidebarRef = useRef(null);
-
-  // Function to handle clicks outside the sidebar to close it
-  const handleClickOutside = (event) => {
-    if (sidebarRef.current && !sidebarRef.current.contains(event.target)) {
-      setIsSideBarActive(false);
-    }
-  };
-
-  // Attach and remove event listeners for handling clicks outside the sidebar
   useEffect(() => {
-    document.addEventListener("mousedown", handleClickOutside);
-
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
+    const handleClickOutside = (e) => {
+      if (sidebarRef.current && !sidebarRef.current.contains(e.target)) {
+        setIsSideBarActive(false);
+      }
     };
-  }, []);
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [setIsSideBarActive]);
 
-  // Fetch and set the maximum size for size filtering based on inventory
+  // Fetch max size once
   useEffect(() => {
     const fetchMax = async () => {
       const max = await fetchMaxSize();
@@ -48,9 +48,9 @@ const SideBar = () => {
       setMaxValue(max);
     };
     fetchMax();
-  }, []);
+  }, [fetchMaxSize, setLargestSize, setMaxValue]);
 
-  // Function to remove all applied filters at once
+  // Reset all filters
   const removeAllFilters = () => {
     setSelectedManufacturer([]);
     setSelectedSKU([]);
@@ -60,49 +60,59 @@ const SideBar = () => {
       Orthosis: false,
       Pediatric: false,
     });
+    setAssistiveDevice("");
+    setExtremity("");
+    setDescription("");
+    setPediatric(false);
   };
 
   return (
     <div
       id="side-bar"
-      className={isSideBarActive ? "is-filter-active" : ""}
+      className={isSideBarActive ? "is-filter-active flex flex-col" : ""}
       ref={sidebarRef}
     >
-      {/* Sidebar header */}
-      <div id="side-bar-top">
-        <h1
-          className="is-size-3 mt-3"
-          style={{ fontWeight: "650", marginRight: "79px" }}
-        >
-          Filters
-        </h1>
-        {/* Close icon */}
-        <span
-          className="icon is-right is-medium mt-3 mr-5"
-          style={{ cursor: "pointer" }}
-          onClick={activeToggle}
-          id="filter-x"
-        >
-          <i className="fas fa-times" style={{ fontSize: "1.5rem" }}></i>
-        </span>
-      </div>
-      <hr style={{ width: "80%", margin: "10px auto" }}></hr>
-      {/* Component for selecting multiple Manufacturers and Descriptions */}
-      <MultipleSelect />
-      <hr style={{ width: "80%", margin: "10px auto 0px" }}></hr>
-      {/* Component for adjusting size range */}
-      <SizeSlider />
-      <br></br>
-      <div className="is-flex is-justify-content-center">
-        {/* Button to reset all filters */}
+      {/* Header */}
+      <div className="flex items-center justify-between mx-3">
+        <label className="is-size-3 text-center flex-1 font-bold">Filters</label>
         <button
-          className="button is-rounded removeFilter"
-          onClick={removeAllFilters}
-          aria-label="FilterReset"
-          role="button"
+          onClick={activeToggle}
+          className="p-2 rounded-full hover:scale-120"
         >
-          Reset Filters
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            className="m-1 h-5 w-5 text-[#4A4A4A]"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+            strokeWidth={2}
+          >
+            <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+          </svg>
         </button>
+      </div>
+
+      <hr style={{ width: "70%", margin: "20px auto", backgroundColor: "#F5F5F5" }} />
+      <div className="flex flex-col gap-8 mx-5">
+        <AssistiveDevice
+          assistiveDevice={assistiveDevice}
+          setAssistiveDevice={setAssistiveDevice}
+        />
+
+        {assistiveDevice && (
+          <Extremity extremity={extremity} setExtremity={setExtremity} />
+        )}
+
+        {extremity && (
+          <>
+            <Parts description={description} setDescription={setDescription} />
+            <Pediatric pediatric={pediatric} setPediatric={setPediatric} />
+            <Manufacturer/>
+            <Size/>
+          </>
+        )} 
+
+        <ResetFilters removeAllFilters={removeAllFilters} />
       </div>
     </div>
   );

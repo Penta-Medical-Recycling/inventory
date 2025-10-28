@@ -1,5 +1,5 @@
 import { useState, useEffect, useContext, useMemo } from "react";
-import PentaContext from "../context/PentaContext";
+import PentaContext from "../../context/PentaContext";
 import { MultiSelect } from "react-multi-select-component";
 
 // helpers
