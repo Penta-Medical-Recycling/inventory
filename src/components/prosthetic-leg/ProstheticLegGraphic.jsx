@@ -54,11 +54,15 @@ const ProstheticLegGraphic = () => {
   return (
     <div
       ref={legRef}
-      onClick={(e) => e.stopPropagation()}
-      className="relative w-[1400px] h-[1400px] bg-transparent"
+  onClick={(e) => {
+    e.stopPropagation();
+    if (e.target === legRef.current) setExpanded((v) => !v); // click empty area toggles expand
+  }}
+  className="group relative w-[1400px] h-[1400px] bg-transparent"
       aria-label="Prosthetic leg graphic"
       role="region"
     >
+
       {/* ───────── Abutment Screw ───────── */}
       <div className="absolute left-[862px] top-[888px]">
         {selected === "screw" && !allGrey && (
