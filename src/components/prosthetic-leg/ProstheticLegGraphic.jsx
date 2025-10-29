@@ -19,7 +19,10 @@ import Foot from "../../assets/leg-images/Foot.svg";
 /*
 - Responsive shell scales the 1400x1400 canvas:
   sm ≈ 0.37x, md ≈ 0.6x, lg ≈ 0.79x, xl = 1x
-- Hover expand (desktop) + click lock, outside click collapses
+- Hover expand (desktop) and click to lock expand.
+- Each part positioned absolutely within the canvas.
+- Each part has its own hover and click handlers to manage selection and highlighting.
+- Labels appear next to parts when selected or on hover (desktop).
 */
 
 const ProstheticLegGraphic = () => {
@@ -66,7 +69,7 @@ const labelBase =
       ref={wrapperRef}
       className={[
         "relative mx-auto aspect-square",
-        // Width steps by common devices (no config edits)
+        // Width steps by common devices and breakpoints
         "w-[300px]",               // tiny phones
         "min-[375px]:w-[320px]",   // iPhone mini / small Android
         "min-[430px]:w-[400px]",   // big phones (Pro Max / Pixel XL)
