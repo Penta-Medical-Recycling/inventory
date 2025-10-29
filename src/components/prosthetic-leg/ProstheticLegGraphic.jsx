@@ -48,11 +48,22 @@ const ProstheticLegGraphic = () => {
     };
   }, []);
 
-  const handleClick = (part) => {
-    setAllGrey(false);
-    setExpanded(true);
-    setSelected((prev) => (prev === part ? null : part));
-  };
+ const handleClick = (part) => {
+  // If clicking the same part again → deselect + unlock expand
+  if (selected === part) {
+    setSelected(null);
+    setExpanded(false);
+    // Optional: also grey everything again
+    // setAllGrey(true);
+    return;
+  }
+
+  // New selection → color mode + lock expand
+  setAllGrey(false);
+  setExpanded(true);
+  setSelected(part);
+};
+
 
   const fade = (part) =>
     allGrey || (selected && selected !== part) ? "grayscale opacity-40" : "";
@@ -180,10 +191,10 @@ const labelBase =
         {/* ───────── Knee ───────── */}
         <div
           className={[
-            "absolute left-[900px] top-[1092px]",
+            "absolute left-[900px] top-[1095px]",
             "transition-transform duration-500 ease-out",
-            "md:group-hover:-translate-y-[8px]",
-            expanded ? "translate-x-[4px] -translate-y-[8px]" : "",
+            "md:group-hover:translate-x-[7px] -translate-y-[7px]",
+            expanded ? "translate-x-[2px] -translate-y-[8px]" : "",
           ].join(" ")}
         >
           {selected === "knee" && !allGrey && (
