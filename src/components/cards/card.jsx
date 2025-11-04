@@ -1,5 +1,7 @@
 import { Container } from "postcss";
 import React from "react";
+import "../../App.css";
+
 // prop: imgs text
 
 
@@ -28,13 +30,13 @@ export default function Card({partName,imgSrc, }) {
 // whole screen Container
     <div  >
       {/* Card */}
-          <div className=" w-full h-[349px] bg-white border-2 border-red-500 rounded-xl shadow-lg p-6 flex flex-col items-center">
+          <div className="w-full h-[349px]  border-2 border-gray-200 rounded-2xl shadow-md p-6 flex flex-col items-center hover:shadow-xl">
 
 
             {/* img div in div put tailwind code */}
             <div className="mb-3 flex-1 flex items-center justify-center max-h-[200px] object-contain overflow-hidden" >
               <img
-              className=" w-[100px] h-[100px] object-contain"
+              className=" w-[120px] h-[120px] object-contain"
                src={imgSrc}
                 alt={partName}
               />
@@ -42,7 +44,7 @@ export default function Card({partName,imgSrc, }) {
 
 
             {/* part name div in div put tailwind code*/}
-            <div className="text-black text-lg font-medium text-center mt-4 ">
+            <div className="text-black text-lg font-semibold text-center mt-4 ">
               {partName}
             </div>
           </div>

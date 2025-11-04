@@ -37,7 +37,7 @@ export default function CardGrid() {
        
     return (
        
-            <div className="bg-gray-500 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 text-center gap-6 p-10">
+            <div className=" grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 text-center gap-6 p-10">
                 {data.map((card, index) => (
 
               
