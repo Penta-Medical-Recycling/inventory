@@ -84,29 +84,9 @@ const Size = ({ }) => {
             min="1"
             max={maxValue}
           />
-          <div
-            className="is-flex is-justify-content-space-evenly"
-            style={{ userSelect: "none", width: "100%", cursor: "pointer" }}
-          >
-            <div
-              className="crease-click"
-              onClick={() => {
-                if (minValue > 1) setMinValue(minValue - 1);
-              }}
-            >
-              <p>-</p>
-            </div>
-            <div
-              className="crease-click"
-              onClick={() => {
-                if (minValue < maxValue) setMinValue(minValue + 1);
-              }}
-            >
-              <p>+</p>
-            </div>
-          </div>
+          
         </div>
-        <div className="separator">⇄</div>
+        <div className="separator"></div>
         {/* Maximum Size Input */}
         <div className="field">
           <input
@@ -117,27 +97,6 @@ const Size = ({ }) => {
             min="1"
             max={maxValue}
           />
-          <div
-            className="is-flex is-justify-content-space-evenly"
-            style={{ userSelect: "none", width: "100%", cursor: "pointer" }}
-          >
-            <div
-              className="crease-click"
-              onClick={() => {
-                if (maxValue > minValue) setMaxValue(maxValue - 1);
-              }}
-            >
-              <p>-</p>
-            </div>
-            <div
-              className="crease-click"
-              onClick={() => {
-                if (maxValue < largestSize) setMaxValue(maxValue + 1);
-              }}
-            >
-              <p>+</p>
-            </div>
-          </div>
         </div>
       </div>
       {/* Size Range Slider */}
