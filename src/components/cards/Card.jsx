@@ -25,7 +25,7 @@ export default function Card({partName,imgSrc, }) {
 
 
             {/* img div in div put tailwind code */}
-            <div className="w-[238px] h-[181px] mb-4 flex items-center justify-center  object-contain overflow-hidden" >
+            <div className="w-full h-full mb-4 flex items-center justify-center  object-contain overflow-hidden" >
               <img
               className=" w-full h-full object-contain"
                src={imgSrc}
