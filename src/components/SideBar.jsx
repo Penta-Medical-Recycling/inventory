@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useContext, useState } from "react";
+import { useEffect, useRef, useContext, useState } from "react";
 import PentaContext from "../context/PentaContext";
 import AssistiveDevice from "./sidebar-filters/AssistiveDevice";
 import Extremity from "./sidebar-filters/Extremity";
@@ -7,6 +7,7 @@ import Pediatric from "./sidebar-filters/Pediatric";
 import Manufacturer from "./sidebar-filters/Manufacturer";
 import Size from "./sidebar-filters/Size";
 import ResetFilters from "./sidebar-filters/ResetFilters";
+import ProstheticLegGraphic from "./prosthetic-leg/ProstheticLegGraphic";
 
 const SideBar = () => {
   const {
@@ -26,7 +27,9 @@ const SideBar = () => {
   const [description, setDescription] = useState("");
   const [pediatric, setPediatric] = useState(false);
 
-  const activeToggle = () => setIsSideBarActive(!isSideBarActive);
+  const [resetKey, setResetKey] = useState(0);
+ 
+  const activeToggle = () => setIsSideBarActive(!isSideBarActive); //added resetKey to force re-render of child components
 
   // Sidebar ref for outside click
   const sidebarRef = useRef(null);
@@ -64,6 +67,7 @@ const SideBar = () => {
     setExtremity("");
     setDescription("");
     setPediatric(false);
+    setResetKey((k) => k + 1);
   };
 
   return (
@@ -104,7 +108,21 @@ const SideBar = () => {
         )}
 
         {extremity && (
-          <>
+          <> {assistiveDevice === "Prosthesis" && extremity === "Lower" && (
+  <div className="w-full relative">
+
+    {/* The leg graphic container */}
+    <div className="absolute right-0 top-0 overflow-visible">
+
+      {/* Scale + translation applied here */}
+      <div className="scale-[2] origin-top-left translate-y-[-800px] translate-x-[-400px]">
+        <ProstheticLegGraphic />
+      </div>
+
+    </div>
+  </div>
+)}
+
             <Parts description={description} setDescription={setDescription} />
             <Pediatric pediatric={pediatric} setPediatric={setPediatric} />
             <Manufacturer/>

@@ -8,36 +8,27 @@ import Pylon from "../../assets/leg-images/Pylon.svg"
 import Ankle from "../../assets/leg-images/Ankle.svg"
 import Foot from "../../assets/leg-images/Foot.svg";
 
-
 /*
-- Global expand on hover (desktop) via group-hover, and lock on click (expanded=true).
-- Click a part -> select it (blue halo + part stays in color, others grey).
-- Click the same part -> deselect (labels remain tied to expand state).
-- Click outside -> deselect, all grey, collapse.
+- Displays all parts of a prosthetic leg.
+- Click a part → highlight it with an SVG ellipse behind it.
+- Click same part → deselect.
+- Click outside (from App.jsx) → all parts grayscale again.
 */
 
-/*
-- Responsive shell scales the 1400x1400 canvas:
-  sm ≈ 0.37x, md ≈ 0.6x, lg ≈ 0.79x, xl = 1x
-- Hover expand (desktop) and click to lock expand.
-- Each part positioned absolutely within the canvas.
-- Each part has its own hover and click handlers to manage selection and highlighting.
-- Labels appear next to parts when selected or on hover (desktop).
-*/
-
-const ProstheticLegGraphic = () => {
+const BASE_CANVAS = 1300;   // keep this big to match your left/top values
+// control visual size ONLY via `scale` prop
+const ProstheticLegGraphic = ({ scale = 0.50 }) => {
   const [selected, setSelected] = useState(null);
-  const [allGrey, setAllGrey] = useState(false);
-  const [expanded, setExpanded] = useState(false);
-  const wrapperRef = useRef(null);
+  const [allGrey, setAllGrey] = useState(false); // default full color
+  const legRef = useRef(null);
 
+  // Outside click => deselect + all grey
   useEffect(() => {
     const onDocDown = (e) => {
-      const el = wrapperRef.current;
+      const el = legRef.current;
       if (el && !el.contains(e.target)) {
         setSelected(null);
         setAllGrey(true);
-        setExpanded(false);
       }
     };
     document.addEventListener("mousedown", onDocDown, true);
@@ -48,22 +39,11 @@ const ProstheticLegGraphic = () => {
     };
   }, []);
 
- const handleClick = (part) => {
-  // If clicking the same part again → deselect + unlock expand
-  if (selected === part) {
-    setSelected(null);
-    setExpanded(false);
-    // Optional: also grey everything again
-    // setAllGrey(true);
-    return;
-  }
-
-  // New selection → color mode + lock expand
-  setAllGrey(false);
-  setExpanded(true);
-  setSelected(part);
-};
-
+  // Single, correct handleClick
+  const handleClick = (part) => {
+    setAllGrey(false); // inside click returns to color mode
+    setSelected((prev) => (prev === part ? null : part));
+  };
 
   const fade = (part) =>
     allGrey || (selected && selected !== part) ? "grayscale opacity-40" : "";
@@ -71,57 +51,36 @@ const ProstheticLegGraphic = () => {
   const highlight = (part) =>
     !allGrey && selected === part ? "grayscale-0 opacity-100" : "";
 
-const labelBase =
-  "pointer-events-none px-2 py-0.5 rounded-md font-normal text-slate-800 bg-white/80 border border-slate-300 shadow-sm transition-all duration-300 " +
-  "text-[10px] sm:text-xs md:text-sm lg:text-base";
 
   return (
+    // 2) Wrapper equals the *visual* size (so it doesn’t block clicks around it)
     <div
-      ref={wrapperRef}
-      className={[
-        "relative mx-auto aspect-square",
-        // Width steps by common devices and breakpoints
-        "w-[300px]",               // tiny phones
-        "min-[375px]:w-[320px]",   // iPhone mini / small Android
-        "min-[430px]:w-[400px]",   // big phones (Pro Max / Pixel XL)
-        "sm:w-[520px]",            // ≥640
-        "md:w-[720px]",            // ≥768
-        "lg:w-[980px]",            // ≥1024
-        "xl:w-[1200px]",           // ≥1280
-        "2xl:w-[1400px]",          // ≥1536
-        "portrait:max-w-[92vw] landscape:max-w-[88vw]",
-      ].join(" ")}
-      aria-label="Prosthetic leg graphic"
-      role="region"
-      onClick={(e) => {
-        if (e.target === e.currentTarget) setExpanded((v) => !v);
+      className="relative"
+      style={{
+        width:  `${BASE_CANVAS * scale}px`,
+        height: `${BASE_CANVAS * scale}px`,
+        overflow: "hidden",
       }}
+      aria-label="Prosthetic leg graphic (scaled wrapper)"
+      role="region"
     >
-      {/* Scaled 1400x1400 canvas */}
+      {/* 3) Inner canvas keeps the big coordinate space and is visually scaled */}
       <div
-        className={[
-          "group absolute top-0 left-0 w-[1400px] h-[1400px] bg-transparent",
-          "origin-top-left transform-gpu",
-          "[transform:scale(0.215)]",
-          "min-[375px]:[transform:scale(0.23)]",
-          "min-[430px]:[transform:scale(0.285)]",
-          "sm:[transform:scale(0.37)]",
-          "md:[transform:scale(0.51)]",
-          "lg:[transform:scale(0.7)]",
-          "xl:[transform:scale(0.86)]",
-          "2xl:[transform:scale(1)]",
-        ].join(" ")}
+        ref={legRef}
         onClick={(e) => e.stopPropagation()}
+        className="relative bg-transparent"
+        style={{
+          width:  `${BASE_CANVAS}px`,
+          height: `${BASE_CANVAS}px`,
+          transform: `scale(${scale})`,
+          transformOrigin: "top left",
+        }}
       >
+        {/* ... all your absolutely-positioned parts unchanged ... */}
+  
+
         {/* ───────── Abutment Screw ───────── */}
-        <div
-          className={[
-            "absolute left-[862px] top-[888px]",
-            "transition-transform duration-500 ease-out",
-            "md:group-hover:translate-x-[2px] md:group-hover:-translate-y-[16px]",
-            expanded ? "translate-x-[2px] -translate-y-[16px]" : "",
-          ].join(" ")}
-        >
+        <div className="absolute left-[862px] top-[888px]">
           {selected === "screw" && !allGrey && (
             <svg
               className="absolute pointer-events-none left-[-20px] top-[-20px] overflow-visible"
@@ -131,16 +90,6 @@ const labelBase =
               <ellipse cx="49" cy="69.5" rx="69" ry="55" fill="#64c8ff" fillOpacity={0.65} />
             </svg>
           )}
-          <div
-            className={[
-              "absolute top-1/2 -translate-y-1/5 -left-39",
-              labelBase,
-              expanded ? "opacity-100 translate-x-0" : "opacity-0 -translate-x-2",
-              "md:group-hover:opacity-100 md:group-hover:translate-x-0",
-            ].join(" ")}
-          >
-            Abutment Screw
-          </div>
           <img
             src={abutmentScrew}
             alt="Abutment Screw"
@@ -151,14 +100,7 @@ const labelBase =
         </div>
 
         {/* ───────── Socket ───────── */}
-        <div
-          className={[
-            "absolute left-[887px] top-[984px]",
-            "transition-transform duration-500 ease-out",
-            "md:group-hover:translate-x-[-1px] md:group-hover:-translate-y-[10px]",
-            expanded ? "translate-x-[-1px] -translate-y-[10px]" : "",
-          ].join(" ")}
-        >
+        <div className="absolute left-[884px] top-[984px]">
           {selected === "socket" && !allGrey && (
             <svg
               className="absolute pointer-events-none left-[-25px] top-[-20px] overflow-visible"
@@ -168,17 +110,6 @@ const labelBase =
               <ellipse cx="50" cy="75" rx="58" ry="59" fill="#64c8ff" fillOpacity={0.65} />
             </svg>
           )}
-          <div
-            className={[
-              "absolute top-1/2 -translate-y-1/2 -left-20",
-              labelBase,
-              "shadow-lg bg-white",
-              expanded ? "opacity-100 translate-x-0" : "opacity-0 -translate-x-2",
-              "md:group-hover:opacity-100 md:group-hover:translate-x-0",
-            ].join(" ")}
-          >
-            Socket
-          </div>
           <img
             src={Socket}
             alt="Socket"
@@ -189,14 +120,7 @@ const labelBase =
         </div>
 
         {/* ───────── Knee ───────── */}
-        <div
-          className={[
-            "absolute left-[900px] top-[1095px]",
-            "transition-transform duration-500 ease-out",
-            "md:group-hover:translate-x-[7px] -translate-y-[7px]",
-            expanded ? "translate-x-[2px] -translate-y-[8px]" : "",
-          ].join(" ")}
-        >
+        <div className="absolute left-[900px] top-[1092px]">
           {selected === "knee" && !allGrey && (
             <svg
               className="absolute pointer-events-none left-[-20px] top-[-15px] overflow-visible"
@@ -206,34 +130,17 @@ const labelBase =
               <ellipse cx="31.5" cy="21" rx="35" ry="30" fill="#64c8ff" fillOpacity={0.65} />
             </svg>
           )}
-          <div
-            className={[
-              "absolute top-1/2 -translate-y-1/2 -left-18",
-              labelBase,
-              expanded ? "opacity-100 translate-x-0" : "opacity-0 -translate-x-2",
-              "md:group-hover:opacity-100 md:group-hover:translate-x-0",
-            ].join(" ")}
-          >
-            Knee
-          </div>
           <img
             src={Knee}
             alt="Knee"
             onClick={() => handleClick("knee")}
-            className={`relative w-[23px] h-[12px] cursor-pointer transition-all ${fade("knee")} ${highlight("knee")}`}
+            className={`relative w-[23px] h-[12px] cursor-pointer transition-all ${fade("knee")} ${highlight("knee")} pointer-events-auto`}
             draggable={false}
           />
         </div>
 
         {/* ───────── Calf ───────── */}
-        <div
-          className={[
-            "absolute left-[895px] top-[1106px]",
-            "transition-transform duration-500 ease-out",
-            "md:group-hover:translate-x-[2px] md:group-hover:-translate-y-[2px]",
-            expanded ? "translate-x-[5px] -translate-y-[5px]" : "",
-          ].join(" ")}
-        >
+        <div className="absolute left-[895px] top-[1106px]">
           {selected === "calf" && !allGrey && (
             <svg
               className="absolute pointer-events-none left-[-20px] top-[-20px] overflow-visible"
@@ -244,16 +151,6 @@ const labelBase =
               <ellipse cx="36.5" cy="52" rx="50" ry="48" fill="#64c8ff" fillOpacity={0.65} />
             </svg>
           )}
-          <div
-            className={[
-              "absolute top-1/2 -translate-y-1/2 -left-15",
-              labelBase,
-              expanded ? "opacity-100 translate-x-0" : "opacity-0 -translate-x-2",
-              "md:group-hover:opacity-100 md:group-hover:translate-x-0",
-            ].join(" ")}
-          >
-            Calf
-          </div>
           <img
             src={Calf}
             alt="Calf"
@@ -264,14 +161,7 @@ const labelBase =
         </div>
 
         {/* ───────── Pylon ───────── */}
-        <div
-          className={[
-            "absolute left-[907px] top-[1171px]",
-            "transition-transform duration-500 ease-out",
-            "md:group-hover:translate-x-[4px] md:group-hover:translate-y-[2px]",
-            expanded ? "translate-x-[4px] translate-y-[2px]" : "",
-          ].join(" ")}
-        >
+        <div className="absolute left-[907px] top-[1171px]">
           {selected === "pylon" && !allGrey && (
             <svg
               className="absolute pointer-events-none left-[-20px] top-[-20px] overflow-visible"
@@ -281,16 +171,6 @@ const labelBase =
               <ellipse cx="25.5" cy="45.5" rx="40" ry="38" fill="#64c8ff" fillOpacity={0.65} />
             </svg>
           )}
-          <div
-            className={[
-              "absolute top-1/2 -translate-y-1/2 -left-20",
-              labelBase,
-              expanded ? "opacity-100 translate-x-0" : "opacity-0 -translate-x-2",
-              "md:group-hover:opacity-100 md:group-hover:translate-x-0",
-            ].join(" ")}
-          >
-            Pylon
-          </div>
           <img
             src={Pylon}
             alt="Pylon"
@@ -301,14 +181,7 @@ const labelBase =
         </div>
 
         {/* ───────── Ankle ───────── */}
-        <div
-          className={[
-            "absolute left-[906px] top-[1220px]",
-            "transition-transform duration-500 ease-out",
-            "md:group-hover:translate-x-[4px] md:group-hover:translate-y-[10px]",
-            expanded ? "translate-x-[4px] translate-y-[10px]" : "",
-          ].join(" ")}
-        >
+        <div className="absolute left-[906px] top-[1220px]">
           {selected === "ankle" && !allGrey && (
             <svg
               className="absolute pointer-events-none left-[-20px] top-[-20px] overflow-visible"
@@ -318,16 +191,6 @@ const labelBase =
               <ellipse cx="26" cy="26.5" rx="30" ry="30" fill="#64c8ff" fillOpacity={0.65} />
             </svg>
           )}
-          <div
-            className={[
-              "absolute top-1/3 -translate-y-1/2 -left-[80px]",
-              labelBase,
-              expanded ? "opacity-100 translate-x-0" : "opacity-0 -translate-x-2",
-              "md:group-hover:opacity-100 md:group-hover:translate-x-0",
-            ].join(" ")}
-          >
-            Ankle
-          </div>
           <img
             src={Ankle}
             alt="Ankle"
@@ -338,14 +201,7 @@ const labelBase =
         </div>
 
         {/* ───────── Foot ───────── */}
-        <div
-          className={[
-            "absolute left-[872px] top-[1235px]",
-            "transition-transform duration-500 ease-out",
-            "md:group-hover:translate-x-[5px] md:group-hover:translate-y-[15px]",
-            expanded ? "translate-x-[5px] translate-y-[15px]" : "",
-          ].join(" ")}
-        >
+        <div className="absolute left-[872px] top-[1235px]">
           {selected === "foot" && !allGrey && (
             <svg
               className="absolute pointer-events-none left-[-20px] top-[-20px] overflow-visible"
@@ -355,16 +211,6 @@ const labelBase =
               <ellipse cx="46" cy="35" rx="45" ry="38" fill="#64c8ff" fillOpacity={0.65} />
             </svg>
           )}
-          <div
-            className={[
-              "absolute top-1/2 -translate-y-1 -left-15",
-              labelBase,
-              expanded ? "opacity-100 translate-x-0" : "opacity-0 -translate-x-2",
-              "md:group-hover:opacity-100 md:group-hover:translate-x-0",
-            ].join(" ")}
-          >
-            Foot
-          </div>
           <img
             src={Foot}
             alt="Foot"
@@ -379,3 +225,4 @@ const labelBase =
 };
 
 export default ProstheticLegGraphic;
+
