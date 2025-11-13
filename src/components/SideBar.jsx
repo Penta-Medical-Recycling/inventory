@@ -109,26 +109,26 @@ const SideBar = () => {
 
         {extremity && (
           <> {assistiveDevice === "Prosthesis" && extremity === "Lower" && (
-  <div className="w-full relative">
+               <div className="w-full relative">
 
-    {/* The leg graphic container */}
-    <div className="absolute right-0 top-0 overflow-visible">
+                    {/* The leg graphic container */}
+                    <div className="absolute right-0 top-0 overflow-visible">
 
-      {/* Scale + translation applied here */}
-      <div className="scale-[2] origin-top-left translate-y-[-800px] translate-x-[-400px]">
-        <ProstheticLegGraphic />
-      </div>
+                      {/* Scale + translation applied here */}
+                      <div className="scale-[2] origin-top-left translate-y-[50px] translate-x-[-150px]">
+                        <ProstheticLegGraphic />
+                      </div>
 
-    </div>
-  </div>
-)}
+                    </div>
+                  </div>
+                )}
 
-            <Parts description={description} setDescription={setDescription} />
-            <Pediatric pediatric={pediatric} setPediatric={setPediatric} />
-            <Manufacturer/>
-            <Size/>
-          </>
-        )} 
+                            <Parts description={description} setDescription={setDescription} />
+                            <Pediatric pediatric={pediatric} setPediatric={setPediatric} />
+                            <Manufacturer/>
+                            <Size/>
+                          </>
+                        )} 
 
         <ResetFilters removeAllFilters={removeAllFilters} />
       </div>
