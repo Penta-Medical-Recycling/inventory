@@ -22,14 +22,16 @@ const SideBar = () => {
     setSelectedFilters,
   } = useContext(PentaContext);
 
+  
   const [assistiveDevice, setAssistiveDevice] = useState("");
   const [extremity, setExtremity] = useState("");
   const [description, setDescription] = useState("");
   const [pediatric, setPediatric] = useState(false);
+  const [selectedPart, setSelectedPart] = useState(null); // Added state for selected part
 
   const [resetKey, setResetKey] = useState(0);
  
-  const activeToggle = () => setIsSideBarActive(!isSideBarActive); //added resetKey to force re-render of child components
+  const activeToggle = () => setIsSideBarActive(!isSideBarActive);
 
   // Sidebar ref for outside click
   const sidebarRef = useRef(null);
@@ -67,6 +69,7 @@ const SideBar = () => {
     setExtremity("");
     setDescription("");
     setPediatric(false);
+    setSelectedPart(null); // Added state for selected part
     setResetKey((k) => k + 1);
   };
 
@@ -108,27 +111,33 @@ const SideBar = () => {
         )}
 
         {extremity && (
-          <> {assistiveDevice === "Prosthesis" && extremity === "Lower" && (
-               <div className="w-full relative">
-
-                    {/* The leg graphic container */}
-                    <div className="absolute right-0 top-0 overflow-visible">
-
-                      {/* Scale + translation applied here */}
-                      <div className="scale-[2] origin-top-left translate-y-[50px] translate-x-[-150px]">
-                        <ProstheticLegGraphic />
-                      </div>
-
-                    </div>
+          <> 
+            {assistiveDevice === "Prosthesis" && extremity === "Lower" && (
+              <div className="w-full relative">
+                {/* The leg graphic container */}
+                <div className="absolute right-0 top-0 overflow-visible">
+                  {/* Scale + translation applied here */}
+                  <div className="scale-[2] origin-top-left translate-y-[50px] translate-x-[-150px]">
+                    <ProstheticLegGraphic 
+                      selectedPart={selectedPart}
+                      onPartClick={setSelectedPart}
+                    />
                   </div>
-                )}
+                </div>
+              </div>
+            )}
 
-                            <Parts description={description} setDescription={setDescription} />
-                            <Pediatric pediatric={pediatric} setPediatric={setPediatric} />
-                            <Manufacturer/>
-                            <Size/>
-                          </>
-                        )} 
+            <Parts 
+              description={description} 
+              setDescription={setDescription}
+              selectedPart={selectedPart}
+              onPartSelect={setSelectedPart} //added prop to update selected part
+            />
+            <Pediatric pediatric={pediatric} setPediatric={setPediatric} />
+            <Manufacturer/>
+            <Size/>
+          </>
+        )} 
 
         <ResetFilters removeAllFilters={removeAllFilters} />
       </div>
