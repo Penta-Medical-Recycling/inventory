@@ -117,7 +117,7 @@ const SideBar = () => {
                 {/* The leg graphic container */}
                 <div className="absolute right-0 top-0 overflow-visible">
                   {/* Scale + translation applied here */}
-                  <div className="scale-[2] origin-top-left translate-y-[50px] translate-x-[-150px]">
+                  <div className="scale-[2] origin-top-left translate-y-[35px] translate-x-[-150px]">
                     <ProstheticLegGraphic 
                       selectedPart={selectedPart}
                       onPartClick={setSelectedPart}

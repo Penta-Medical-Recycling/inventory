@@ -8,8 +8,8 @@ import Pylon from "../../assets/leg-images/Pylon.svg"
 import Ankle from "../../assets/leg-images/Ankle.svg"
 import Foot from "../../assets/leg-images/Foot.svg";
 
-const BASE_CANVAS_WIDTH = 12.5;
-const BASE_CANVAS_HEIGHT = 25.75;
+const BASE_CANVAS_WIDTH = 12;
+const BASE_CANVAS_HEIGHT = 27;
 
 // Map Parts.jsx categories to leg parts
 const CATEGORY_TO_PARTS = {
@@ -76,12 +76,12 @@ const ProstheticLegGraphic = ({ scale = 0.50, selectedPart }) => {
 
   return (
     <div 
-      className="page-wrapper flex justify-center items-center min-h-1/2 bg-transparent"
+      className="page-wrapper flex justify-center items-center min-h-1/2 bg-transparent p-2"
       data-container="page-wrapper"
       aria-label="Prosthetic leg page wrapper"
     >
       <div
-        className="prosthetic-leg-main relative bg-transparent "
+        className="prosthetic-leg-main relative bg-transparent"
         data-container="prosthetic-leg-main"
         aria-label="Main prosthetic leg container"
         role="region"
@@ -127,7 +127,7 @@ const ProstheticLegGraphic = ({ scale = 0.50, selectedPart }) => {
           <div className="leg-part knee-container absolute left-[6rem] top-[14.05rem]">
             {shouldShowHighlight("knee") && (
               <svg className="highlight-overlay absolute pointer-events-none left-[-1.25rem] top-[-1rem] overflow-visible" width="63" height="42">
-                <ellipse cx="35.5" cy="21" rx="45" ry="40" fill="#64c8ff" fillOpacity={0.65} />
+                <ellipse cx="33" cy="21" rx="45" ry="40" fill="#64c8ff" fillOpacity={0.65} />
               </svg>
             )}
             <img src={Knee} alt="Knee" className={`leg-part-image relative transition-all ${fade("knee")} ${highlight("knee")}`} style={{ width: '1.45813rem', height: '0.75438rem' }} draggable={false} />
@@ -167,7 +167,7 @@ const ProstheticLegGraphic = ({ scale = 0.50, selectedPart }) => {
           <div className="leg-part foot-container absolute left-[4.5rem] top-[23.2rem]">
             {shouldShowHighlight("foot") && (
               <svg className="highlight-overlay absolute pointer-events-none left-[-1.25rem] top-[-1.25rem] overflow-visible" width="92" height="68">
-                <ellipse cx="55" cy="35" rx="45" ry="35" fill="#64c8ff" fillOpacity={0.65} />
+                <ellipse cx="50" cy="35" rx="45" ry="35" fill="#64c8ff" fillOpacity={0.65} />
               </svg>
             )}
             <img src={Foot} alt="Foot" className={`leg-part-image relative transition-all ${fade("foot")} ${highlight("foot")}`} style={{ width: '3.26869rem', height: '1.72906rem' }} draggable={false} />
