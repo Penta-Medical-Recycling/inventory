@@ -120,16 +120,21 @@ const SideBar = () => {
         {extremity && (
           <>
             {extremity === "Lower" && (
-              <div className="w-full relative">
-                <div className="absolute right-0 top-0 overflow-visible">
-                  <div className="scale-[2] origin-top-left translate-y-[50px] translate-x-[-150px]">
-                    <ProstheticLegGraphic selectedPart={description} />
+              <>
+                <Parts
+                  description={description}
+                  setDescription={setDescription}
+                />
+                <div className="w-full relative">
+                  <div className="absolute right-0 top-0 overflow-visible">
+                    <div className="scale-[2] origin-top-left translate-y-[-530px] translate-x-[-150px]">
+                      <ProstheticLegGraphic selectedPart={description} />
+                    </div>
                   </div>
                 </div>
-              </div>
+              </>
             )}
 
-            <Parts description={description} setDescription={setDescription} />
             <Pediatric
               pediatric={pediatric}
               setPediatric={setPediatric}
