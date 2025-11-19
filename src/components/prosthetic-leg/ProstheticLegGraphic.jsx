@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from "react";
+import React, { useRef} from "react";
 
 import abutmentScrew from "../../assets/leg-images/AbutmentScrew.svg";
 import Socket from "../../assets/leg-images/Socket.svg";
