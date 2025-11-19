@@ -7,6 +7,7 @@ import Pediatric from "./sidebar-filters/Pediatric";
 import Manufacturer from "./sidebar-filters/Manufacturer";
 import Size from "./sidebar-filters/Size";
 import ResetFilters from "./sidebar-filters/ResetFilters";
+import ProstheticLegGraphic from "./prosthetic-leg/ProstheticLegGraphic";
 
 const SideBar = () => {
   const {
@@ -24,7 +25,7 @@ const SideBar = () => {
   const [assistiveDevice, setAssistiveDevice] = useState("");
   const [extremity, setExtremity] = useState("");
   const [description, setDescription] = useState("");
-  const [selectedPart, setSelectedPart] = useState("");
+  const [selectedPart, setSelectedPart] = useState(null);
   const [pediatric, setPediatric] = useState(false);
 
   const activeToggle = () => setIsSideBarActive(!isSideBarActive);
@@ -64,6 +65,7 @@ const SideBar = () => {
     setAssistiveDevice("");
     setExtremity("");
     setDescription("");
+    setSelectedPart(null);
     setPediatric(false);
   };
 
@@ -109,12 +111,26 @@ const SideBar = () => {
         {extremity && (
           <>
             {extremity === "Lower" && (
-              <Parts
-                description={description}
-                setDescription={setDescription}
-                selectedPart={selectedPart}
-                setSelectedPart={setSelectedPart}
-              />
+              <div>
+                <Parts
+                  description={description}
+                  setDescription={setDescription}
+                  selectedPart={selectedPart}
+                  onPartSelect={setSelectedPart} //added prop to update selected part
+                />
+                       <div className="w-full relative">
+                  {/* The leg graphic container */}
+                  <div className="absolute right-0 top-0 overflow-visible">
+                    {/* Scale + translation applied here */}
+                    <div className="scale-[2] origin-top-left translate-y-[35px] translate-x-[-150px]">
+                      <ProstheticLegGraphic
+                        selectedPart={selectedPart}
+                        onPartClick={setSelectedPart}
+                      />
+                    </div>
+                  </div>
+                </div>
+              </div>
             )}
 
             <Pediatric pediatric={pediatric} setPediatric={setPediatric} setSelectedFilters={setSelectedFilters} />
