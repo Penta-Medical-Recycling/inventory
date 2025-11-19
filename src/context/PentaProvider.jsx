@@ -121,7 +121,7 @@ function PentaProvider({ children }) {
       const searchConditions = searchTerms.map(
         (term) => `SEARCH("${term}", {StringSearch})`
       );
-      filters.push(`AND(${searchConditions.join(",")})`);
+      filters.push(`OR(${searchConditions.join(",")})`);
     }
 
 if (selectedSKU.length > 0) {
