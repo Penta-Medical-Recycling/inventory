@@ -1,7 +1,7 @@
 import React, { useContext } from "react";
 import PentaContext from "../../context/PentaContext";
 
-const Parts = ({ description, setDescription, selectedPart, onPartSelect }) => {
+const Parts = ({ description, setDescription }) => {
   const { setSelectedDescriptions, setSearchInput } = useContext(PentaContext);
 
   const partFilters = {
@@ -42,7 +42,7 @@ const Parts = ({ description, setDescription, selectedPart, onPartSelect }) => {
             key={option}
             onClick={() => handlePartClick(option)}
             className={`w-fit px-5 py-2 text-xl rounded-3xl border font-normal transition-all duration-200
-              ${description === option || selectedPart === option
+              ${description === option
                 ? "bg-[#D9F1FF] text-[#4A4A4A] border-[#64C8FF] font-semibold"
                 : "text-[#4A4A4A] border-transparent"}`}
           >
