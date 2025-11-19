@@ -75,7 +75,9 @@ const SideBar = () => {
     >
       {/* Header */}
       <div className="flex items-center justify-between mx-3 py-3">
-        <label className="is-size-3 text-center flex-1 font-bold">Filters</label>
+        <label className="is-size-3 text-center flex-1 font-bold">
+          Filters
+        </label>
         <button
           onClick={activeToggle}
           className="p-2 rounded-full hover:scale-120"
@@ -88,12 +90,22 @@ const SideBar = () => {
             stroke="currentColor"
             strokeWidth={2}
           >
-            <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              d="M6 18L18 6M6 6l12 12"
+            />
           </svg>
         </button>
       </div>
 
-      <hr style={{ width: "70%", margin: "20px auto", backgroundColor: "#F5F5F5" }} />
+      <hr
+        style={{
+          width: "70%",
+          margin: "20px auto",
+          backgroundColor: "#F5F5F5",
+        }}
+      />
       <div className="flex flex-col gap-8 mx-5">
         <AssistiveDevice
           assistiveDevice={assistiveDevice}
@@ -111,19 +123,18 @@ const SideBar = () => {
               <div className="w-full relative">
                 <div className="absolute right-0 top-0 overflow-visible">
                   <div className="scale-[2] origin-top-left translate-y-[50px] translate-x-[-150px]">
-                    <ProstheticLegGraphic 
-                      selectedPart={description}
-                    />
+                    <ProstheticLegGraphic selectedPart={description} />
                   </div>
                 </div>
               </div>
             )}
 
-            <Parts 
-              description={description} 
-              setDescription={setDescription}
+            <Parts description={description} setDescription={setDescription} />
+            <Pediatric
+              pediatric={pediatric}
+              setPediatric={setPediatric}
+              setSelectedFilters={setSelectedFilters}
             />
-            <Pediatric pediatric={pediatric} setPediatric={setPediatric} setSelectedFilters={setSelectedFilters} />
             <Manufacturer />
             <Size />
           </>
