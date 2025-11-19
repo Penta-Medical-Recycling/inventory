@@ -24,6 +24,7 @@ const SideBar = () => {
   const [assistiveDevice, setAssistiveDevice] = useState("");
   const [extremity, setExtremity] = useState("");
   const [description, setDescription] = useState("");
+  const [selectedPart, setSelectedPart] = useState("");
   const [pediatric, setPediatric] = useState(false);
 
   const activeToggle = () => setIsSideBarActive(!isSideBarActive);
@@ -73,7 +74,7 @@ const SideBar = () => {
       ref={sidebarRef}
     >
       {/* Header */}
-      <div className="flex items-center justify-between mx-3">
+      <div className="flex items-center justify-between mx-3 py-3">
         <label className="is-size-3 text-center flex-1 font-bold">Filters</label>
         <button
           onClick={activeToggle}
@@ -107,8 +108,16 @@ const SideBar = () => {
 
         {extremity && (
           <>
-            <Parts description={description} setDescription={setDescription} />
-            <Pediatric pediatric={pediatric} setPediatric={setPediatric} />
+            {extremity === "Lower" && (
+              <Parts
+                description={description}
+                setDescription={setDescription}
+                selectedPart={selectedPart}
+                setSelectedPart={setSelectedPart}
+              />
+            )}
+
+            <Pediatric pediatric={pediatric} setPediatric={setPediatric} setSelectedFilters={setSelectedFilters} />
             <Manufacturer />
             <Size />
           </>
