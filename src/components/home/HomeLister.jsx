@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useContext, useRef } from "react";
+import React, { useState, useEffect, useContext, useRef, useMemo } from "react";
 import PentaContext from "../../context/PentaContext";
 import BigSpinner from "../../assets/BigSpinner";
 import InStockCard from "../cards/InStockCard";
@@ -38,8 +38,8 @@ const HomeLister = ({ onRemove, setOnRemove }) => {
         let allRecords = [];
         let nextOffset = "";
         let pageCounter = 0;
-        const maxPages = 50;
-        const baseUrl = urlCreator().split("&offset=")[0];
+        const maxPages = 60;
+        const baseUrl = useMemo(() => { return urlCreator().split("&offset=")[0]},[urlCreator]);
 
         while (pageCounter < maxPages) {
           const url = baseUrl + nextOffset;
@@ -50,6 +50,8 @@ const HomeLister = ({ onRemove, setOnRemove }) => {
           if (!res.offset) break;
           nextOffset = `&offset=${res.offset}`;
           pageCounter++;
+          console.log(`📦 Fetching page ${pageCounter + 1}...`);
+
         }
 
         sessionStorage.setItem("allInventoryItems", JSON.stringify(allRecords));
@@ -60,7 +62,7 @@ const HomeLister = ({ onRemove, setOnRemove }) => {
     }
 
     fetchAllInventory();
-  }, []);
+  }, [urlCreator]);
 
   async function loadNewPage() {
     const newUrl = urlCreator();
@@ -107,7 +109,7 @@ const HomeLister = ({ onRemove, setOnRemove }) => {
       setTimeout(() => {
         setIsLoading(true);
         resolve();
-      }, 750);
+      }, 300);
     });
 
   const addingCards = () =>
@@ -115,7 +117,7 @@ const HomeLister = ({ onRemove, setOnRemove }) => {
       setTimeout(() => {
         setIsLoading(false);
         resolve();
-      }, 750);
+      }, 300);
     });
 
   useEffect(() => {
@@ -132,7 +134,7 @@ const HomeLister = ({ onRemove, setOnRemove }) => {
         setOnRemove(false);
         await loadNewPage();
         await addingCards();
-      }, 750);
+      }, 300);
 
       return () => clearTimeout(debounceTimeout);
     }
