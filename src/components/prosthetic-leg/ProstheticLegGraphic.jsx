@@ -22,7 +22,7 @@ const CATEGORY_TO_PARTS = {
   All: null, // null means show all parts
 };
 
-const ProstheticLegGraphic = ({ scale = 0.5, selectedPart }) => {
+const ProstheticLegGraphic = ({ scale = 1, selectedPart }) => {
   const legRef = useRef(null);
 
   const fade = (part) => {

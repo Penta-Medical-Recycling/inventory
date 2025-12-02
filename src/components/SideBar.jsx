@@ -70,7 +70,9 @@ const SideBar = () => {
   return (
     <div
       id="side-bar"
-      className={isSideBarActive ? "is-filter-active flex flex-col" : ""}
+      className={
+        isSideBarActive ? "is-filter-active flex flex-col sm:flex-col" : ""
+      }
       ref={sidebarRef}
     >
       {/* Header */}
@@ -106,7 +108,7 @@ const SideBar = () => {
           backgroundColor: "#F5F5F5",
         }}
       />
-      <div className="flex flex-col gap-8 mx-5">
+      <div className="flex flex-col gap-8 mx-5 sm:flex-col sm:gap-8 sm:mx-5">
         <AssistiveDevice
           assistiveDevice={assistiveDevice}
           setAssistiveDevice={setAssistiveDevice}
@@ -120,19 +122,73 @@ const SideBar = () => {
         {extremity && (
           <>
             {extremity === "Lower" && (
-              <>
-                <Parts
-                  description={description}
-                  setDescription={setDescription}
-                />
-                <div className="w-full relative">
-                  <div className="absolute right-0 top-0 overflow-visible">
-                    <div className="scale-[2] origin-top-left translate-y-[-530px] translate-x-[-150px]">
-                      <ProstheticLegGraphic selectedPart={description} />
-                    </div>
+              <div
+                className="
+      flex w-full items-start justify-between
+      gap-2 sm:gap-2 md:gap-3 lg:gap-4 xl:gap-20  /* closer spacing */
+      
+      px-3 md:px-4 lg:px-5 xl:px-6 2xl:px-7                        /* padding INSIDE container */
+      py-4 md:py-5 lg:py-6 xl:py-7 2xl:py-8                      /* padding top/bottom */
+      
+      mb-4 md:mb-6 lg:mb-8                       /* margin BELOW section */
+    "
+              >
+                {/* Parts — LEFT */}
+                <div
+                  className="
+        flex-1
+        max-w-[50%]
+        sm:max-w-[48%]
+        md:max-w-[45%]
+        lg:max-w-[40%]
+        xl:max-w-[38%]
+        2xl:max-w-[35%]
+        
+        pl-2 sm:pl-3 md:pl-4 lg:pl-5 xl:pl-6 2xl:pl-7
+        "
+                >
+                  <Parts
+                    description={description}
+                    setDescription={setDescription}
+                  />
+                </div>
+
+                {/* Leg Graphic — RIGHT */}
+                <div
+                  className="
+        flex-1 flex items-center justify-start
+        max-w-[50%]
+        sm:max-w-[52%]
+        md:max-w-[55%]
+        lg:max-w-[60%]
+        xl:max-w-[62%]
+        2xl:max-w-[65%]
+        pl-2 sm:pl- md:pl-6 lg:pl-10 xl:pl-12 2xl:pl-14
+      "
+                >
+                  <div
+                    className="
+          relative w-full
+          
+          /* leg graphic sizing based on screen */
+          max-w-[120px] aspect-[3/5]
+          sm:max-w-[160px]
+          md:max-w-[200px]
+          lg:max-w-[240px]
+          xl:max-w-[280px]
+          2xl:max-w-[320px]
+          
+          /* margin around leg so it doesn't feel glued to edges */
+          mx-auto my-1
+        "
+                  >
+                    <ProstheticLegGraphic
+                      selectedPart={description}
+                      scale={window.innerWidth < 640 ? 0.8 : 1}
+                    />
                   </div>
                 </div>
-              </>
+              </div>
             )}
 
             <Pediatric
