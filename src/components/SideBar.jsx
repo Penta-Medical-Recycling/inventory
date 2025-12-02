@@ -125,7 +125,7 @@ const SideBar = () => {
               <div
                 className="
       flex w-full items-start justify-between
-      gap-2 sm:gap-2 md:gap-3 lg:gap-4 xl:gap-20  /* closer spacing */
+      gap-1 sm:gap-2 md:gap-3 lg:gap-4 xl:gap-1      /* closer spacing */
       
       px-3 md:px-4 lg:px-5 xl:px-6 2xl:px-7                        /* padding INSIDE container */
       py-4 md:py-5 lg:py-6 xl:py-7 2xl:py-8                      /* padding top/bottom */
@@ -136,7 +136,7 @@ const SideBar = () => {
                 {/* Parts — LEFT */}
                 <div
                   className="
-        flex-1
+        flex-1 flex items-center justify-ce
         max-w-[50%]
         sm:max-w-[48%]
         md:max-w-[45%]
@@ -163,7 +163,7 @@ const SideBar = () => {
         lg:max-w-[60%]
         xl:max-w-[62%]
         2xl:max-w-[65%]
-        pl-2 sm:pl- md:pl-6 lg:pl-10 xl:pl-12 2xl:pl-14
+        pl-2 sm:pl- md:pl-6 lg:pl-10 xl:pl-12 2xl:pl-10
       "
                 >
                   <div
