@@ -42,9 +42,11 @@ const Parts = ({ description, setDescription }) => {
             key={option}
             onClick={() => handlePartClick(option)}
             className={`w-fit px-5 py-2 text-xl rounded-3xl border font-normal transition-all duration-200
-              ${description === option
-                ? "bg-[#D9F1FF] text-[#4A4A4A] border-[#64C8FF] font-semibold"
-                : "text-[#4A4A4A] border-transparent"}`}
+              ${
+                description === option
+                  ? "bg-[#D9F1FF] text-[#4A4A4A] border-[#64C8FF] font-semibold"
+                  : "text-[#4A4A4A] border-transparent"
+              }`}
           >
             {option}
           </button>
