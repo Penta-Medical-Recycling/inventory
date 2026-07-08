@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import PentaContext from "./PentaContext";
 
 function PentaProvider({ children }) {
@@ -59,7 +59,7 @@ function PentaProvider({ children }) {
     fetchStatus();
   }, []);
 
-  function urlCreator() {
+  const urlCreator = useCallback(() => {
     const baseUrl = "https://api.airtable.com/v0/appHFwcwuXLTNCjtN/Inventory?";
     const sort = `sort[0][field]=Item ID&sort[0][direction]=asc`;
     const pageSize = "pageSize=36";
@@ -121,7 +121,7 @@ function PentaProvider({ children }) {
       const searchConditions = searchTerms.map(
         (term) => `SEARCH("${term}", {StringSearch})`
       );
-      filters.push(`AND(${searchConditions.join(",")})`);
+      filters.push(`OR(${searchConditions.join(",")})`);
     }
 
 if (selectedSKU.length > 0) {
@@ -143,7 +143,14 @@ if (selectedSKU.length > 0) {
     return baseUrl + [pageSize, sort, filterFunction].join("&");
 
     
-  }
+  }, [
+    selectedSKU,
+    selectedManufacturer,
+    selectedFilter,
+    minValue,
+    isRangeOn,
+    searchInput
+  ]);
 
   async function fetchAPI(url) {
     try {

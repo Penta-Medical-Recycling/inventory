@@ -1,217 +1,312 @@
-import { useState, useRef, useEffect } from "react";
+import React, { useRef } from "react";
 
 import abutmentScrew from "../../assets/leg-images/AbutmentScrew.svg";
 import Socket from "../../assets/leg-images/Socket.svg";
 import Knee from "../../assets/leg-images/Knee.svg";
 import Calf from "../../assets/leg-images/Calf.svg";
-import Pylon from "../../assets/leg-images/Pylon.svg"
-import Ankle from "../../assets/leg-images/Ankle.svg"
+import Pylon from "../../assets/leg-images/Pylon.svg";
+import Ankle from "../../assets/leg-images/Ankle.svg";
 import Foot from "../../assets/leg-images/Foot.svg";
 
+const BASE_CANVAS_WIDTH = 12;
+const BASE_CANVAS_HEIGHT = 27;
 
-/*
-- Displays all parts of a prosthetic leg.
-- Click a part → highlight it with an SVG ellipse behind it.
-- Click same part → deselect.
-- Click outside (from App.jsx) → all parts grayscale again.
-*/
+// Map Parts.jsx categories to leg parts
+const CATEGORY_TO_PARTS = {
+  Liners: ["screw"],
+  Adapters: ["knee", "ankle"],
+  "Knees/Hips": ["calf"],
+  Pylons: ["pylon"],
+  Feet: ["foot"],
+  Accessories: [], // Empty array - all parts turn gray
+  All: null, // null means show all parts
+};
 
-const ProstheticLegGraphic = () => {
-  const [selected, setSelected] = useState(null);
-  const [allGrey, setAllGrey] = useState(false); // default full color
+const ProstheticLegGraphic = ({ scale = 1, selectedPart }) => {
   const legRef = useRef(null);
 
-  // Outside click => deselect + all grey
-  useEffect(() => {
-    const onDocDown = (e) => {
-      const el = legRef.current;
-      if (el && !el.contains(e.target)) {
-        setSelected(null);
-        setAllGrey(true);
-      }
-    };
-    document.addEventListener("mousedown", onDocDown, true);
-    document.addEventListener("touchstart", onDocDown, true);
-    return () => {
-      document.removeEventListener("mousedown", onDocDown, true);
-      document.removeEventListener("touchstart", onDocDown, true);
-    };
-  }, []);
+  const fade = (part) => {
+    // If "Accessories" is selected, fade everything
+    if (selectedPart === "Accessories") {
+      return "grayscale opacity-40";
+    }
 
-  // Single, correct handleClick
-  const handleClick = (part) => {
-    setAllGrey(false); // inside click returns to color mode
-    setSelected((prev) => (prev === part ? null : part));
+    // If a category is selected, only fade parts not in that category
+    if (selectedPart && selectedPart !== "All") {
+      const partsToShow = CATEGORY_TO_PARTS[selectedPart];
+      if (partsToShow && !partsToShow.includes(part)) {
+        return "grayscale opacity-40";
+      }
+    }
+
+    return "";
   };
 
+  const highlight = (part) => {
+    // No highlighting when "Accessories" is selected
+    if (selectedPart === "Accessories") {
+      return "";
+    }
 
-  const fade = (part) =>
-    allGrey || (selected && selected !== part) ? "grayscale opacity-40" : "";
+    if (selectedPart && selectedPart !== "All") {
+      const partsToShow = CATEGORY_TO_PARTS[selectedPart];
+      if (partsToShow && partsToShow.includes(part)) {
+        return "grayscale-0 opacity-100";
+      }
+    }
+    return "";
+  };
 
-  const highlight = (part) =>
-    !allGrey && selected === part ? "grayscale-0 opacity-100" : "";
+  const shouldShowHighlight = (part) => {
+    // Never show highlight for "Accessories"
+    if (selectedPart === "Accessories") {
+      return false;
+    }
+
+    // Show highlight for all parts in the selected category
+    if (selectedPart && selectedPart !== "All") {
+      const partsToShow = CATEGORY_TO_PARTS[selectedPart];
+      if (partsToShow && partsToShow.includes(part)) {
+        return true;
+      }
+    }
+
+    return false;
+  };
 
   return (
     <div
-      ref={legRef}
-      onClick={(e) => e.stopPropagation()}
-      className="relative w-[1400px] h-[1400px] bg-transparent"
-      aria-label="Prosthetic leg graphic"
-      role="region"
+      className="page-wrapper flex justify-center items-center min-h-1/2 bg-transparent p-2"
+      data-container="page-wrapper"
+      aria-label="Prosthetic leg page wrapper"
     >
-      {/* ───────── Abutment Screw ───────── */}
-      <div className="absolute left-[862px] top-[888px]">
-        {selected === "screw" && !allGrey && (
-          <svg
-            className="absolute pointer-events-none left-[-20px] top-[-20px] overflow-visible"
-            width="98"
-            height="139"
-          >
-            <ellipse cx="49" cy="69.5" rx="69" ry="55" fill="#64c8ff" fillOpacity={.65} />
-          </svg>
-        )}
-        <img
-          src={abutmentScrew}
-          alt="Abutment Screw"
-          onClick={() => handleClick("screw")}
-          className={`relative w-[58px] h-[99px] cursor-pointer transition-all ${fade(
-            "screw"
-          )} ${highlight("screw")}`}
-          draggable={false}
-        />
-      </div>
+      <div
+        className="prosthetic-leg-main relative bg-transparent"
+        data-container="prosthetic-leg-main"
+        aria-label="Main prosthetic leg container"
+        role="region"
+        style={{
+          width: `${BASE_CANVAS_WIDTH * scale}rem`,
+          height: `${BASE_CANVAS_HEIGHT * scale}rem`,
+          maxWidth: "100%",
+          maxHeight: "90vh",
+          overflow: "hidden",
+        }}
+      >
+        <div
+          ref={legRef}
+          className="leg-canvas relative bg-transparent"
+          style={{
+            width: `${BASE_CANVAS_WIDTH}rem`,
+            height: `${BASE_CANVAS_HEIGHT}rem`,
+            transform: `scale(${scale})`,
+            transformOrigin: "top left",
+          }}
+        >
+          {/* Abutment Screw */}
+          <div className="leg-part abutment-screw-container absolute left-[3.50rem] top-[1.5rem]">
+            {shouldShowHighlight("screw") && (
+              <svg
+                className="highlight-overlay absolute pointer-events-none left-[-1.25rem] top-[-1.25rem] overflow-visible"
+                width="98"
+                height="139"
+              >
+                <ellipse
+                  cx="49"
+                  cy="75.5"
+                  rx="69"
+                  ry="61"
+                  fill="#64c8ff"
+                  fillOpacity={0.65}
+                />
+              </svg>
+            )}
+            <img
+              src={abutmentScrew}
+              alt="Abutment Screw"
+              className={`leg-part-image relative transition-all ${fade(
+                "screw"
+              )} ${highlight("screw")}`}
+              style={{ width: "3.60394rem", height: " 6.17075rem" }}
+              draggable={false}
+            />
+          </div>
 
-      {/* ───────── Socket ───────── */}
-      <div className="absolute left-[887px] top-[984px]">
-        {selected === "socket" && !allGrey && (
-          <svg
-            className="absolute pointer-events-none left-[-25px] top-[-20px] overflow-visible"
-            width="100"
-            height="142"
-          >
-            <ellipse cx="50" cy="75" rx="58" ry="59" fill="#64c8ff" fillOpacity={.65} />
-          </svg>
-        )}
-        <img
-          src={Socket}
-          alt="Socket"
-          onClick={() => handleClick("socket")}
-          className={`relative w-[50px] h-[102px] cursor-pointer transition-all ${fade(
-            "socket"
-          )} ${highlight("socket")}`}
-          draggable={false}
-        />
-      </div>
+          {/* Socket */}
+          <div className="leg-part socket-container absolute left-[5rem] top-[7.5rem]">
+            {shouldShowHighlight("socket") && (
+              <svg
+                className="highlight-overlay absolute pointer-events-none left-[-1.5rem] top-[-1.25rem] overflow-visible"
+                width="100"
+                height="142"
+              >
+                <ellipse
+                  cx="50"
+                  cy="75"
+                  rx="58"
+                  ry="59"
+                  fill="#64c8ff"
+                  fillOpacity={0.65}
+                />
+              </svg>
+            )}
+            <img
+              src={Socket}
+              alt="Socket"
+              className={`leg-part-image relative transition-all ${fade(
+                "socket"
+              )} ${highlight("socket")}`}
+              style={{ width: "3.11269rem", height: "6.39394rem" }}
+              draggable={false}
+            />
+          </div>
 
-      {/* ───────── Knee ───────── */}
-      <div className="absolute left-[900px] top-[1092px]">
-        {selected === "knee" && !allGrey && (
-          <svg
-            className="absolute pointer-events-none left-[-20px] top-[-15px] overflow-visible"
-            width="63"
-            height="42"
-          >
-            <ellipse cx="31.5" cy="21" rx="35" ry="30" fill="#64c8ff" fillOpacity={.65} />
-          </svg>
-        )}
-        <img
-          src={Knee}
-          alt="Knee"
-          onClick={() => handleClick("knee")}
-          className={`relative w-[23px] h-[12px] cursor-pointer transition-all ${fade(
-            "knee"
-          )} ${highlight("knee")}`}
-          draggable={false}
-        />
-      </div>
+          {/* Knee */}
+          <div className="leg-part knee-container absolute left-[6rem] top-[14.05rem]">
+            {shouldShowHighlight("knee") && (
+              <svg
+                className="highlight-overlay absolute pointer-events-none left-[-1.25rem] top-[-1rem] overflow-visible"
+                width="63"
+                height="42"
+              >
+                <ellipse
+                  cx="33"
+                  cy="21"
+                  rx="45"
+                  ry="40"
+                  fill="#64c8ff"
+                  fillOpacity={0.65}
+                />
+              </svg>
+            )}
+            <img
+              src={Knee}
+              alt="Knee"
+              className={`leg-part-image relative transition-all ${fade(
+                "knee"
+              )} ${highlight("knee")}`}
+              style={{ width: "1.45813rem", height: "0.75438rem" }}
+              draggable={false}
+            />
+          </div>
 
-      {/* ───────── Calf ───────── */}
-      <div className="absolute left-[895px] top-[1106px]">
-        {selected === "calf" && !allGrey && (
-          <svg
-            className="absolute pointer-events-none left-[-20px] top-[-20px] overflow-visible"
-            width="140"
-            height="180"
-            viewBox="0 0 140 180"
-          >
-            <ellipse cx="36.5" cy="52" rx="50" ry="48" fill="#64c8ff" fillOpacity={.65} />
-          </svg>
-        )}
-        <img
-          src={Calf}
-          alt="Calf"
-          onClick={() => handleClick("calf")}
-          className={`relative w-[33px] h-[64px] cursor-pointer transition-all ${fade(
-            "calf"
-          )} ${highlight("calf")}`}
-          draggable={false}
-        />
-      </div>
+          {/* Calf */}
+          <div className="leg-part calf-container absolute left-[5.8rem] top-[15rem]">
+            {shouldShowHighlight("calf") && (
+              <svg
+                className="highlight-overlay absolute pointer-events-none left-[-1.25rem] top-[-1.25rem] overflow-visible"
+                width="140"
+                height="180"
+                viewBox="0 0 140 180"
+              >
+                <ellipse
+                  cx="40.5"
+                  cy="55"
+                  rx="65"
+                  ry="55"
+                  fill="#64c8ff"
+                  fillOpacity={0.7}
+                />
+              </svg>
+            )}
+            <img
+              src={Calf}
+              alt="Calf"
+              className={`leg-part-image relative transition-all ${fade(
+                "calf"
+              )} ${highlight("calf")}`}
+              style={{ width: "2.04694rem", height: "4.02338rem" }}
+              draggable={false}
+            />
+          </div>
 
-      {/* ───────── Pylon ───────── */}
-      <div className="absolute left-[907px] top-[1171px]">
-        {selected === "pylon" && !allGrey && (
-          <svg
-            className="absolute pointer-events-none left-[-20px] top-[-20px] overflow-visible"
-            width="51"
-            height="91"
-          >
-            <ellipse cx="25.5" cy="45.5" rx="40" ry="38" fill="#64c8ff" fillOpacity={.65} />
-          </svg>
-        )}
-        <img
-          src={Pylon}
-          alt="Pylon"
-          onClick={() => handleClick("pylon")}
-          className={`relative w-[11px] h-[51px] cursor-pointer transition-all ${fade(
-            "pylon"
-          )} ${highlight("pylon")}`}
-          draggable={false}
-        />
-      </div>
+          {/* Pylon */}
+          <div className="leg-part pylon-container absolute left-[6.5rem] top-[19rem]">
+            {shouldShowHighlight("pylon") && (
+              <svg
+                className="highlight-overlay absolute pointer-events-none left-[-1.25rem] top-[-1.25rem] overflow-visible"
+                width="51"
+                height="91"
+              >
+                <ellipse
+                  cx="25.5"
+                  cy="58.5"
+                  rx="60"
+                  ry="50"
+                  fill="#64c8ff"
+                  fillOpacity={0.7}
+                />
+              </svg>
+            )}
+            <img
+              src={Pylon}
+              alt="Pylon"
+              className={`leg-part-image relative transition-all ${fade(
+                "pylon"
+              )} ${highlight("pylon")}`}
+              style={{ width: "0.6885rem", height: "3.20113rem" }}
+              draggable={false}
+            />
+          </div>
 
-      {/* ───────── Ankle ───────── */}
-      <div className="absolute left-[905px] top-[1220px]">
-        {selected === "ankle" && !allGrey && (
-          <svg
-            className="absolute pointer-events-none left-[-20px] top-[-20px] overflow-visible"
-            width="52"
-            height="53"
-          >
-            <ellipse cx="26" cy="26.5" rx="30" ry="30" fill="#64c8ff" fillOpacity={.65} />
-          </svg>
-        )}
-        <img
-          src={Ankle}
-          alt="Ankle"
-          onClick={() => handleClick("ankle")}
-          className={`relative w-[12px] h-[13px] cursor-pointer transition-all ${fade(
-            "ankle"
-          )} ${highlight("ankle")}`}
-          draggable={false}
-        />
-      </div>
+          {/* Ankle */}
+          <div className="leg-part ankle-container absolute left-[6.45rem] top-[22.25rem]">
+            {shouldShowHighlight("ankle") && (
+              <svg
+                className="highlight-overlay absolute pointer-events-none left-[-1.25rem] top-[-1.25rem] overflow-visible"
+                width="52"
+                height="53"
+              >
+                <ellipse
+                  cx="30"
+                  cy="25"
+                  rx="40"
+                  ry="35"
+                  fill="#64c8ff"
+                  fillOpacity={0.65}
+                />
+              </svg>
+            )}
+            <img
+              src={Ankle}
+              alt="Ankle"
+              className={`leg-part-image relative transition-all ${fade(
+                "ankle"
+              )} ${highlight("ankle")}`}
+              style={{ width: "0.76731rem", height: "0.82775rem" }}
+              draggable={false}
+            />
+          </div>
 
-      {/* ───────── Foot ───────── */}
-      <div className="absolute left-[872px] top-[1233px]">
-        {selected === "foot" && !allGrey && (
-          <svg
-            className="absolute pointer-events-none left-[-20px] top-[-20px] overflow-visible"
-            width="92"
-            height="68"
-          >
-            <ellipse cx="46" cy="35" rx="45" ry="38" fill="#64c8ff" fillOpacity={.65} />
-          </svg>
-        )}
-        <img
-          src={Foot}
-          alt="Foot"
-          onClick={() => handleClick("foot")}
-          className={`relative w-[52px] h-[28px] cursor-pointer transition-all ${fade(
-            "foot"
-          )} ${highlight("foot")}`}
-          draggable={false}
-        />
+          {/* Foot */}
+          <div className="leg-part foot-container absolute left-[4.5rem] top-[23.2rem]">
+            {shouldShowHighlight("foot") && (
+              <svg
+                className="highlight-overlay absolute pointer-events-none left-[-1.25rem] top-[-1.25rem] overflow-visible"
+                width="92"
+                height="68"
+              >
+                <ellipse
+                  cx="50"
+                  cy="35"
+                  rx="45"
+                  ry="35"
+                  fill="#64c8ff"
+                  fillOpacity={0.65}
+                />
+              </svg>
+            )}
+            <img
+              src={Foot}
+              alt="Foot"
+              className={`leg-part-image relative transition-all ${fade(
+                "foot"
+              )} ${highlight("foot")}`}
+              style={{ width: "3.26869rem", height: "1.72906rem" }}
+              draggable={false}
+            />
+          </div>
+        </div>
       </div>
     </div>
   );
