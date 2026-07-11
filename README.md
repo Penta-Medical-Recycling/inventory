@@ -59,7 +59,7 @@ Before you begin, ensure you have met the following requirements:
 
 4. **Edit the .env File:**
    Open the .env file in a text editor.
-   Create a REACT_APP_API_KEY variable and replace with Penta's AirTable personal access token.
+   Create a VITE_REACT_APP_API_KEY  variable and replace with Penta's AirTable personal access token.
    Note: Be cautious with API keys, PATs, and sensitive information. Do not commit your .env file to version control (e.g., Git) to keep your secrets secure.
 
 5. **Secrets in GitHub:** It's essential to keep your secrets safe. Avoid exposing your API keys or sensitive data in your GitHub repository. If you suspect that your API keys or any other sensitive information stored in GitHub Secrets has been compromised, it's essential to take immediate action to update and secure it. Revoke the current Personal Access Token in AirTable and create a new one.
