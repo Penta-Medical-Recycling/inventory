@@ -14,6 +14,7 @@
   - [Main Components](#main-components)
   - [State Management](#state-management)
   - [Data Fetching](#data-fetching)
+- [Testing](#testing)
 - [Usage](#usage)
   - [Using Item Cards](#using-item-cards)
   - [Requesting Items](#requesting-items)
@@ -159,6 +160,32 @@ The application fetches data from Airtable using the Airtable API. Data fetching
 
 - **Home.js**: Fetches and displays the inventory items on the home page.
 - **Cart.js**: Checks item availability and facilitates the item request process.
+
+## Testing
+
+The project uses [Vitest](https://vitest.dev/) as the test runner with [React Testing Library](https://testing-library.com/docs/react-testing-library/intro/) for component tests, and [Mock Service Worker (MSW)](https://mswjs.io/) to mock the Airtable API at the network level. Tests run in a `jsdom` environment.
+
+### Running Tests
+
+```bash
+npm run test        # run the full suite once
+npm run test:watch  # re-run on file changes
+npm run coverage    # run with a coverage report
+```
+
+### How It's Organized
+
+Test files live next to the code they cover as `*.test.jsx`. Shared testing infrastructure lives under `src/test/`:
+
+- **`setup.js`**: Global setup wired into Vitest. Starts/stops the MSW server, resets handlers and `localStorage`/`sessionStorage` between tests, and stubs the Airtable API key.
+- **`utils.jsx`**: A `renderWithProviders` helper that wraps components in the app's `HashRouter` and `PentaProvider`, plus re-exports of React Testing Library and `user-event`.
+- **`mocks/`**: The MSW layer — `fixtures.js` (Airtable-shaped sample data), `handlers.js` (default responses for each endpoint), and `server.js`. Individual tests can override responses with `server.use(...)` to simulate edge cases.
+
+### Writing a Test
+
+Because MSW intercepts the Airtable calls, most tests just render a component with `renderWithProviders`, wait for mocked data to appear, and assert on the result — no real network access required. Since the app reads heavily from `localStorage`, the setup file clears it between tests so each test starts clean.
+
+> **Note:** MSW is configured to error on any unhandled request, so if you add a feature that calls a new Airtable endpoint, add a matching handler in `src/test/mocks/handlers.js`.
 
 ## Usage
 
