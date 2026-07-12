@@ -1,23 +1,28 @@
 import React from "react";
+import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
+
+const itemClass =
+  "h-auto flex-1 cursor-pointer rounded-3xl border border-transparent px-4 py-1.5 text-base font-normal text-[#4A4A4A] transition-all hover:bg-transparent hover:text-[#4A4A4A] aria-pressed:border-[#64C8FF] aria-pressed:bg-[#D9F1FF] aria-pressed:font-semibold aria-pressed:text-[#4A4A4A]";
+
+const ASSISTIVE_DEVICE_OPTIONS = ["All", "Prosthesis", "Orthosis"];
 
 const AssistiveDevice = ({ assistiveDevice, setAssistiveDevice }) => {
   return (
-    <div className="filter-section flex flex-col gap-3">
-      <label className="mb-1 text-[#4A4A4A] text-2xl">Select Assistive Device</label>
-      <div className="is-fullwidth w-100 rounded-xl border flex overflow-hidden">
-        {["All", "Prosthesis", "Orthosis"].map((option) => (
-          <button
-            key={option}
-            onClick={() => setAssistiveDevice(option)}
-            className={`flex-1 px-5 py-2 text-xl rounded-3xl border font-normal transition-all
-              ${assistiveDevice === option
-                ? "bg-[#D9F1FF] text-[#4A4A4A] border-[#64C8FF] font-semibold"
-                : "text-[#4A4A4A] border-transparent"}`}
-          >
+    <div className="filter-section flex flex-col gap-2">
+      <label className="text-sm font-semibold uppercase tracking-wide text-[#6B7280]">Assistive Device</label>
+      <ToggleGroup
+        value={assistiveDevice ? [assistiveDevice] : []}
+        onValueChange={(value) => {
+          if (value.length) setAssistiveDevice(value[value.length - 1]);
+        }}
+        className="w-full gap-0 overflow-hidden rounded-3xl border"
+      >
+        {ASSISTIVE_DEVICE_OPTIONS.map((option) => (
+          <ToggleGroupItem key={option} value={option} className={itemClass}>
             {option}
-          </button>
+          </ToggleGroupItem>
         ))}
-      </div>
+      </ToggleGroup>
     </div>
   );
 };

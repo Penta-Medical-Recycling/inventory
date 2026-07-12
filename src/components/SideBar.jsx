@@ -1,8 +1,19 @@
-import React, { useEffect, useRef, useContext, useState } from "react";
+import { useEffect, useContext, useState } from "react";
+import { X } from "lucide-react";
 import PentaContext from "../context/PentaContext";
+import {
+  Drawer,
+  DrawerContent,
+  DrawerHeader,
+  DrawerTitle,
+  DrawerClose,
+  DrawerFooter,
+} from "./ui/drawer";
+import { ScrollArea } from "./ui/scroll-area";
 import AssistiveDevice from "./sidebar-filters/AssistiveDevice";
 import Extremity from "./sidebar-filters/Extremity";
 import Parts from "./sidebar-filters/Parts";
+import LegDiagram from "./sidebar-filters/LegDiagram";
 import Pediatric from "./sidebar-filters/Pediatric";
 import Manufacturer from "./sidebar-filters/Manufacturer";
 import Size from "./sidebar-filters/Size";
@@ -14,31 +25,20 @@ const SideBar = () => {
     isSideBarActive,
     fetchMaxSize,
     setLargestSize,
+    setMinValue,
     setMaxValue,
+    largestSize,
     setSelectedManufacturer,
     setSelectedSKU,
-    setIsRangeOn,
     setSelectedFilters,
+    selectedPart,
+    setSelectedPart,
+    extremity,
+    setExtremity,
   } = useContext(PentaContext);
 
   const [assistiveDevice, setAssistiveDevice] = useState("");
-  const [extremity, setExtremity] = useState("");
-  const [description, setDescription] = useState("");
   const [pediatric, setPediatric] = useState(false);
-
-  const activeToggle = () => setIsSideBarActive(!isSideBarActive);
-
-  // Sidebar ref for outside click
-  const sidebarRef = useRef(null);
-  useEffect(() => {
-    const handleClickOutside = (e) => {
-      if (sidebarRef.current && !sidebarRef.current.contains(e.target)) {
-        setIsSideBarActive(false);
-      }
-    };
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, [setIsSideBarActive]);
 
   // Fetch max size once
   useEffect(() => {
@@ -48,13 +48,40 @@ const SideBar = () => {
       setMaxValue(max);
     };
     fetchMax();
-  }, [fetchMaxSize, setLargestSize, setMaxValue]);
+    // Only run on mount. `fetchMaxSize` is recreated every render, so including
+    // it here would re-run this effect and reset `maxValue` on every render,
+    // fighting the size slider's user-selected max.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // The Parts filter (and leg diagram) is only shown for the Lower extremity.
+  // Default its selection to "All" on entering Lower, and clear it otherwise.
+  useEffect(() => {
+    setSelectedPart(extremity === "Lower" ? "All" : "");
+  }, [extremity, setSelectedPart]);
+
+  // Sync the Assistive Device selection to the Tag filter. "All"/none clears it.
+  useEffect(() => {
+    setSelectedFilters((prev) => ({
+      ...prev,
+      Prosthesis: assistiveDevice === "Prosthesis",
+      Orthosis: assistiveDevice === "Orthosis",
+    }));
+  }, [assistiveDevice, setSelectedFilters]);
+
+  // Sync the Pediatric toggle to the Tag filter.
+  useEffect(() => {
+    setSelectedFilters((prev) =>
+      prev.Pediatric === pediatric ? prev : { ...prev, Pediatric: pediatric }
+    );
+  }, [pediatric, setSelectedFilters]);
 
   // Reset all filters
   const removeAllFilters = () => {
     setSelectedManufacturer([]);
     setSelectedSKU([]);
-    setIsRangeOn(false);
+    setMinValue(1);
+    setMaxValue(largestSize);
     setSelectedFilters({
       Prosthesis: false,
       Orthosis: false,
@@ -62,59 +89,69 @@ const SideBar = () => {
     });
     setAssistiveDevice("");
     setExtremity("");
-    setDescription("");
+    setSelectedPart("");
     setPediatric(false);
   };
 
   return (
-    <div
-      id="side-bar"
-      className={isSideBarActive ? "is-filter-active flex flex-col" : ""}
-      ref={sidebarRef}
+    <Drawer
+      open={isSideBarActive}
+      onOpenChange={setIsSideBarActive}
+      swipeDirection="left"
     >
-      {/* Header */}
-      <div className="flex items-center justify-between mx-3">
-        <label className="is-size-3 text-center flex-1 font-bold">Filters</label>
-        <button
-          onClick={activeToggle}
-          className="p-2 rounded-full hover:scale-120"
-        >
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            className="m-1 h-5 w-5 text-[#4A4A4A]"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
-            strokeWidth={2}
+      <DrawerContent className="w-[min(550px,92vw)] rounded-l-none border-white/40 bg-white/85 backdrop-blur-xl sm:w-[550px]">
+        <DrawerHeader className="flex flex-row items-center justify-between">
+          <DrawerTitle className="flex-1 text-center text-lg">
+            Filters
+          </DrawerTitle>
+          <DrawerClose
+            aria-label="Close filters"
+            className="rounded-full p-2 transition-transform hover:scale-110"
           >
-            <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
-          </svg>
-        </button>
-      </div>
+            <X className="h-5 w-5 text-[#4A4A4A]" />
+          </DrawerClose>
+        </DrawerHeader>
 
-      <hr style={{ width: "70%", margin: "20px auto", backgroundColor: "#F5F5F5" }} />
-      <div className="flex flex-col gap-8 mx-5">
-        <AssistiveDevice
-          assistiveDevice={assistiveDevice}
-          setAssistiveDevice={setAssistiveDevice}
-        />
+        <ScrollArea className="min-h-0 flex-1">
+          <div className="flex flex-col gap-7 px-5 pb-8">
+            <AssistiveDevice
+              assistiveDevice={assistiveDevice}
+              setAssistiveDevice={setAssistiveDevice}
+            />
 
-        {assistiveDevice && (
-          <Extremity extremity={extremity} setExtremity={setExtremity} />
-        )}
+            {assistiveDevice && (
+              <Extremity extremity={extremity} setExtremity={setExtremity} />
+            )}
 
-        {extremity && (
-          <>
-            <Parts description={description} setDescription={setDescription} />
-            <Pediatric pediatric={pediatric} setPediatric={setPediatric} />
-            <Manufacturer/>
-            <Size/>
-          </>
-        )} 
+            {extremity && (
+              <>
+                {extremity === "Lower" && (
+                  <div className="flex items-center gap-2">
+                    <div className="w-2/5 shrink-0">
+                      <Parts
+                        description={selectedPart}
+                        setDescription={setSelectedPart}
+                      />
+                    </div>
+                    <LegDiagram
+                      description={selectedPart}
+                      setDescription={setSelectedPart}
+                    />
+                  </div>
+                )}
+                <Manufacturer />
+                <Pediatric pediatric={pediatric} setPediatric={setPediatric} />
+                <Size />
+              </>
+            )}
+          </div>
+        </ScrollArea>
 
-        <ResetFilters removeAllFilters={removeAllFilters} />
-      </div>
-    </div>
+        <DrawerFooter className="border-t border-black/5 pt-4">
+          <ResetFilters removeAllFilters={removeAllFilters} />
+        </DrawerFooter>
+      </DrawerContent>
+    </Drawer>
   );
 };
 

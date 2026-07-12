@@ -5,6 +5,7 @@ import SideBar from "./components/SideBar";
 import NavBar from "./components/NavBar";
 import Partner from "./pages/Partner";
 import Maintenance from "./pages/Maintenance";
+import { Toaster } from "./components/ui/sonner";
 import { useContext } from "react";
 import PentaContext from "./context/PentaContext";
 
@@ -40,6 +41,7 @@ function App() {
           <Route path="/partner" element={<Partner />}></Route>
         </Routes>
       </main>
+      <Toaster position="top-center" richColors closeButton />
     </>
   );
 }

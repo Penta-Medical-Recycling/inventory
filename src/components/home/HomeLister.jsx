@@ -1,9 +1,14 @@
 import React, { useState, useEffect, useContext, useRef } from "react";
+import { useDebounce } from "use-debounce";
 import PentaContext from "../../context/PentaContext";
 import BigSpinner from "../../assets/BigSpinner";
 import InStockCard from "../cards/InStockCard";
 
 // HomeLister lists the cards for the home page.
+
+// Duration of the card fade in/out, kept in sync with the .fade-in/.fade-out
+// CSS rules in App.css.
+const FADE_MS = 400;
 
 const HomeLister = ({ onRemove, setOnRemove }) => {
   const {
@@ -20,6 +25,8 @@ const HomeLister = ({ onRemove, setOnRemove }) => {
     maxValue,
     isRangeOn,
     searchInput,
+    selectedPart,
+    extremity,
     setIsLoading,
     setPage,
     urlCreator,
@@ -30,6 +37,11 @@ const HomeLister = ({ onRemove, setOnRemove }) => {
   const globalUrl = useRef("");
   const offsetKey = useRef("&offset=");
   const cardDiv = useRef(null);
+
+  // Debounce only the search text so rapid typing coalesces into one fetch.
+  // Other filters (manufacturer, size, part, page) are discrete and fetch
+  // immediately.
+  const [debouncedSearch] = useDebounce(searchInput, 400);
 
   // ✅ Background fetch of all inventory pages
   useEffect(() => {
@@ -77,7 +89,10 @@ const HomeLister = ({ onRemove, setOnRemove }) => {
           setPage("None");
         }
 
-        offsetKey.current = newOffset;
+        // The new filter always lands on page 0, so record the page-0 offset
+        // key. Storing the old page's key here made the follow-up offset reset
+        // look like a page change and replay the loading animation.
+        offsetKey.current = "&offset=";
         globalUrl.current = newUrl;
         setOffset(0);
         setData(res.records);
@@ -102,45 +117,59 @@ const HomeLister = ({ onRemove, setOnRemove }) => {
     }
   }
 
-  const removingCards = () =>
-    new Promise((resolve) => {
-      setTimeout(() => {
-        setIsLoading(true);
-        resolve();
-      }, 750);
-    });
-
-  const addingCards = () =>
-    new Promise((resolve) => {
-      setTimeout(() => {
-        setIsLoading(false);
-        resolve();
-      }, 750);
-    });
+  // Cheap, synchronous mirror of loadNewPage's fetch decision so the effect can
+  // skip cycles that wouldn't fetch anything - e.g. the async max size arriving
+  // after mount, or the offset reset that follows a filter change. Without this,
+  // those no-op cycles replay the loading animation a second time.
+  function willFetch() {
+    const newUrl = urlCreator();
+    const newOffset = "&offset=" + offsetArray[offset];
+    if (globalUrl.current !== newUrl) return true;
+    if (offsetKey.current !== newOffset) return true;
+    return false;
+  }
 
   useEffect(() => {
-    let isMounted = true;
+    // Cancel-safe loading cycle. `cancelled` short-circuits state updates and
+    // every timer is tracked so the cleanup can clear them when the effect
+    // re-runs (a new filter/page), preventing overlapping loading cycles.
+    let cancelled = false;
+    const timers = [];
+    const delay = (ms) =>
+      new Promise((resolve) => timers.push(setTimeout(resolve, ms)));
 
-    async function onStart() {
-      if (cardDiv.current && isMounted) {
-        setOnRemove(true);
-        await removingCards();
+    async function run() {
+      // Skip cycles that wouldn't change what's displayed. This coalesces the
+      // extra dependency updates that fire right after a load (the async max
+      // size on first render, the offset reset after a filter change) so the
+      // loading animation only ever plays once.
+      if (!willFetch()) {
+        setIsLoading(false);
+        return;
       }
 
-      const debounceTimeout = setTimeout(async () => {
-        if (!isMounted) return;
-        setOnRemove(false);
-        await loadNewPage();
-        await addingCards();
-      }, 750);
+      // Fade the current cards out before swapping them (skip on first load).
+      if (cardDiv.current) {
+        setOnRemove(true);
+        await delay(FADE_MS);
+        if (cancelled) return;
+      }
 
-      return () => clearTimeout(debounceTimeout);
+      setIsLoading(true);
+      setOnRemove(false);
+      await loadNewPage();
+      if (cancelled) return;
+
+      await delay(FADE_MS);
+      if (cancelled) return;
+      setIsLoading(false);
     }
 
-    onStart();
+    run();
 
     return () => {
-      isMounted = false;
+      cancelled = true;
+      timers.forEach(clearTimeout);
     };
   }, [
     selectedManufacturer,
@@ -149,7 +178,9 @@ const HomeLister = ({ onRemove, setOnRemove }) => {
     minValue,
     maxValue,
     isRangeOn,
-    searchInput,
+    debouncedSearch,
+    selectedPart,
+    extremity,
     offset,
   ]);
 

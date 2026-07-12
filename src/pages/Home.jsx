@@ -32,18 +32,18 @@ function Home() {
           partner affiliation and click 'Request Items.'
         </p>
 
-        {/* Search Bar */}
+        {/* Search Bar with filter button to its left */}
         <div
           style={{
             display: "flex",
-            flexDirection: "column",
-            alignItems: "flex-end",
+            alignItems: "center",
+            justifyContent: "center",
           }}
         >
+          {/* Filter button */}
+          <Tags></Tags>
           <Search></Search>
         </div>
-        {/* Tags Filter */}
-        <Tags></Tags>
         {/* Download Instructions */}
         <p
           className="my-6 mx-6 has-text-centered loading-effect"

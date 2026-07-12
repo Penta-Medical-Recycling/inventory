@@ -41,8 +41,8 @@ const Manufacturer = () => {
   return (
     <>
       {/* Manufacturer (unchanged) */}
-      <div className="filter-section flex flex-col gap-3">
-        <label className="mb-1 text-[#4A4A4A] text-2xl">Select Manufacturer</label>
+      <div className="filter-section flex flex-col gap-2">
+        <label className="text-sm font-semibold uppercase tracking-wide text-[#6B7280]">Manufacturer</label>
         <MultiSelect
           options={manuOptions}
           value={selectedManufacturer}

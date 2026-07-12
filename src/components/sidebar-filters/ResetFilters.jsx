@@ -1,16 +1,18 @@
 import React from "react";
+import { Button } from "@/components/ui/button";
 
 const ResetFilters = ({ removeAllFilters }) => {
   return (
-    <div className="is-flex is-justify-content-center">
-      <button
-        className="button is-rounded removeFilter"
+    <div className="flex justify-center">
+      <Button
+        variant="outline"
+        size="lg"
+        className="rounded-full"
         onClick={removeAllFilters}
         aria-label="FilterReset"
-        role="button"
       >
         Reset Filters
-      </button>
+      </Button>
     </div>
   );
 };

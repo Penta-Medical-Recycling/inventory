@@ -32,10 +32,14 @@ function PentaProvider({ children }) {
   const [selectedManufacturer, setSelectedManufacturer] = useState([]);
   const [selectedSKU, setSelectedSKU] = useState([]);
   const [selectedDescriptions, setSelectedDescriptions] = useState([]); 
+  const [selectedPart, setSelectedPart] = useState("");
+  const [extremity, setExtremity] = useState("");
 
   const [minValue, setMinValue] = useState(1);
-  const [maxValue, setMaxValue] = useState(55);
-  const [isRangeOn, setIsRangeOn] = useState(false);
+  const [maxValue, setMaxValue] = useState(60);
+  // The size range is always shown; it only counts as an active filter once the
+  // user narrows it from the full [1, largestSize] range.
+  const isRangeOn = minValue > 1 || maxValue < largestSize;
   const [offset, setOffset] = useState(0);
   const [offsetArray, setOffsetArray] = useState([""]);
 
@@ -103,11 +107,11 @@ function PentaProvider({ children }) {
 
     
     const selectedTags = Object.keys(selectedFilter).filter((key) => selectedFilter[key]);
-    if (selectedTags.length > 0) {
-      filters.push(
-        `OR(${selectedTags.map((tag) => `{Tag}='${tag}'`).join(",")})`
-      );
-    }
+    // Tag is a multi-value field. Match membership within its joined values and
+    // require every selected tag (e.g. "Prosthesis" AND "Pediatric").
+    selectedTags.forEach((tag) => {
+      filters.push(`FIND("${tag}", ARRAYJOIN({Tag}))`);
+    });
 
     if (isRangeOn) {
       filters.push(`AND({Size} >= ${minValue}, {Size} <= ${maxValue})`);
@@ -138,6 +142,30 @@ if (selectedSKU.length > 0) {
   }
 }
 
+
+    // Filter by prosthetic part via the Airtable "Limb Guide" field. The Parts
+    // filter options don't map 1:1 to the field values, so translate them here.
+    // "All" (and no selection) has no mapping and applies no filter.
+    const limbGuide = {
+      Liners: "Liners",
+      Adapters: "Adapters",
+      "Knees/Hips": "Knees/ Hips",
+      Pylons: "Pylons",
+      Feet: "Feet",
+      Accessories: "Accessory/ Misc.",
+    }[selectedPart];
+    if (limbGuide) {
+      // Limb Guide is a multi-value field; match within its joined values.
+      filters.push(`FIND("${limbGuide}", ARRAYJOIN({Limb Guide}))`);
+    }
+
+    // Filter by extremity via the "Arms/ Hands" Limb Guide value: Upper keeps
+    // only those items, Lower excludes them.
+    if (extremity === "Upper") {
+      filters.push(`FIND("Arms/ Hands", ARRAYJOIN({Limb Guide}))`);
+    } else if (extremity === "Lower") {
+      filters.push(`NOT(FIND("Arms/ Hands", ARRAYJOIN({Limb Guide})))`);
+    }
 
     filterFunction += encodeURIComponent(`AND(${filters.join(",")})`);
     return baseUrl + [pageSize, sort, filterFunction].join("&");
@@ -279,7 +307,6 @@ if (selectedSKU.length > 0) {
         largestSize,
         setLargestSize,
         isRangeOn,
-        setIsRangeOn,
         page,
         setPage,
         offset,
@@ -317,6 +344,10 @@ if (selectedSKU.length > 0) {
         getTotalInStockBySKU,
         selectedDescriptions,
        setSelectedDescriptions,
+        selectedPart,
+        setSelectedPart,
+        extremity,
+        setExtremity,
       }}
     >
       {children}

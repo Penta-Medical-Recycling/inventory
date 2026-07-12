@@ -17,9 +17,14 @@ built as static files and deployed to **GitHub Pages**.
   under a subpath). Routes live in `src/App.jsx`.
 - **State:** React Context API only (no Redux/Zustand). Global state is in
   `src/context/PentaProvider.jsx`, consumed via `src/context/PentaContext.jsx`.
-- **Styling:** Tailwind CSS v4 (utility classes). Some Bulma CSS + Font Awesome are loaded via CDN
-  in `index.html`. `bulma-toast` is used for toast notifications. There is **no** full UI component
-  library (no MUI/Chakra/AntD); components are hand-built.
+- **Styling:** Tailwind CSS v4 (utility classes) + **shadcn/ui** components (Base UI–based, in
+  `src/components/ui/`; theme tokens mapped to Penta brand colors in `src/App.css`). Toasts use
+  **sonner** (`src/components/Toast.jsx` wraps it). **Bulma is deprecated and being phased out** — it
+  is still loaded (locally, inside a low-priority `@layer bulma` in `src/App.css`) for legacy
+  structural markup that hasn't been migrated yet, but **do NOT add new Bulma classes**. Use
+  **Tailwind + shadcn only** for new/changed UI, and convert Bulma classes to Tailwind/shadcn when
+  you touch a component. Font Awesome is loaded via CDN in `index.html`. There is no other UI
+  component library (no MUI/Chakra/AntD).
 
 ## CRITICAL: project root is a subfolder
 
@@ -124,7 +129,7 @@ inventory/
   .gitignore
   .github/dependabot.yml
   deploy.sh            # alternative manual gh-pages deploy script
-  index.html           # Vite entry HTML; loads Bulma + Font Awesome + GA via CDN
+  index.html           # Vite entry HTML; loads Font Awesome + GA via CDN (Bulma now bundled locally)
   package.json         # scripts: dev, build, lint, preview, test, test:watch, coverage, deploy
   package-lock.json
   postcss.config.js    # uses @tailwindcss/postcss
@@ -136,6 +141,7 @@ inventory/
     App.css
     assets/            # SVG icon components + images (leg-images/)
     components/        # NavBar, SideBar, Toast, CartLister + subfolders:
+      ui/              # shadcn/ui components (button, drawer, sonner, toggle-group, etc.)
       cards/           # Card, CardBody, CardGrid, In/OutOfStockCard, modals
       home/            # HomeLister, Pagination, Search, Tags, DownloadButton
       sidebar-filters/ # Manufacturer, Parts, Size, SizeSlider, MultipleSelect, etc.
@@ -177,6 +183,21 @@ inventory/
 - Keep the Vite `base: "/inventory/"` — changing it breaks GitHub Pages asset paths.
 - A few pre-existing `// TODO:` markers exist (e.g. `Card.jsx`, `CardGrid.jsx`, `Cart.jsx`); they
   are not blocking.
+
+### Readability over micro-optimizations
+
+Prefer clear, straightforward code over premature or micro-optimizations. This is a small
+client-side app; the bottleneck is network/Airtable calls, not local JS. Do not add cleverness that
+obscures intent to save a negligible amount of work.
+
+- **Do not** hand-roll referential-equality bail-outs, memoization, or "skip if unchanged" guards
+  unless there is a demonstrated performance problem. For example, write a state updater as a plain
+  object spread (`setSelectedFilters((prev) => ({ ...prev, Prosthesis, Orthosis }))`) rather than
+  comparing each field to `prev` and conditionally returning `prev`.
+- Reach for `useMemo`/`useCallback` only when profiling shows a real cost, or when a stable
+  reference is required for correctness (e.g. an effect dependency), not by default.
+- When a readable version and an optimized version behave the same for the user, choose the
+  readable one.
 
 ### Comments
 
