@@ -56,6 +56,7 @@ const HomeLister = ({ onRemove, setOnRemove }) => {
         while (pageCounter < maxPages) {
           const url = baseUrl + nextOffset;
           const res = await fetchAPI(url);
+          if (!res) break; // network/HTTP error – save what we have so far
           if (res.records) {
             allRecords.push(...res.records.map((r) => r.fields));
           }
