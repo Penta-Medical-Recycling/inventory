@@ -698,7 +698,11 @@ input[type="range"]::-moz-range-thumb {
  }
 }
 .fade-in-out-Spin {
-  animation: fadeSpin 1.15s infinite;
+  /* Fade in once and hold steady. The spinner logo keeps rotating via .loading-logo
+     (spin2), so a single entrance reads as continuous loading. Previously this pulsed
+     opacity 0->1->0 on an infinite loop, which looked like the spinner restarting
+     several times during the longer full-inventory fetch. */
+  animation: fade-in 0.6s ease-out forwards;
 }
 @keyframes fade-in-animation {
   from {

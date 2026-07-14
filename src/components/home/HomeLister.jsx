@@ -31,6 +31,11 @@ const HomeLister = ({ onRemove, setOnRemove }) => {
   const offsetKey = useRef("&offset=");
   const cardDiv = useRef(null);
 
+  // Gate the inventory cards behind the full master-list fetch. Until every
+  // inventory page is cached, the add-to-cart stock check can't tell "not
+  // loaded yet" from "actually zero", so we hold the spinner until it's done.
+  const [inventoryReady, setInventoryReady] = useState(false);
+
   // ✅ Background fetch of all inventory pages
   useEffect(() => {
     async function fetchAllInventory() {
@@ -38,8 +43,13 @@ const HomeLister = ({ onRemove, setOnRemove }) => {
         let allRecords = [];
         let nextOffset = "";
         let pageCounter = 0;
-        const maxPages = 50;
-        const baseUrl = urlCreator().split("&offset=")[0];
+        // Safety bound only - the loop exits on the missing offset below once
+        // Airtable runs out of pages. Larger pages (100 is the Airtable max)
+        // cut the request count vs the visible 36/page pagination.
+        const maxPages = 1000;
+        const baseUrl = urlCreator()
+          .split("&offset=")[0]
+          .replace("pageSize=36", "pageSize=100");
 
         while (pageCounter < maxPages) {
           const url = baseUrl + nextOffset;
@@ -56,6 +66,8 @@ const HomeLister = ({ onRemove, setOnRemove }) => {
         console.log(`✅ Fetched ${allRecords.length} total items from inventory.`);
       } catch (err) {
         console.error("❌ Error fetching all inventory:", err);
+      } finally {
+        setInventoryReady(true);
       }
     }
 
@@ -155,7 +167,7 @@ const HomeLister = ({ onRemove, setOnRemove }) => {
 
   return (
     <>
-      {isLoading ? (
+      {isLoading || !inventoryReady ? (
         <BigSpinner size={75} />
       ) : data && data.length ? (
         <div id="cardDiv" ref={cardDiv}>
