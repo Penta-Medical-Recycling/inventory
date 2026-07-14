@@ -22,7 +22,7 @@ function PentaProvider({ children }) {
   const [isLoading, setIsLoading] = useState(false);
   const [isDropActive, setIsDropActive] = useState(false);
   const [data, setData] = useState();
-
+  const [filteredDescriptions, setFilteredDescriptions] = useState([]);
   const [searchInput, setSearchInput] = useState("");
   const [selectedFilter, setSelectedFilters] = useState({
     Prosthesis: false,
@@ -31,6 +31,8 @@ function PentaProvider({ children }) {
   });
   const [selectedManufacturer, setSelectedManufacturer] = useState([]);
   const [selectedSKU, setSelectedSKU] = useState([]);
+  const [selectedDescriptions, setSelectedDescriptions] = useState([]); 
+
   const [minValue, setMinValue] = useState(1);
   const [maxValue, setMaxValue] = useState(55);
   const [isRangeOn, setIsRangeOn] = useState(false);
@@ -70,9 +72,27 @@ function PentaProvider({ children }) {
     ];
 
     const skus = selectedSKU.map((option) => option.value);
-    if (skus.length > 0) {
-      filters.push(`OR(${skus.map((sku) => `{SKU}='${decodeURIComponent(sku)}'`).join(",")})`);
-    }
+    if (selectedSKU.length > 0) {
+  filters.push(
+    `OR(${selectedSKU.map((sku) => `{SKU}='${decodeURIComponent(sku)}'`).join(",")})`
+        );
+      }
+
+    if (selectedDescriptions.length > 0) {
+  const descTerms = selectedDescriptions
+    .map((option) =>
+      option.label.toLowerCase().replace(/[^a-z0-9\s]/gi, "")
+    )
+    .filter(Boolean);
+
+  const descConditions = descTerms.map(
+    (term) => `SEARCH("${term}", {StringSearch})`
+  );
+
+  if (descConditions.length > 0) {
+    filters.push(`OR(${descConditions.join(",")})`);
+  }
+}
 
     const manufacturers = selectedManufacturer.map((option) => option.value);
     if (manufacturers.length > 0) {
@@ -81,6 +101,7 @@ function PentaProvider({ children }) {
       );
     }
 
+    
     const selectedTags = Object.keys(selectedFilter).filter((key) => selectedFilter[key]);
     if (selectedTags.length > 0) {
       filters.push(
@@ -103,8 +124,25 @@ function PentaProvider({ children }) {
       filters.push(`AND(${searchConditions.join(",")})`);
     }
 
+if (selectedSKU.length > 0) {
+  const descTerms = selectedSKU
+    .map((option) => option.label.toLowerCase().replace(/[^a-z0-9\s]/gi, ""))
+    .filter(Boolean);
+
+  const descConditions = descTerms.map(
+    (term) => `SEARCH("${term}", {StringSearch})`
+  );
+
+  if (descConditions.length > 0) {
+    filters.push(`OR(${descConditions.join(",")})`);
+  }
+}
+
+
     filterFunction += encodeURIComponent(`AND(${filters.join(",")})`);
     return baseUrl + [pageSize, sort, filterFunction].join("&");
+
+    
   }
 
   async function fetchAPI(url) {
@@ -161,7 +199,7 @@ function PentaProvider({ children }) {
       }))
       .sort((a, b) => a.label.localeCompare(b.label));
   } else if (fieldToMap === "SKUs") {
-    const skuList = records.map((e) => e.fields.SKU); // assuming 'SKU' is the field name
+    const skuList = records.map((e) => e.fields.SKU);
     const mappedData = skuList
       .filter((item) => typeof item === "string" && item.trim() !== "")
       .map((item) => ({
@@ -277,6 +315,8 @@ function PentaProvider({ children }) {
         getCartItemsSortedFIFO,
         fulfillCartItems,
         getTotalInStockBySKU,
+        selectedDescriptions,
+       setSelectedDescriptions,
       }}
     >
       {children}
