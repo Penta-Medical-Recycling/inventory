@@ -33,7 +33,7 @@ function PentaProvider({ children }) {
   const [selectedSKU, setSelectedSKU] = useState([]);
   const [selectedDescriptions, setSelectedDescriptions] = useState([]); 
   const [selectedPart, setSelectedPart] = useState("");
-  const [extremity, setExtremity] = useState("");
+  const [extremity, setExtremity] = useState("All");
 
   const [minValue, setMinValue] = useState(1);
   const [maxValue, setMaxValue] = useState(60);

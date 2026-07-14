@@ -37,7 +37,7 @@ const SideBar = () => {
     setExtremity,
   } = useContext(PentaContext);
 
-  const [assistiveDevice, setAssistiveDevice] = useState("");
+  const [assistiveDevice, setAssistiveDevice] = useState("All");
   const [pediatric, setPediatric] = useState(false);
 
   // Fetch max size once
@@ -87,8 +87,8 @@ const SideBar = () => {
       Orthosis: false,
       Pediatric: false,
     });
-    setAssistiveDevice("");
-    setExtremity("");
+    setAssistiveDevice("All");
+    setExtremity("All");
     setSelectedPart("");
     setPediatric(false);
   };
@@ -100,13 +100,13 @@ const SideBar = () => {
       swipeDirection="left"
     >
       <DrawerContent className="w-[min(550px,92vw)] rounded-l-none border-white/40 bg-white/85 backdrop-blur-xl sm:w-[550px]">
-        <DrawerHeader className="flex flex-row items-center justify-between">
-          <DrawerTitle className="flex-1 text-center text-lg">
+        <DrawerHeader className="relative flex flex-row items-center justify-center">
+          <DrawerTitle className="text-center text-lg">
             Filters
           </DrawerTitle>
           <DrawerClose
             aria-label="Close filters"
-            className="rounded-full p-2 transition-transform hover:scale-110"
+            className="absolute right-4 top-1/2 -translate-y-1/2 cursor-pointer rounded-full p-2 transition-transform hover:scale-110"
           >
             <X className="h-5 w-5 text-[#4A4A4A]" />
           </DrawerClose>
