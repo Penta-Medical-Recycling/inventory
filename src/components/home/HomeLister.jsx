@@ -56,7 +56,10 @@ const HomeLister = ({ onRemove, setOnRemove }) => {
         while (pageCounter < maxPages) {
           const url = baseUrl + nextOffset;
           const res = await fetchAPI(url);
-          if (!res) break; // network/HTTP error – save what we have so far
+          if (!res) {
+            console.warn(`⚠️ Inventory fetch failed on page ${pageCounter + 1}; saving ${allRecords.length} items cached so far.`);
+            break;
+          }
           if (res.records) {
             allRecords.push(...res.records.map((r) => r.fields));
           }
