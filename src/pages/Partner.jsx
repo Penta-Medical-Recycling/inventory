@@ -99,7 +99,7 @@ const Partner = () => {
       <div
         className="loading-effect"
         ref={containerRef}
-        style={{ animationDelay: "0.66s", zIndex: "1" }}
+        style={{ animationDelay: "0.66s", zIndex: "1", width: "90vw" }}
       >
         {/* Dropdown for partner selection */}
         <div
@@ -109,10 +109,11 @@ const Partner = () => {
               : "dropdown is-flex is-justify-content-center"
           }
           onClick={dropDown}
+          style={{ width: "100%" }}
         >
-          <div className="dropdown-trigger">
+          <div className="dropdown-trigger" style={{ width: "100%" }}>
             <button
-              className="button"
+              className="button flex w-full items-center justify-between gap-2 rounded-full border border-gray-300 bg-white px-5 py-2 text-gray-700 hover:border-gray-400"
               aria-haspopup="true"
               aria-controls="dropdown-menu"
               aria-label="PartnerDropdown"
@@ -127,15 +128,15 @@ const Partner = () => {
               </span>
             </button>
           </div>
-          <div className="dropdown-menu" role="menu">
+          <div className="dropdown-menu" role="menu" style={{ width: "100%" }}>
             <div
               className="dropdown-content"
-              style={{ maxHeight: "400px", overflowY: "auto", width: "80vw" }}
+              style={{ maxHeight: "400px", overflowY: "auto", width: "100%" }}
             >
               {/* Search input for filtering partner options */}
               <div className="dropdown-item">
                 <input
-                  className="input is-small is-rounded search-partner"
+                  className="input is-small is-rounded search-partner w-full rounded-full border border-gray-300 px-3 py-1"
                   type="text"
                   placeholder="Search"
                   value={searchTerm}
@@ -171,7 +172,7 @@ const Partner = () => {
           id="partner-button"
           aria-label="SubmitPartner"
           role="button"
-          className="button my-4 is-rounded"
+          className="button my-4 is-rounded rounded-full border border-gray-300 bg-white px-8 py-2 text-gray-700 hover:border-gray-400 hover:bg-gray-50"
           onClick={submit}
           z-index="0"
         >
