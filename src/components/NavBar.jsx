@@ -32,21 +32,24 @@ const NavBar = () => {
             </div>
           </Link>
           
-          { popUpStatus === "Online" && 
-            <div className= "logo" style={{ marginLeft : "45%" }} onClick={() => setShowModal(!showModal)}>
-            <NotificationLogo />
-          </div> 
-          }
+          {/* Right-aligned group containing the notification and cart icons */}
+          <div className="nav-icons">
+            { popUpStatus === "Online" &&
+              <div className="logo" onClick={() => setShowModal(!showModal)}>
+                <NotificationLogo />
+              </div>
+            }
 
-          {/* Link to the cart page if a partner is selected, or partner selection page otherwise */}
-          <Link to={selectedPartner ? "/cart" : "/partner"} id="shopping-cart">
-            {/* Display the cart icon */}
-            <CartLogo></CartLogo>
-            <div className={`badge ${isCartPressed ? "animate" : ""}`}>
-              {/* Display the cart count with badge animation if cart is pressed */}
-              <p>{cartCount}</p>
-            </div>
-          </Link>
+            {/* Link to the cart page if a partner is selected, or partner selection page otherwise */}
+            <Link to={selectedPartner ? "/cart" : "/partner"} id="shopping-cart">
+              {/* Display the cart icon */}
+              <CartLogo></CartLogo>
+              <div className={`badge ${isCartPressed ? "animate" : ""}`}>
+                {/* Display the cart count with badge animation if cart is pressed */}
+                <p>{cartCount}</p>
+              </div>
+            </Link>
+          </div>
         </nav>
         <div style={{ width: "100%", height: "120px" }}></div>
       </div>

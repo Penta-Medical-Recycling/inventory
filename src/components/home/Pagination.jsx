@@ -57,9 +57,7 @@ const Pagination = ({ bottom, onRemove }) => {
       {page === "Next" ? (
         // Display only the "Next" page button
         <div
-          className={`is-flex is-justify-content-center is-align-items-center fade-in ${
-            onRemove ? "fade-out" : ""
-          }`}
+          className="is-flex is-justify-content-center is-align-items-center"
         >
           <div
             style={{ marginLeft: "44px" }}
@@ -82,9 +80,7 @@ const Pagination = ({ bottom, onRemove }) => {
       ) : page === "Previous" ? (
         // Display only the "Previous" page button
         <div
-          className={`is-flex is-justify-content-center is-align-items-center fade-in ${
-            onRemove ? "fade-out" : ""
-          }`}
+          className="is-flex is-justify-content-center is-align-items-center"
         >
           <p
             className={`is-size-4 mr-1 is-text-weight-bold pag-btn ${
@@ -107,9 +103,7 @@ const Pagination = ({ bottom, onRemove }) => {
       ) : page === "Next/Previous" ? (
         // Display both "Next" and "Previous" page buttons
         <div
-          className={`is-flex is-justify-content-center is-align-items-center fade-in ${
-            onRemove ? "fade-out" : ""
-          }`}
+          className="is-flex is-justify-content-center is-align-items-center"
         >
           <p
             className={`is-size-4 mr-1 is-text-weight-bold pag-btn ${

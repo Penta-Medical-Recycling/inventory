@@ -35,4 +35,26 @@ describe("App status gate", () => {
     ).toBeInTheDocument();
     expect(screen.queryByAltText("logo")).not.toBeInTheDocument();
   });
+
+  it("renders nothing until the status fetch resolves (no Maintenance flash)", async () => {
+    const { container } = renderWithProviders(<App />);
+
+    // serverStatus starts as null (unknown), so App renders nothing initially -
+    // neither the Home UI nor the logo-only Maintenance screen.
+    expect(container).toBeEmptyDOMElement();
+    expect(screen.queryByAltText("Company Logo")).not.toBeInTheDocument();
+
+    // Once the status resolves (Online via default handler), the Home UI appears.
+    expect(await screen.findByAltText("logo")).toBeInTheDocument();
+  });
+
+  it("falls back to the Maintenance page when the status fetch fails", async () => {
+    server.use(http.get(SITE_STATUS_URL, () => HttpResponse.error()));
+
+    renderWithProviders(<App />);
+
+    // The Maintenance page uses alt="Company Logo"; the NavBar (alt="logo") is absent.
+    expect(await screen.findByAltText("Company Logo")).toBeInTheDocument();
+    expect(screen.queryByAltText("logo")).not.toBeInTheDocument();
+  });
 });

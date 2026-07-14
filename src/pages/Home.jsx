@@ -16,16 +16,15 @@ function Home() {
       <div id="text-section">
         {/* Page Title */}
         <h1
-          className="is-size-2 has-text-weight-bold has-text-centered loading-effect"
+          className="is-size-2 has-text-weight-bold has-text-centered"
           id="penta-title"
-          style={{ animationDelay: "0.107s" }}
         >
           Penta Medical Recycling Inventory
         </h1>
         {/* Introduction Text */}
         <p
-          className="my-6 mx-6 is-size-5 has-text-centered loading-effect"
-          style={{ width: "60%", animationDelay: "0.214s" }}
+          className="my-6 mx-6 is-size-5 has-text-centered"
+          style={{ width: "60%" }}
         >
           To submit a request, simply click the 'Add to Cart' button on the
           item's card and proceed to the cart above. Once there, select your
@@ -38,6 +37,7 @@ function Home() {
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
+            gap: "1rem",
           }}
         >
           {/* Filter button */}
@@ -46,9 +46,8 @@ function Home() {
         </div>
         {/* Download Instructions */}
         <p
-          className="my-6 mx-6 has-text-centered loading-effect"
+          className="my-6 mx-6 has-text-centered"
           id="scroll-to"
-          style={{ animationDelay: "0.642s" }}
         >
           If you would like to download a copy of the current page click the
           icon to the right of the search bar.

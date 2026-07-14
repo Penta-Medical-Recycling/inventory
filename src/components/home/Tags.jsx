@@ -34,8 +34,6 @@ const Tags = ({}) => {
   return (
     <div
       id="filter-buttons"
-      className="loading-effect"
-      style={{ animationDelay: "0.535s" }}
     >
       {/* Filter button to toggle sidebar */}
       <Button

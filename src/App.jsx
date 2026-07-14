@@ -24,6 +24,9 @@ function App() {
 
   const { serverStatus, serverMessage } = useContext(PentaContext)
 
+  // Status not yet known - render nothing to avoid flashing the Maintenance
+  // (logo-only) screen before the /Site-Status fetch resolves.
+  if (serverStatus === null) return null;
 
   return serverStatus ===  "Offline" ? (
     <Routes>

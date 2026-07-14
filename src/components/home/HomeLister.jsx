@@ -9,6 +9,9 @@ import InStockCard from "../cards/InStockCard";
 // Duration of the card fade in/out, kept in sync with the .fade-in/.fade-out
 // CSS rules in App.css.
 const FADE_MS = 400;
+// Airtable's maximum page size. Used for the background master-list fetch so it
+// pulls the full inventory in as few requests as possible.
+const AIRTABLE_MAX_PAGE_SIZE = 100;
 
 const HomeLister = ({ onRemove, setOnRemove }) => {
   const {
@@ -42,16 +45,39 @@ const HomeLister = ({ onRemove, setOnRemove }) => {
   // Other filters (manufacturer, size, part, page) are discrete and fetch
   // immediately.
   const [debouncedSearch] = useDebounce(searchInput, 400);
+  // Gate the inventory cards behind the full master-list fetch. Until every
+  // inventory page is cached, the add-to-cart stock check can't tell "not
+  // loaded yet" from "actually zero", so we hold the spinner until it's done.
+  const [inventoryReady, setInventoryReady] = useState(false);
 
   // ✅ Background fetch of all inventory pages
   useEffect(() => {
+    // Reuse the cached master list across in-app navigation (e.g. Cart -> Home).
+    // sessionStorage persists for the tab session, so only do the full
+    // multi-page fetch when the cache is missing or empty.
+    const cached = sessionStorage.getItem("allInventoryItems");
+    if (cached) {
+      try {
+        const parsed = JSON.parse(cached);
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          setInventoryReady(true);
+          return;
+        }
+      } catch {
+        // Malformed cache - fall through and refetch.
+      }
+    }
+
     async function fetchAllInventory() {
       try {
         let allRecords = [];
         let nextOffset = "";
         let pageCounter = 0;
-        const maxPages = 50;
-        const baseUrl = urlCreator().split("&offset=")[0];
+        // Safety bound only - the loop exits on the missing offset below once
+        // Airtable runs out of pages. Larger pages (100 is the Airtable max)
+        // cut the request count vs the visible 36/page pagination.
+        const maxPages = 1000;
+        const baseUrl = urlCreator(AIRTABLE_MAX_PAGE_SIZE).split("&offset=")[0];
 
         while (pageCounter < maxPages) {
           const url = baseUrl + nextOffset;
@@ -68,6 +94,8 @@ const HomeLister = ({ onRemove, setOnRemove }) => {
         console.log(`✅ Fetched ${allRecords.length} total items from inventory.`);
       } catch (err) {
         console.error("❌ Error fetching all inventory:", err);
+      } finally {
+        setInventoryReady(true);
       }
     }
 
@@ -186,7 +214,7 @@ const HomeLister = ({ onRemove, setOnRemove }) => {
 
   return (
     <>
-      {isLoading ? (
+      {isLoading || !inventoryReady ? (
         <BigSpinner size={75} />
       ) : data && data.length ? (
         <div id="cardDiv" ref={cardDiv}>

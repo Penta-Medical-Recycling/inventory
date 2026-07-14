@@ -16,15 +16,21 @@ const PopUpCard = ({ showModal, setShowModal }) => {
                     <header
                         className="has-background-light"
                         style={{
+                            position: "relative",
                             display: "flex",
                             alignItems: "center",
-                            justifyContent: "space-between",
+                            justifyContent: "center",
                             padding: "1rem 1.25rem",
                             borderBottom: "1px solid #dbdbdb",
                         }}
                     >
-                        <p className="modal-card-title" style={{ margin: 0 }}>Please note</p>
-                        <button className="delete" aria-label="close" onClick={() => setShowModal(false)}></button>
+                        <p className="modal-card-title" style={{ margin: 0, fontSize: "1.5rem", fontWeight: 700, color: "#363636" }}>Please note</p>
+                        <button
+                            className="delete is-medium"
+                            aria-label="close"
+                            onClick={() => setShowModal(false)}
+                            style={{ position: "absolute", right: "1.25rem", backgroundColor: "#c4c4c4", borderRadius: "9999px" }}
+                        ></button>
                     </header>
                     <div style={{ display: "flex", alignItems: "stretch" }}>
                         <div

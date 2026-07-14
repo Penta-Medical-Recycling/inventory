@@ -4,6 +4,9 @@ import BigSpinner from "../assets/BigSpinner";
 import CartLister from "../components/CartLister";
 import Toast from "../components/Toast";
 import PentaContext from "../context/PentaContext";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 
 // You should implement or import this method properly
 const getTotalInStockBySKU = async (sku) => {
@@ -18,8 +21,8 @@ function Cart() {
   const navigate = useNavigate();
   const [notes, setNotes] = useState(localStorage.getItem("notes") || "");
   const [isLoading, setIsLoading] = useState(false);
-  const [numOfPatients, setNumOfPatients] = useState(0);
-  const [numOfChildren, setNumOfChildren] = useState(0);
+  const [numOfPatients, setNumOfPatients] = useState("");
+  const [numOfChildren, setNumOfChildren] = useState("");
   const [showResetModal, setShowResetModal] = useState(false);
   const [itemValidationStatus, setItemValidationStatus] = useState({});
   const [loadingItems, setLoadingItems] = useState(true);
@@ -187,8 +190,8 @@ useEffect(() => {
             Partner: localStorage["partner"],
             "Additional Notes": notes,
             "Items You Would Like": items,
-            "Number of patients helped": numOfPatients,
-            "Number of children helped": numOfChildren
+            "Number of patients helped": Number(numOfPatients) || 0,
+            "Number of children helped": Number(numOfChildren) || 0
           },
         },
       ],
@@ -210,11 +213,15 @@ useEffect(() => {
   } else {
     setNotes("");
     setCartCount(0);
-    setNumOfChildren(0);
-    setNumOfPatients(0);
+    setNumOfChildren("");
+    setNumOfPatients("");
     const partner = localStorage["partner"];
     localStorage.clear();
     localStorage.setItem("partner", partner);
+    // Invalidate the cached master inventory list: the items just requested are
+    // no longer available, so the next Home visit must rebuild a fresh list
+    // instead of reusing the stale session cache.
+    sessionStorage.removeItem("allInventoryItems");
     setIsLoading(false);
     Toast({
       message:
@@ -253,10 +260,7 @@ useEffect(() => {
     return (
     <>
       <div id="text-section">
-        <h1
-          className="title has-text-centered mt-6 loading-effect"
-          style={{ animationDelay: "0.23s" }}
-        >
+        <h1 className="is-size-3 has-text-weight-bold has-text-centered mt-6">
           MY CART
         </h1>
       </div>
@@ -265,13 +269,15 @@ useEffect(() => {
   <BigSpinner size={75} />
 ) : (
   <>
-    <h1 className="has-text-centered is-size-5 my-4 loading-effect" style={{ animationDelay: "0.46s" }}>
+    <h1 className="has-text-centered is-size-5 my-4">
       Hello, {selectedPartner} Member!
     </h1>
 
-    <Link to="/partner" className="is-flex is-justify-content-center my-3 loading-effect" style={{ animationDelay: "0.66s" }}>
-      <button className="button is-rounded" id="partner-button">Change Partner</button>
-    </Link>
+    <div className="is-flex is-justify-content-center my-3">
+      <Button render={<Link to="/partner" />} variant="outline" size="lg" className="rounded-full w-[142px]">
+        Change Partner
+      </Button>
+    </div>
 
     <CartLister
       outOfStock={outOfStock}
@@ -281,16 +287,16 @@ useEffect(() => {
 
           <div style={{ width: "60vw", margin: "auto" }}>
             <p>How many patients do you plan to help with this request?</p>
-            <input
-              className="input is-normal"
+            <Input
+              className="my-2"
               type="number"
               placeholder="Please input a number"
               value={numOfPatients}
               onChange={(e) => setNumOfPatients(e.target.value)}
             />
             <p>How many of the patients are children (under 21 years old)?</p>
-            <input
-              className="input is-normal"
+            <Input
+              className="my-2"
               type="number"
               placeholder="Please input a number"
               value={numOfChildren}
@@ -299,53 +305,40 @@ useEffect(() => {
           </div>
 
           <div style={{ width: "60vw", margin: "auto" }}>
-            <textarea
-              id="cart-textarea"
-              className="textarea my-4 is-rounded loading-effect"
-              style={{ animationDelay: "0.83s" }}
+            <Textarea
+              className="my-4 min-h-40"
               placeholder="Additional Notes"
               value={notes}
               onChange={handleNotesChange}
-            ></textarea>
+            />
           </div>
 
           <div
-            className="is-flex is-justify-content-center loading-effect"
-            style={{ animationDelay: "1.2s" }}
+            className="is-flex is-justify-content-center"
           >
-            <button
-              id="confirm-button"
+            <Button
               aria-label="Confirm"
-              role="button"
-              className="button mb-1 is-rounded is-primary"
               type="button"
-              style={{ backgroundColor: "#78d3fb" }}
+              size="lg"
+              className="mb-4 w-[142px] rounded-full bg-[#78d3fb] text-white hover:bg-[#78d3fb]/90"
               onClick={handleConfirmOrder}
             >
               Request Items
-            </button>
+            </Button>
           </div>
 
           <div
-            className="is-flex is-justify-content-center loading-effect"
-            style={{ animationDelay: "1.3s" }}
+            className="is-flex is-justify-content-center"
           >
-            <button
-              id="reset-button"
+            <Button
               aria-label="ResetCart"
-              role="button"
-              className="button mb-4 is-rounded is-danger"
               type="button"
-              style={{
-                minWidth: "142px",
-                padding: "0.75rem 1.5rem",
-                fontSize: "1rem",
-                backgroundColor: "#ff5c47e8",
-              }}
+              size="lg"
+              className="mb-4 w-[142px] rounded-full bg-[#ff5c47] text-white hover:bg-[#ff5c47]/90"
               onClick={handleResetCart}
             >
               Reset Cart
-            </button>
+            </Button>
           </div>
 
           {showResetModal && (
@@ -358,19 +351,16 @@ useEffect(() => {
                   className="is-flex is-justify-content-center"
                   style={{ gap: "1.5rem", marginTop: "1rem" }}
                 >
-                  <button
-                    className="button is-danger is-light custom-reset"
-                    onClick={confirmResetCart}
-                  >
+                  <Button variant="destructive" onClick={confirmResetCart}>
                     Reset
-                  </button>
+                  </Button>
 
-                  <button
-                    className="button is-light"
+                  <Button
+                    variant="outline"
                     onClick={() => setShowResetModal(false)}
                   >
                     Cancel
-                  </button>
+                  </Button>
                 </div>
               </div>
             </div>

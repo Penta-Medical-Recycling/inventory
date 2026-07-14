@@ -10,7 +10,9 @@ function PentaProvider({ children }) {
   const [cartCount, setCartCount] = useState(
     Object.keys(localStorage).filter((k) => k !== "partner" && k !== "notes").length
   );
-  const [serverStatus, setServerStatus] = useState("Offline");
+  // null = status not yet known. App renders nothing until the /Site-Status
+  // fetch resolves, so the Maintenance screen doesn't flash on every load.
+  const [serverStatus, setServerStatus] = useState(null);
   const [serverMessage, setServerMessage] = useState("");
   const [popUpStatus, setPopUpStatus] = useState("Offline");
   const [message, setMessage] = useState("");
@@ -20,7 +22,6 @@ function PentaProvider({ children }) {
   const [page, setPage] = useState();
   const [isDownloading, setIsDownloading] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [isDropActive, setIsDropActive] = useState(false);
   const [data, setData] = useState();
   const [filteredDescriptions, setFilteredDescriptions] = useState([]);
   const [searchInput, setSearchInput] = useState("");
@@ -45,28 +46,35 @@ function PentaProvider({ children }) {
 
   useEffect(() => {
     const fetchStatus = async () => {
-      const data = await fetch("https://api.airtable.com/v0/appHFwcwuXLTNCjtN/Site-Status", {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-          "authorization": `Bearer ${APIKey}`
-        }
-      });
+      try {
+        const data = await fetch("https://api.airtable.com/v0/appHFwcwuXLTNCjtN/Site-Status", {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            "authorization": `Bearer ${APIKey}`
+          }
+        });
 
-      const response = await data.json();
-      setPopUpStatus(response.records[0].fields.Status);
-      setMessage(response.records[0].fields.Message);
-      setServerStatus(response.records[1].fields.Status);
-      setServerMessage(response.records[1].fields.Message);
+        const response = await data.json();
+        setPopUpStatus(response.records[0].fields.Status);
+        setMessage(response.records[0].fields.Message);
+        setServerStatus(response.records[1].fields.Status);
+        setServerMessage(response.records[1].fields.Message);
+      } catch (error) {
+        // If the status can't be fetched, fall back to Maintenance rather than
+        // leaving the app blank forever.
+        console.error("Error fetching site status:", error);
+        setServerStatus("Offline");
+      }
     };
 
     fetchStatus();
   }, []);
 
-  function urlCreator() {
+  function urlCreator(pageSizeValue = 36) {
     const baseUrl = "https://api.airtable.com/v0/appHFwcwuXLTNCjtN/Inventory?";
     const sort = `sort[0][field]=Item ID&sort[0][direction]=asc`;
-    const pageSize = "pageSize=36";
+    const pageSize = `pageSize=${pageSizeValue}`;
     let filterFunction = "filterByFormula=";
 
     const filters = [
@@ -319,8 +327,6 @@ if (selectedSKU.length > 0) {
         setIsDownloading,
         isLoading,
         setIsLoading,
-        isDropActive,
-        setIsDropActive,
         selectedFilter,
         setSelectedFilters,
         data,

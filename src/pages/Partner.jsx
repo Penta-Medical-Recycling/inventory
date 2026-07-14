@@ -1,42 +1,32 @@
-import { useEffect, useState, useContext, useRef } from "react";
+import { useEffect, useState, useContext } from "react";
 import { useNavigate } from "react-router-dom";
 import PentaContext from "../context/PentaContext";
+import { Button } from "@/components/ui/button";
+import {
+  Combobox,
+  ComboboxInput,
+  ComboboxContent,
+  ComboboxEmpty,
+  ComboboxList,
+  ComboboxItem,
+  useComboboxAnchor,
+} from "@/components/ui/combobox";
 
-// Partner Page allows the user to select a partner to view their cart
+// Partner Page allows the user to select a partner to view their cart.
+// The partner picker is a searchable shadcn Combobox (Base UI); it handles
+// filtering, keyboard navigation, and open/close state internally.
 
 const Partner = () => {
   const { setSelectedPartner, fetchSelectOptions } = useContext(PentaContext);
-  const [isActive, setIsActive] = useState(false); // Dropdown menu active state
-  const [searchTerm, setSearchTerm] = useState(""); // Search term for partner selection
   const [partner, setPartner] = useState(""); // Selected partner
-  const navigate = useNavigate();
+  const [inputValue, setInputValue] = useState(""); // Text shown in the combobox
   const [data, setData] = useState([]); // List of partner options
+  const [open, setOpen] = useState(false); // Controls the dropdown popup
+  const navigate = useNavigate();
 
-  const containerRef = useRef(null);
-
-  // Close the dropdown when clicking outside of it
-  const handleClickOutside = (event) => {
-    if (containerRef.current && !containerRef.current.contains(event.target)) {
-      setIsActive(false);
-    }
-  };
-
-  useEffect(() => {
-    const handleDocumentClick = (event) => {
-      handleClickOutside(event);
-    };
-
-    // Add or remove event listener based on dropdown state
-    if (isActive) {
-      document.addEventListener("mousedown", handleDocumentClick);
-    } else {
-      document.removeEventListener("mousedown", handleDocumentClick);
-    }
-
-    return () => {
-      document.removeEventListener("mousedown", handleDocumentClick);
-    };
-  }, [isActive]);
+  // Anchor the dropdown popup to the full-width input so its options render at
+  // the input's width instead of the tiny chevron trigger's width.
+  const anchorRef = useComboboxAnchor();
 
   useEffect(() => {
     // Fetch partner options from AirTable
@@ -47,36 +37,10 @@ const Partner = () => {
     fetchPartners();
   }, []);
 
-  // Handle search input change
-  const handleSearch = (event) => {
-    setSearchTerm(event.target.value);
-  };
-
-  // Handle click on a partner option
-  const handleOptionClick = (option) => {
-    setPartner(option);
-    setIsActive(false);
-  };
-
-  // Filter partner options based on the search term
-  const filteredOptions = data.filter((option) =>
-    option.toLowerCase().includes(searchTerm.toLowerCase())
-  );
-
-  // Toggle the dropdown visibility
-  const dropDown = () => {
-    setIsActive(!isActive);
-  };
-
-  // Prevent the dropdown from closing when clicking on the search input
-  const handleSearchClick = (event) => {
-    event.stopPropagation();
-  };
-
   // Submit selected partner to localStorage and navigate to Cart page
   const submit = async () => {
     try {
-      await localStorage.setItem("partner", partner);
+      localStorage.setItem("partner", partner);
       setSelectedPartner(partner);
       navigate("/cart");
     } catch (error) {
@@ -91,93 +55,65 @@ const Partner = () => {
     >
       {/* Title for the partner selection */}
       <h1
-        className="is-size-4 has-text-weight-bold has-text-centered my-4 loading-effect"
-        style={{ animationDelay: "0.33s" }}
+        className="is-size-4 has-text-weight-bold has-text-centered my-4"
       >
         Select Partner To View Cart
       </h1>
+
+      {/* Searchable partner combobox */}
       <div
-        className="loading-effect"
-        ref={containerRef}
-        style={{ animationDelay: "0.66s", zIndex: "1", width: "90vw" }}
+        className="w-[90vw] max-w-md sm:max-w-lg md:max-w-xl lg:max-w-2xl"
       >
-        {/* Dropdown for partner selection */}
-        <div
-          className={
-            isActive
-              ? "is-active dropdown is-flex is-justify-content-center"
-              : "dropdown is-flex is-justify-content-center"
-          }
-          onClick={dropDown}
-          style={{ width: "100%" }}
+        <Combobox
+          items={data}
+          value={partner}
+          onValueChange={(value) => {
+            setPartner(value ?? "");
+            // Mirror the selection into the input so it shows the chosen partner.
+            setInputValue(value ?? "");
+          }}
+          inputValue={inputValue}
+          onInputValueChange={setInputValue}
+          open={open}
+          onOpenChange={setOpen}
         >
-          <div className="dropdown-trigger" style={{ width: "100%" }}>
-            <button
-              className="button flex w-full items-center justify-between gap-2 rounded-full border border-gray-300 bg-white px-5 py-2 text-gray-700 hover:border-gray-400"
-              aria-haspopup="true"
-              aria-controls="dropdown-menu"
+          <div ref={anchorRef}>
+            <ComboboxInput
+              className="w-full bg-white [--ring:#35b0fb] has-[[data-slot=input-group-control]:focus-visible]:border-input"
+              placeholder="Select a Partner"
               aria-label="PartnerDropdown"
-              role="button"
               id="partner-dropdown"
-            >
-              <span style={{ overflow: "hidden" }}>
-                {partner || "Select a Partner"}
-              </span>
-              <span className="icon is-small">
-                <i className="fas fa-angle-down" aria-hidden="true"></i>
-              </span>
-            </button>
+              onFocus={() => setOpen(true)}
+            />
           </div>
-          <div className="dropdown-menu" role="menu" style={{ width: "100%" }}>
-            <div
-              className="dropdown-content"
-              style={{ maxHeight: "400px", overflowY: "auto", width: "100%" }}
-            >
-              {/* Search input for filtering partner options */}
-              <div className="dropdown-item">
-                <input
-                  className="input is-small is-rounded search-partner w-full rounded-full border border-gray-300 px-3 py-1"
-                  type="text"
-                  placeholder="Search"
-                  value={searchTerm}
-                  onChange={handleSearch}
-                  onClick={handleSearchClick}
-                />
-              </div>
-              <hr className="dropdown-divider" />
-              {/* List of partner options */}
-              {filteredOptions.map((option, index) => (
-                <p
-                  className={
-                    partner === option
-                      ? "dropdown-item is-active partnerOption"
-                      : "dropdown-item partnerOption"
-                  }
-                  key={index}
-                  onClick={() => handleOptionClick(option)}
-                >
-                  {option}
-                </p>
-              ))}
-            </div>
-          </div>
-        </div>
+          <ComboboxContent anchor={anchorRef}>
+            <ComboboxEmpty>No partners found.</ComboboxEmpty>
+            <ComboboxList>
+              {(item) => (
+                <ComboboxItem key={item} value={item}>
+                  {item}
+                </ComboboxItem>
+              )}
+            </ComboboxList>
+          </ComboboxContent>
+        </Combobox>
       </div>
+
+      {/* Button to submit the selected partner */}
       <div
-        className="is-flex is-justify-content-center loading-effect"
-        style={{ animationDelay: "1s" }}
+        className="is-flex is-justify-content-center"
       >
-        {/* Button to submit the selected partner */}
-        <button
+        <Button
           id="partner-button"
           aria-label="SubmitPartner"
-          role="button"
-          className="button my-4 is-rounded rounded-full border border-gray-300 bg-white px-8 py-2 text-gray-700 hover:border-gray-400 hover:bg-gray-50"
+          variant="outline"
+          size="lg"
+          className="my-4 rounded-full"
           onClick={submit}
-          z-index="0"
+          disabled={!partner}
         >
           Submit
-        </button>
+        </Button>
       </div>
     </div>
   );

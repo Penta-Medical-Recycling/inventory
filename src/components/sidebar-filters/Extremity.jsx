@@ -15,7 +15,7 @@ const Extremity = ({ extremity, setExtremity }) => {
         onValueChange={(value) => {
           if (value.length) setExtremity(value[value.length - 1]);
         }}
-        className="w-full gap-0 overflow-hidden rounded-3xl border"
+        className="w-full gap-0 overflow-hidden rounded-3xl border bg-white"
       >
         {EXTREMITY_OPTIONS.map((option) => (
           <ToggleGroupItem key={option} value={option} className={itemClass}>

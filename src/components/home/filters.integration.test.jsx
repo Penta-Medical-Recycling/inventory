@@ -62,7 +62,7 @@ describe("Filter integration → Airtable query", () => {
     const user = userEvent.setup();
     await setup();
 
-    await user.type(screen.getByPlaceholderText("Search ..."), "foot");
+    await user.type(screen.getByPlaceholderText("Search"), "foot");
 
     await waitFor(() =>
       expect(query()).toContain('SEARCH("foot", {StringSearch})')

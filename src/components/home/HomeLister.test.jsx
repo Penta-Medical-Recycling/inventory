@@ -30,7 +30,7 @@ describe("Home search debounce", () => {
       </>
     );
 
-    await user.type(screen.getByPlaceholderText("Search ..."), "abc");
+    await user.type(screen.getByPlaceholderText("Search"), "abc");
 
     // Exactly one request carries the fully-typed term.
     await waitFor(
