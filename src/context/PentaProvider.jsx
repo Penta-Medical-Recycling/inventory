@@ -59,10 +59,10 @@ function PentaProvider({ children }) {
     fetchStatus();
   }, []);
 
-  function urlCreator() {
+  function urlCreator(pageSizeValue = 36) {
     const baseUrl = "https://api.airtable.com/v0/appHFwcwuXLTNCjtN/Inventory?";
     const sort = `sort[0][field]=Item ID&sort[0][direction]=asc`;
-    const pageSize = "pageSize=36";
+    const pageSize = `pageSize=${pageSizeValue}`;
     let filterFunction = "filterByFormula=";
 
     const filters = [

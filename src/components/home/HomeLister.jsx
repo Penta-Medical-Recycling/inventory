@@ -5,6 +5,10 @@ import InStockCard from "../cards/InStockCard";
 
 // HomeLister lists the cards for the home page.
 
+// Airtable's maximum page size. Used for the background master-list fetch so it
+// pulls the full inventory in as few requests as possible.
+const AIRTABLE_MAX_PAGE_SIZE = 100;
+
 const HomeLister = ({ onRemove, setOnRemove }) => {
   const {
     isLoading,
@@ -47,9 +51,7 @@ const HomeLister = ({ onRemove, setOnRemove }) => {
         // Airtable runs out of pages. Larger pages (100 is the Airtable max)
         // cut the request count vs the visible 36/page pagination.
         const maxPages = 1000;
-        const baseUrl = urlCreator()
-          .split("&offset=")[0]
-          .replace("pageSize=36", "pageSize=100");
+        const baseUrl = urlCreator(AIRTABLE_MAX_PAGE_SIZE).split("&offset=")[0];
 
         while (pageCounter < maxPages) {
           const url = baseUrl + nextOffset;
