@@ -1,6 +1,13 @@
-import React, { useContext } from "react";
+import { useContext } from "react";
+import { Search as SearchIcon, X as XIcon } from "lucide-react";
 import PentaContext from "../../context/PentaContext";
 import DownloadButton from "./DownloadButton";
+import {
+  InputGroup,
+  InputGroupAddon,
+  InputGroupButton,
+  InputGroupInput,
+} from "@/components/ui/input-group";
 
 // Search component used for searching through the inventory.
 
@@ -19,36 +26,41 @@ const Search = () => {
 
   return (
     <div id="search-form">
-      <form onSubmit={(e) => e.preventDefault()}>
-        <div className="field">
-          <div
-            className="control has-icons-left has-icons-right loading-effect"
-            style={{ animationDelay: "0.321s" }}
-          >
-            {/* Search Input */}
-            <input
-              className="input is-rounded mr-3 search-bar"
-              type="text"
-              placeholder="Search ..."
-              value={searchInput}
-              onChange={onSearchChange}
-            />
-            {/* Search Icon */}
-            <span className="icon is-small is-left">
-              <i className="fas fa-search"></i>
-            </span>
-            {/* Clear Search Button */}
-            {searchInput && (
-              <span
-                className="icon is-small is-right"
-                onClick={clearSearchInput}
+      <form
+        onSubmit={(e) => e.preventDefault()}
+        className="mr-3 flex-1"
+      >
+        {/* Override the theme ring (Penta coral) with the blue theme locally so
+            the search box focuses blue instead of orange. */}
+        <InputGroup className="h-9 w-full rounded-full bg-white [--ring:#35b0fb] has-[[data-slot=input-group-control]:focus-visible]:border-input">
+          {/* Search Icon */}
+          <InputGroupAddon align="inline-start">
+            <SearchIcon />
+          </InputGroupAddon>
+
+          {/* Search Input */}
+          <InputGroupInput
+            type="text"
+            placeholder="Search"
+            className="pl-3"
+            value={searchInput}
+            onChange={onSearchChange}
+          />
+
+          {/* Clear Search Button */}
+          {searchInput && (
+            <InputGroupAddon align="inline-end">
+              <InputGroupButton
                 id="search-clear"
+                aria-label="ClearSearch"
+                size="icon-xs"
+                onClick={clearSearchInput}
               >
-                <i className="fas fa-times mr-5"></i>
-              </span>
-            )}
-          </div>
-        </div>
+                <XIcon />
+              </InputGroupButton>
+            </InputGroupAddon>
+          )}
+        </InputGroup>
       </form>
       {/* Download Button Component */}
       <DownloadButton></DownloadButton>

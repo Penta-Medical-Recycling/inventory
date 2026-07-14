@@ -1,43 +1,23 @@
-import React, { useContext, useRef, useEffect } from "react";
+import { useContext } from "react";
 import PentaContext from "../../context/PentaContext";
 import LittleSpinner from "../../assets/LittleSpinner";
 import DownloadLogo from "../../assets/DownloadLogo";
+import { ChevronDown } from "lucide-react";
 import * as XLSX from "xlsx";
+import { cn } from "@/lib/utils";
+import { buttonVariants } from "@/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuTrigger,
+  DropdownMenuContent,
+  DropdownMenuItem,
+} from "@/components/ui/dropdown-menu";
 
 // DownloadButton component is used for downloading the current inventory
 
 const DownloadButton = () => {
-  const {
-    isDropActive,
-    setIsDropActive,
-    isDownloading,
-    setIsDownloading,
-    urlCreator,
-    fetchAPI,
-  } = useContext(PentaContext);
-
-  // Toggle the dropdown menu visibility.
-  const toggleDropdown = (event) => {
-    event.stopPropagation();
-    setIsDropActive(!isDropActive);
-  };
-
-  const dropdownRef = useRef(null);
-
-  // Handle clicks outside of the dropdown menu to close it.
-  const handleClickOutside = (event) => {
-    if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
-      setIsDropActive(false);
-    }
-  };
-
-  useEffect(() => {
-    document.addEventListener("mousedown", handleClickOutside);
-
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
-    };
-  }, []);
+  const { isDownloading, setIsDownloading, urlCreator, fetchAPI } =
+    useContext(PentaContext);
 
   /**
    * Create and initiate the download of a blob containing inventory data in the chosen file format.
@@ -134,64 +114,28 @@ const DownloadButton = () => {
   }
 
   return (
-    <div
-      className={`dropdown loading-effect ${isDropActive ? "is-active" : ""}`}
-      ref={dropdownRef}
-      style={{ animationDelay: "0.428s", zIndex: 1 }}
-    >
-      {/* Dropdown Trigger */}
-      <div className="dropdown-trigger">
-        <button
-          className="button is-rounded dropdown-download"
+    <div>
+      <DropdownMenu>
+        <DropdownMenuTrigger
           aria-label="Download"
-          role="button"
-          aria-haspopup="true"
-          aria-controls="dropdown-menu3"
-          onClick={toggleDropdown}
-        >
-          {/* Display a loading spinner or download icon based on isDownloading state. */}
-          {isDownloading ? (
-            <LittleSpinner size={30} />
-          ) : (
-            <DownloadLogo></DownloadLogo>
+          className={cn(
+            buttonVariants({ variant: "outline", size: "lg" }),
+            "gap-2 rounded-full px-4 [&_svg:not([class*='size-'])]:size-6"
           )}
-          <span className="icon is-small">
-            <i className="fas fa-angle-down" aria-hidden="true"></i>
-          </span>
-        </button>
-      </div>
-      {/* Dropdown Menu */}
-      <div
-        className="dropdown-menu"
-        id="dropdown-menu3"
-        role="menu"
-        style={{ minWidth: "87px" }}
-      >
-        <div className="dropdown-content">
-          {/* Trigger the blob creation and download for CSV format. */}
-          <a
-            href="#"
-            className="dropdown-item"
-            onClick={() => {
-              createBlob("csv");
-              setIsDropActive(false);
-            }}
-          >
+        >
+          {/* Loading spinner while downloading, otherwise the download icon. */}
+          {isDownloading ? <LittleSpinner size={24} /> : <DownloadLogo />}
+          <ChevronDown className="size-4" aria-hidden="true" />
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="end">
+          <DropdownMenuItem onClick={() => createBlob("csv")}>
             .csv
-          </a>
-          {/* Trigger the blob creation and download for XLSX format. */}
-          <a
-            href="#"
-            className="dropdown-item"
-            onClick={() => {
-              createBlob("xlsx");
-              setIsDropActive(false);
-            }}
-          >
+          </DropdownMenuItem>
+          <DropdownMenuItem onClick={() => createBlob("xlsx")}>
             .xlsx
-          </a>
-        </div>
-      </div>
+          </DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenu>
     </div>
   );
 };

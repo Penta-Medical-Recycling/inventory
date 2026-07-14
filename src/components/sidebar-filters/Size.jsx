@@ -1,174 +1,157 @@
-import { useContext } from "react";
+import { useContext, useState, useEffect, useRef } from "react";
+import { Minus, Plus } from "lucide-react";
 import PentaContext from "../../context/PentaContext";
+import { Slider } from "@/components/ui/slider";
 
 // SizeSlider component for selecting size range using sliders and inputs.
 
-const Size = ({ }) => {
+const Stepper = ({
+  label,
+  value,
+  min,
+  max,
+  onValueChange,
+  onDecrement,
+  onIncrement,
+  canDecrement,
+  canIncrement,
+}) => {
+  // Local text state so the user can freely edit the field (including transient
+  // empty/out-of-range states) while the committed value stays clamped.
+  const [text, setText] = useState(String(value));
+  const isFocused = useRef(false);
+
+  // Keep the field in sync with the committed value, but never overwrite what
+  // the user is actively typing.
+  useEffect(() => {
+    if (!isFocused.current) setText(String(value));
+  }, [value]);
+
+  const handleChange = (event) => {
+    const raw = event.target.value;
+    setText(raw);
+    if (raw === "") return;
+    const parsed = parseInt(raw, 10);
+    if (Number.isNaN(parsed)) return;
+    // Only commit live when the value is already in range. Out-of-range typing
+    // (e.g. "3" on the way to "30") is left uncommitted so it isn't clamped and
+    // overwritten mid-edit; clamping happens on blur.
+    if (parsed >= min && parsed <= max) onValueChange(parsed);
+  };
+
+  const handleFocus = () => {
+    isFocused.current = true;
+  };
+
+  // Normalize/clamp the displayed text to a committed value when focus leaves.
+  const handleBlur = () => {
+    isFocused.current = false;
+    const parsed = parseInt(text, 10);
+    if (Number.isNaN(parsed)) {
+      setText(String(value));
+      return;
+    }
+    const clamped = Math.min(Math.max(parsed, min), max);
+    onValueChange(clamped);
+    setText(String(clamped));
+  };
+
+  return (
+    <div className="flex flex-1 flex-col gap-1.5">
+      <span className="text-[11px] font-semibold uppercase tracking-wide text-[#8A8A8A]">
+        {label}
+      </span>
+      <div className="flex items-center gap-1 rounded-2xl border border-[#E5E7EB] bg-white px-1.5 py-1 transition-colors focus-within:border-[#64C8FF]">
+        <button
+          type="button"
+          onClick={onDecrement}
+          disabled={!canDecrement}
+          aria-label={`Decrease ${label}`}
+          className="flex size-8 shrink-0 items-center justify-center rounded-full text-[#4A4A4A] transition-colors hover:bg-[#D9F1FF] hover:text-[#1a9fe0] disabled:opacity-30 disabled:hover:bg-transparent"
+        >
+          <Minus className="size-4" />
+        </button>
+        <input
+          type="number"
+          value={text}
+          onChange={handleChange}
+          onFocus={handleFocus}
+          onBlur={handleBlur}
+          aria-label={`${label} size`}
+          className="w-full min-w-0 bg-transparent text-center text-lg font-semibold text-[#4A4A4A] outline-none [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
+        />
+        <button
+          type="button"
+          onClick={onIncrement}
+          disabled={!canIncrement}
+          aria-label={`Increase ${label}`}
+          className="flex size-8 shrink-0 items-center justify-center rounded-full text-[#4A4A4A] transition-colors hover:bg-[#D9F1FF] hover:text-[#1a9fe0] disabled:opacity-30 disabled:hover:bg-transparent"
+        >
+          <Plus className="size-4" />
+        </button>
+      </div>
+    </div>
+  );
+};
+
+const Size = () => {
   const {
     minValue,
     setMinValue,
     maxValue,
     setMaxValue,
     largestSize,
-    isRangeOn,
-    setIsRangeOn,
   } = useContext(PentaContext);
 
-  // Toggle the range switch
-  const toggleSwitch = () => {
-    setIsRangeOn((prevState) => !prevState);
-  };
-
-  // Handle changes in the minimum size input
-  const handleMinChange = (event) => {
-    const newMinValue = parseInt(event.target.value);
-    if (newMinValue <= maxValue && newMinValue >= 1) {
-      setMinValue(newMinValue);
-    }
-  };
-
-  // Handle changes in the maximum size input
-  const handleMaxChange = (event) => {
-    const newMaxValue = parseInt(event.target.value);
-    if (newMaxValue >= minValue && newMaxValue <= largestSize) {
-      setMaxValue(newMaxValue);
-    }
-  };
-
-  // Handle changes in the minimum size slider
-  const handleMinSliderChange = (event) => {
-    const newMinValue = parseInt(event.target.value);
-    if (newMinValue <= maxValue && newMinValue >= 1) {
-      setMinValue(newMinValue);
-    }
-  };
-
-  // Handle changes in the maximum size slider
-  const handleMaxSliderChange = (event) => {
-    const newMaxValue = parseInt(event.target.value);
-    if (newMaxValue >= minValue && newMaxValue <= largestSize) {
-      setMaxValue(newMaxValue);
-    }
-  };
-
   return (
-    <div>
-      <header>
-        <div className="flex items-center justify-between">
-          <label className="text-2xl font-bold">Size Range</label>
+    <div className="filter-section flex flex-col gap-4">
+      <label className="text-sm font-semibold uppercase tracking-wide text-[#6B7280]">Device size</label>
 
-          {/* Toggle switch with tailwind */}
-          <label className="cursor-pointer">
-            <div
-              onClick={toggleSwitch}
-              className={`relative w-14 h-8 rounded-full bg-gray-300`}
-            >
-              <div
-                className={`absolute top-1 left-1 w-6 h-6 rounded-full shadow-md transition-all duration-300
-          ${isRangeOn ? "translate-x-6 bg-[#64C8FF]" : "translate-x-0 bg-white"}`}
-              />
-            </div>
-          </label>
-        </div>
-
-        <p className="text-gray-600 text-md">Use slider to enter min and max size</p>
-      </header>
-      <div className={isRangeOn ? "size-input" : "size-off size-input"}>
-        {/* Minimum Size Input */}
-        <div className="field">
-          <input
-            type="number"
-            className="input-min slider-input"
-            value={minValue}
-            onChange={handleMinChange}
-            min="1"
-            max={maxValue}
-          />
-          <div
-            className="is-flex is-justify-content-space-evenly"
-            style={{ userSelect: "none", width: "100%", cursor: "pointer" }}
-          >
-            <div
-              className="crease-click"
-              onClick={() => {
-                if (minValue > 1) setMinValue(minValue - 1);
-              }}
-            >
-              <p>-</p>
-            </div>
-            <div
-              className="crease-click"
-              onClick={() => {
-                if (minValue < maxValue) setMinValue(minValue + 1);
-              }}
-            >
-              <p>+</p>
-            </div>
-          </div>
-        </div>
-        <div className="separator">⇄</div>
-        {/* Maximum Size Input */}
-        <div className="field">
-          <input
-            type="number"
-            className="input-max slider-input"
-            value={maxValue}
-            onChange={handleMaxChange}
-            min="1"
-            max={maxValue}
-          />
-          <div
-            className="is-flex is-justify-content-space-evenly"
-            style={{ userSelect: "none", width: "100%", cursor: "pointer" }}
-          >
-            <div
-              className="crease-click"
-              onClick={() => {
-                if (maxValue > minValue) setMaxValue(maxValue - 1);
-              }}
-            >
-              <p>-</p>
-            </div>
-            <div
-              className="crease-click"
-              onClick={() => {
-                if (maxValue < largestSize) setMaxValue(maxValue + 1);
-              }}
-            >
-              <p>+</p>
-            </div>
-          </div>
-        </div>
-      </div>
-      {/* Size Range Slider */}
-      <div className={isRangeOn ? "slider" : "size-off slider"}>
-        <div
-          className="progress"
-          style={{
-            left: `${((minValue - 1) / (largestSize - 1)) * 100}%`,
-            width: `${((maxValue - minValue) / (largestSize - 1)) * 100}%`,
-          }}
-        ></div>
-      </div>
-      {/* Range Input Slider */}
-      <div className={isRangeOn ? "range-input" : "size-off range-input"}>
-        <input
-          type="range"
-          className="range-min"
-          min="1"
-          max={largestSize}
+      <div className="flex items-center gap-3">
+        <Stepper
+          label="Min"
           value={minValue}
-          step="1"
-          onChange={handleMinSliderChange}
+          min={1}
+          max={maxValue}
+          onValueChange={setMinValue}
+          onDecrement={() => {
+            if (minValue > 1) setMinValue(minValue - 1);
+          }}
+          onIncrement={() => {
+            if (minValue < maxValue) setMinValue(minValue + 1);
+          }}
+          canDecrement={minValue > 1}
+          canIncrement={minValue < maxValue}
         />
-        <input
-          type="range"
-          className="range-max"
-          min="1"
-          max={largestSize}
+
+        <Stepper
+          label="Max"
           value={maxValue}
-          step="1"
-          onChange={handleMaxSliderChange}
+          min={minValue}
+          max={largestSize}
+          onValueChange={setMaxValue}
+          onDecrement={() => {
+            if (maxValue > minValue) setMaxValue(maxValue - 1);
+          }}
+          onIncrement={() => {
+            if (maxValue < largestSize) setMaxValue(maxValue + 1);
+          }}
+          canDecrement={maxValue > minValue}
+          canIncrement={maxValue < largestSize}
+        />
+      </div>
+
+      {/* Size Range Slider */}
+      <div className="px-1">
+        <Slider
+          min={1}
+          max={largestSize}
+          step={1}
+          value={[minValue, maxValue]}
+          onValueChange={([newMin, newMax]) => {
+            setMinValue(newMin);
+            setMaxValue(newMax);
+          }}
         />
       </div>
     </div>

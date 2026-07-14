@@ -122,7 +122,23 @@ const QuantityModal = ({ itemName, currentItemId, onSubmit, onClose, hasSize = f
                 min={0}
                 max={75}
                 onChange={(e) => setExactSize(e.target.value)}
-                style={{ width: "100%", marginTop: "0.5rem" }}
+                onFocus={(e) => {
+                  e.target.style.borderColor = "#35b0fb";
+                  e.target.style.boxShadow = "rgba(53, 176, 251, 0.4) 0px 2px 8px 0px";
+                }}
+                onBlur={(e) => {
+                  e.target.style.borderColor = "#dbdbdb";
+                  e.target.style.boxShadow = "none";
+                }}
+                style={{
+                  width: "100%",
+                  marginTop: "0.5rem",
+                  padding: "0.5rem",
+                  boxSizing: "border-box",
+                  border: "1px solid #dbdbdb",
+                  borderRadius: "6px",
+                  outline: "none",
+                }}
               />
             </div>
 
@@ -153,16 +169,49 @@ const QuantityModal = ({ itemName, currentItemId, onSubmit, onClose, hasSize = f
                 justifyContent: "center",
               }}
             >
-              <button className="button is-small" onClick={decrement}>
+              <button
+                className="button is-small"
+                onClick={decrement}
+                style={{
+                  height: "32px",
+                  width: "32px",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  border: "1px solid #dbdbdb",
+                  borderRadius: "6px",
+                }}
+              >
                 -
               </button>
               <input
                 type="number"
                 value={inputValue}
                 onChange={(e) => setInputValue(e.target.value)}
-                style={{ width: "60px", textAlign: "center" }}
+                style={{
+                  width: "60px",
+                  height: "32px",
+                  margin: 0,
+                  padding: 0,
+                  boxSizing: "border-box",
+                  textAlign: "center",
+                  border: "1px solid #dbdbdb",
+                  borderRadius: "6px",
+                }}
               />
-              <button className="button is-small" onClick={increment}>
+              <button
+                className="button is-small"
+                onClick={increment}
+                style={{
+                  height: "32px",
+                  width: "32px",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  border: "1px solid #dbdbdb",
+                  borderRadius: "6px",
+                }}
+              >
                 +
               </button>
             </div>
