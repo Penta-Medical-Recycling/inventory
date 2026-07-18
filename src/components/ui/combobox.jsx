@@ -5,6 +5,7 @@ import { Combobox as ComboboxPrimitive } from "@base-ui/react"
 
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
+import { ScrollArea } from "@/components/ui/scroll-area"
 import {
   InputGroup,
   InputGroupAddon,
@@ -116,13 +117,12 @@ function ComboboxList({
   ...props
 }) {
   return (
-    <ComboboxPrimitive.List
-      data-slot="combobox-list"
-      className={cn(
-        "no-scrollbar max-h-[min(calc(--spacing(72)---spacing(9)),calc(var(--available-height)---spacing(9)))] scroll-py-1 overflow-y-auto overscroll-contain p-1 data-empty:p-0",
-        className
-      )}
-      {...props} />
+    <ScrollArea viewportClassName="h-auto max-h-[min(calc(--spacing(72)---spacing(9)),calc(var(--available-height)---spacing(9)))]">
+      <ComboboxPrimitive.List
+        data-slot="combobox-list"
+        className={cn("scroll-py-1 p-1 pr-2 data-empty:p-0", className)}
+        {...props} />
+    </ScrollArea>
   );
 }
 
@@ -229,7 +229,7 @@ function ComboboxChip({
     <ComboboxPrimitive.Chip
       data-slot="combobox-chip"
       className={cn(
-        "flex h-7 w-fit items-center justify-center gap-1 rounded-sm border border-[#64C8FF] bg-[#D9F1FF] px-2 text-sm font-medium whitespace-nowrap text-[#4A4A4A] has-disabled:pointer-events-none has-disabled:cursor-not-allowed has-disabled:opacity-50 has-data-[slot=combobox-chip-remove]:pr-0",
+        "flex h-7 w-fit items-center justify-center gap-1 rounded-sm border border-[#E5E7EB] bg-[#F3F4F6] px-2 text-sm font-medium whitespace-nowrap text-[#4A4A4A] has-disabled:pointer-events-none has-disabled:cursor-not-allowed has-disabled:opacity-50 has-data-[slot=combobox-chip-remove]:pr-0",
         className
       )}
       {...props}>
@@ -237,7 +237,7 @@ function ComboboxChip({
       {showRemove && (
         <ComboboxPrimitive.ChipRemove
           render={<Button variant="ghost" size="icon-xs" />}
-          className="ml-0.5 text-[#4A4A4A]/60 hover:bg-[#64C8FF]/40 hover:text-[#4A4A4A]"
+          className="ml-0.5 text-[#4A4A4A]/60 hover:bg-[#E5E7EB] hover:text-[#4A4A4A]"
           data-slot="combobox-chip-remove">
           <XIcon className="pointer-events-none" />
         </ComboboxPrimitive.ChipRemove>
