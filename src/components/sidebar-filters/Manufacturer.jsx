@@ -1,34 +1,24 @@
-import { useState, useEffect, useContext, useMemo } from "react";
+import { useState, useEffect, useContext } from "react";
 import PentaContext from "../../context/PentaContext";
-import { MultiSelect } from "react-multi-select-component";
-
-// helpers
-const norm = (s = "") =>
-  s
-    .toLowerCase()
-    .replace(/["'’`]/g, "")
-    .replace(/[^\w\s-]/g, " ")
-    .replace(/\s+/g, " ")
-    .trim();
-
-const titleize = (s = "") =>
-  s.replace(/\b\w+/g, (w) => w.charAt(0).toUpperCase() + w.slice(1));
+import {
+  Combobox,
+  ComboboxChips,
+  ComboboxChip,
+  ComboboxChipsInput,
+  ComboboxContent,
+  ComboboxList,
+  ComboboxItem,
+  ComboboxEmpty,
+  ComboboxValue,
+  useComboboxAnchor,
+} from "@/components/ui/combobox";
 
 const Manufacturer = () => {
-  const {
-    selectedManufacturer,
-    setSelectedManufacturer,
-    selectedSKU,
-    setSelectedSKU,
-    selectedFilter,
-    fetchSelectOptions,
-    setSearchInput,
-    selectedDescriptions,
-    setSelectedDescriptions,
-  } = useContext(PentaContext);
+  const { selectedManufacturer, setSelectedManufacturer, fetchSelectOptions } =
+    useContext(PentaContext);
 
   const [manuOptions, setManu] = useState([]);
-  const [descOptions, setDescOptions] = useState([]);
+  const manuAnchor = useComboboxAnchor();
 
   // load manufacturers (unchanged)
   useEffect(() => {
@@ -43,14 +33,42 @@ const Manufacturer = () => {
       {/* Manufacturer (unchanged) */}
       <div className="filter-section flex flex-col gap-2">
         <label className="text-sm font-semibold uppercase tracking-wide text-[#6B7280]">Manufacturer</label>
-        <MultiSelect
-          options={manuOptions}
+        <Combobox
+          items={manuOptions}
+          multiple
           value={selectedManufacturer}
-          onChange={setSelectedManufacturer}
-          labelledBy="Select..."
-          hasSelectAll
-          ClearSelectedIcon={null}
-        />
+          onValueChange={setSelectedManufacturer}
+          itemToStringLabel={(item) => item.label}
+          itemToStringValue={(item) => item.value}
+          isItemEqualToValue={(a, b) => a.value === b.value}
+        >
+          <ComboboxChips ref={manuAnchor} className="bg-white">
+            <ComboboxValue>
+              {(selected) => (
+                <>
+                  {selected.map((item) => (
+                    <ComboboxChip key={item.value} aria-label={item.label}>
+                      {item.label}
+                    </ComboboxChip>
+                  ))}
+                  <ComboboxChipsInput
+                    placeholder={selected.length > 0 ? "" : "Select..."}
+                  />
+                </>
+              )}
+            </ComboboxValue>
+          </ComboboxChips>
+          <ComboboxContent anchor={manuAnchor}>
+            <ComboboxEmpty>No results.</ComboboxEmpty>
+            <ComboboxList>
+              {(item) => (
+                <ComboboxItem key={item.value} value={item}>
+                  {item.label}
+                </ComboboxItem>
+              )}
+            </ComboboxList>
+          </ComboboxContent>
+        </Combobox>
       </div>
     </>
   );

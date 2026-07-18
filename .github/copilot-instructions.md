@@ -144,7 +144,7 @@ inventory/
       ui/              # shadcn/ui components (button, drawer, sonner, toggle-group, etc.)
       cards/           # Card, CardBody, CardGrid, In/OutOfStockCard, modals
       home/            # HomeLister, Pagination, Search, Tags, DownloadButton
-      sidebar-filters/ # Manufacturer, Parts, Size, SizeSlider, MultipleSelect, etc.
+      sidebar-filters/ # Manufacturer, Description, Parts, Size, SizeSlider, etc.
       leg/, prosthetic-leg/  # ProstheticLegGraphic
     context/
       PentaContext.jsx   # createContext
@@ -171,7 +171,6 @@ inventory/
 
 - `fuse.js` + `fuzzysort`: client-side fuzzy search.
 - `xlsx`, `json2csv`, `papaparse`, `file-saver`: inventory export to CSV/XLSX.
-- `react-multi-select-component`: multi-select filter dropdowns.
 - `react-range`: the size range slider.
 - `js-cookie`: cookie storage; cart items/notes/partner are persisted in `localStorage`.
 
@@ -183,6 +182,29 @@ inventory/
 - Keep the Vite `base: "/inventory/"` — changing it breaks GitHub Pages asset paths.
 - A few pre-existing `// TODO:` markers exist (e.g. `Card.jsx`, `CardGrid.jsx`, `Cart.jsx`); they
   are not blocking.
+
+### shadcn/ui components — add via CLI, never import Base UI directly
+
+When you need a UI primitive (combobox, dialog, select, popover, etc.), **first add the shadcn
+component locally with the CLI**, then import it from `@/components/ui/*`. **Do NOT import from
+`@base-ui/react` (or any other primitive library) directly in feature code.** Base UI imports
+belong only inside the generated `src/components/ui/*` wrapper files.
+
+- Check `src/components/ui/` first — if the component already exists, just import it.
+- If it does not exist, add it from `inventory/`:
+  ```
+  cd inventory
+  npx shadcn@latest add <component>
+  ```
+  This writes a wrapper (styled with the project's `base-nova` theme, per `components.json`) into
+  `src/components/ui/`, which internally wraps the appropriate `@base-ui/react` primitive.
+- Then import the wrapper, e.g. `import { Combobox, ComboboxChips, ... } from "@/components/ui/combobox"`.
+- Rationale: keeps styling/theme tokens consistent, centralizes primitive usage in one place, and
+  makes future library upgrades a single-file change. A raw `@base-ui/react` import in a
+  `sidebar-filters/`, `cards/`, `home/`, or `pages/` file is a red flag — wrap it in `ui/` instead.
+- Prefer these shadcn wrappers over legacy libraries (e.g. use `ui/combobox.jsx` with `multiple` +
+  `ComboboxChips` instead of `react-multi-select-component`).
+
 
 ### Readability over micro-optimizations
 

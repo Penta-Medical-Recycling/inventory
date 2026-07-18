@@ -203,20 +203,21 @@ function ComboboxSeparator({
   );
 }
 
-function ComboboxChips({
+const ComboboxChips = React.forwardRef(function ComboboxChips({
   className,
   ...props
-}) {
+}, ref) {
   return (
     <ComboboxPrimitive.Chips
+      ref={ref}
       data-slot="combobox-chips"
       className={cn(
-        "flex min-h-8 flex-wrap items-center gap-1 rounded-lg border border-input bg-transparent bg-clip-padding px-2.5 py-1 text-sm transition-colors focus-within:border-ring focus-within:ring-3 focus-within:ring-ring/50 has-aria-invalid:border-destructive has-aria-invalid:ring-3 has-aria-invalid:ring-destructive/20 has-data-[slot=combobox-chip]:px-1 dark:bg-input/30 dark:has-aria-invalid:border-destructive/50 dark:has-aria-invalid:ring-destructive/40",
+        "flex min-h-11 flex-wrap items-center gap-1.5 rounded-lg border border-input bg-transparent bg-clip-padding px-3 py-1.5 text-base transition-colors focus-within:border-ring focus-within:ring-3 focus-within:ring-ring/50 has-aria-invalid:border-destructive has-aria-invalid:ring-3 has-aria-invalid:ring-destructive/20 has-data-[slot=combobox-chip]:px-1.5 dark:bg-input/30 dark:has-aria-invalid:border-destructive/50 dark:has-aria-invalid:ring-destructive/40",
         className
       )}
       {...props} />
   );
-}
+});
 
 function ComboboxChip({
   className,
@@ -228,7 +229,7 @@ function ComboboxChip({
     <ComboboxPrimitive.Chip
       data-slot="combobox-chip"
       className={cn(
-        "flex h-[calc(--spacing(5.25))] w-fit items-center justify-center gap-1 rounded-sm bg-muted px-1.5 text-xs font-medium whitespace-nowrap text-foreground has-disabled:pointer-events-none has-disabled:cursor-not-allowed has-disabled:opacity-50 has-data-[slot=combobox-chip-remove]:pr-0",
+        "flex h-7 w-fit items-center justify-center gap-1 rounded-sm border border-[#64C8FF] bg-[#D9F1FF] px-2 text-sm font-medium whitespace-nowrap text-[#4A4A4A] has-disabled:pointer-events-none has-disabled:cursor-not-allowed has-disabled:opacity-50 has-data-[slot=combobox-chip-remove]:pr-0",
         className
       )}
       {...props}>
@@ -236,7 +237,7 @@ function ComboboxChip({
       {showRemove && (
         <ComboboxPrimitive.ChipRemove
           render={<Button variant="ghost" size="icon-xs" />}
-          className="-ml-1 opacity-50 hover:opacity-100"
+          className="ml-0.5 text-[#4A4A4A]/60 hover:bg-[#64C8FF]/40 hover:text-[#4A4A4A]"
           data-slot="combobox-chip-remove">
           <XIcon className="pointer-events-none" />
         </ComboboxPrimitive.ChipRemove>
