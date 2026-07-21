@@ -36,6 +36,8 @@ const HomeLister = ({ onRemove, setOnRemove }) => {
     urlCreator,
     fetchAPI,
     setData,
+    allInventoryItems,
+    setAllInventoryItems,
   } = useContext(PentaContext);
 
   const globalUrl = useRef("");
@@ -56,17 +58,9 @@ const HomeLister = ({ onRemove, setOnRemove }) => {
     // Reuse the cached master list across in-app navigation (e.g. Cart -> Home).
     // sessionStorage persists for the tab session, so only do the full
     // multi-page fetch when the cache is missing or empty.
-    const cached = sessionStorage.getItem("allInventoryItems");
-    if (cached) {
-      try {
-        const parsed = JSON.parse(cached);
-        if (Array.isArray(parsed) && parsed.length > 0) {
-          setInventoryReady(true);
-          return;
-        }
-      } catch {
-        // Malformed cache - fall through and refetch.
-      }
+    if (allInventoryItems.length > 0) {
+      setInventoryReady(true);
+      return;
     }
 
     async function fetchAllInventory() {
@@ -92,6 +86,7 @@ const HomeLister = ({ onRemove, setOnRemove }) => {
         }
 
         sessionStorage.setItem("allInventoryItems", JSON.stringify(allRecords));
+          setAllInventoryItems(allRecords);
         console.log(`✅ Fetched ${allRecords.length} total items from inventory.`);
       } catch (err) {
         console.error("❌ Error fetching all inventory:", err);

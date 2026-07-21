@@ -23,6 +23,16 @@ function PentaProvider({ children }) {
   const [isDownloading, setIsDownloading] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [data, setData] = useState();
+  const [allInventoryItems, setAllInventoryItems] = useState(() => {
+    try {
+      const cached = JSON.parse(
+        sessionStorage.getItem("allInventoryItems") || "[]"
+      );
+      return Array.isArray(cached) ? cached : [];
+    } catch {
+      return [];
+    }
+  });
   const [filteredDescriptions, setFilteredDescriptions] = useState([]);
   const [searchInput, setSearchInput] = useState("");
   const [selectedFilter, setSelectedFilters] = useState({
@@ -331,6 +341,8 @@ if (selectedSKU.length > 0) {
         setSelectedFilters,
         data,
         setData,
+        allInventoryItems,
+        setAllInventoryItems,
         serverMessage,
         setServerMessage,
         serverStatus,

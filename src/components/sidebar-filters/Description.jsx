@@ -1,4 +1,4 @@
-import { useState, useEffect, useContext } from "react";
+import { useContext } from "react";
 import PentaContext from "../../context/PentaContext";
 import {
   Combobox,
@@ -14,39 +14,28 @@ import {
 } from "@/components/ui/combobox";
 
 const Description = () => {
-  const { selectedDescriptions, setSelectedDescriptions } =
-    useContext(PentaContext);
-
-  const [descOptions, setDescOptions] = useState([]);
+  const {
+    selectedDescriptions,
+    setSelectedDescriptions,
+    allInventoryItems,
+  } = useContext(PentaContext);
   const anchor = useComboboxAnchor();
 
-  // Build the option list from the cached master inventory list. Each record's
-  // "Description (from SKU)" is an array field, so pull the first value, then
-  // dedupe and sort alphabetically to mirror the Manufacturer options.
-  useEffect(() => {
-    let records = [];
-    try {
-      records = JSON.parse(
-        sessionStorage.getItem("allInventoryItems") || "[]"
-      );
-    } catch {
-      records = [];
+  const descriptions = new Set();
+  allInventoryItems.forEach((record) => {
+    const description = Array.isArray(record?.["Description (from SKU)"])
+      ? record["Description (from SKU)"][0]
+      : record?.["Description (from SKU)"];
+    if (description && String(description).trim()) {
+      descriptions.add(String(description).trim());
     }
-
-    const descriptions = new Set();
-    records.forEach((r) => {
-      const desc = Array.isArray(r?.["Description (from SKU)"])
-        ? r["Description (from SKU)"][0]
-        : r?.["Description (from SKU)"];
-      if (desc && String(desc).trim()) descriptions.add(String(desc).trim());
-    });
-
-    const opts = Array.from(descriptions)
-      .sort((a, b) => a.localeCompare(b))
-      .map((desc) => ({ label: desc, value: encodeURIComponent(desc) }));
-
-    setDescOptions(opts);
-  }, []);
+  });
+  const descOptions = Array.from(descriptions)
+    .sort((first, second) => first.localeCompare(second))
+    .map((description) => ({
+      label: description,
+      value: encodeURIComponent(description),
+    }));
 
   return (
     <div className="filter-section flex flex-col gap-2">
@@ -60,7 +49,7 @@ const Description = () => {
         itemToStringValue={(item) => item.value}
         isItemEqualToValue={(a, b) => a.value === b.value}
       >
-        <ComboboxChips ref={anchor} className="bg-white">
+        <ComboboxChips ref={anchor} className="bg-white [--ring:#64C8FF]">
           <ComboboxValue>
             {(selected) => (
               <>

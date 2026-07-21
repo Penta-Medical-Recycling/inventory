@@ -63,6 +63,28 @@ async function setup() {
   return { user, queries };
 }
 
+async function setupWithoutCachedInventory() {
+  sessionStorage.removeItem("allInventoryItems");
+
+  server.use(
+    http.get(INVENTORY_URL, () =>
+      HttpResponse.json({ records: inventoryRecords })
+    )
+  );
+
+  const user = userEvent.setup();
+  renderWithProviders(
+    <>
+      <OpenFilters />
+      <SideBar />
+      <HomeLister onRemove={false} setOnRemove={() => {}} />
+    </>
+  );
+
+  await screen.findByText("Description");
+  return user;
+}
+
 // The Description filter section (scoped so we don't collide with the sibling
 // Manufacturer combobox).
 const descSection = () => screen.getByText("Description").closest(".filter-section");
@@ -118,6 +140,17 @@ describe("Description filter → HomeLister inventory query", () => {
       within(popup).getByText("Pylon, with Integrated Tube Clamp")
     ).toBeInTheDocument();
     expect(within(popup).getByText("Socket, Left leg")).toBeInTheDocument();
+  });
+
+  it("updates description options when the master inventory finishes loading", async () => {
+    const user = await setupWithoutCachedInventory();
+
+    await waitFor(() =>
+      expect(sessionStorage.getItem("allInventoryItems")).not.toBeNull()
+    );
+    const popup = await openDescriptionPopup(user);
+
+    expect(within(popup).getByText("Left Foot Shell")).toBeInTheDocument();
   });
 
   it("selecting a description adds an OR SEARCH condition to the request", async () => {

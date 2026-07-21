@@ -42,7 +42,7 @@ const Manufacturer = () => {
           itemToStringValue={(item) => item.value}
           isItemEqualToValue={(a, b) => a.value === b.value}
         >
-          <ComboboxChips ref={manuAnchor} className="bg-white">
+          <ComboboxChips ref={manuAnchor} className="bg-white [--ring:#64C8FF]">
             <ComboboxValue>
               {(selected) => (
                 <>

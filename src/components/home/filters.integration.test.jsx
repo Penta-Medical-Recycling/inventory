@@ -118,7 +118,10 @@ describe("Filter integration → Airtable query", () => {
     // Open the manufacturer combobox and pick "3M". The drawer and the combobox
     // popup both render in portals, so query the whole document and scope the
     // option lookup to the open popup.
-    const manuSection = screen.getByText("Manufacturer").closest(".filter-section");
+    const manuSection = screen
+      .getAllByText("Manufacturer")
+      .find((element) => element.tagName === "LABEL")
+      .closest(".filter-section");
     await user.click(manuSection.querySelector("[data-slot='combobox-chip-input']"));
     const popup = await waitFor(() => {
       const el = document.querySelector("[data-slot='combobox-content']");
