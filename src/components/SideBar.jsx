@@ -15,6 +15,7 @@ import Extremity from "./sidebar-filters/Extremity";
 import Parts from "./sidebar-filters/Parts";
 import LegDiagram from "./sidebar-filters/LegDiagram";
 import Pediatric from "./sidebar-filters/Pediatric";
+import Description from "./sidebar-filters/Description";
 import Manufacturer from "./sidebar-filters/Manufacturer";
 import Size from "./sidebar-filters/Size";
 import ResetFilters from "./sidebar-filters/ResetFilters";
@@ -30,6 +31,7 @@ const SideBar = () => {
     largestSize,
     setSelectedManufacturer,
     setSelectedSKU,
+    setSelectedDescriptions,
     setSelectedFilters,
     selectedPart,
     setSelectedPart,
@@ -80,6 +82,7 @@ const SideBar = () => {
   const removeAllFilters = () => {
     setSelectedManufacturer([]);
     setSelectedSKU([]);
+    setSelectedDescriptions([]);
     setMinValue(1);
     setMaxValue(largestSize);
     setSelectedFilters({
@@ -139,6 +142,7 @@ const SideBar = () => {
                     />
                   </div>
                 )}
+                <Description />
                 <Manufacturer />
                 <Pediatric pediatric={pediatric} setPediatric={setPediatric} />
                 <Size />

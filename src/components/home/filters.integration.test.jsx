@@ -115,15 +115,20 @@ describe("Filter integration → Airtable query", () => {
     await chooseAssistive(user, "All");
     await chooseExtremity(user, "All");
 
-    // Open the manufacturer multiselect and pick "3M". The drawer renders in a
-    // portal, so query the whole document rather than the render container.
-    const heading = await waitFor(() => {
-      const el = document.querySelector(".dropdown-heading");
-      if (!el) throw new Error("manufacturer dropdown not ready");
+    // Open the manufacturer combobox and pick "3M". The drawer and the combobox
+    // popup both render in portals, so query the whole document and scope the
+    // option lookup to the open popup.
+    const manuSection = screen
+      .getAllByText("Manufacturer")
+      .find((element) => element.tagName === "LABEL")
+      .closest(".filter-section");
+    await user.click(manuSection.querySelector("[data-slot='combobox-chip-input']"));
+    const popup = await waitFor(() => {
+      const el = document.querySelector("[data-slot='combobox-content']");
+      if (!el) throw new Error("manufacturer combobox did not open");
       return el;
     });
-    await user.click(heading);
-    await user.click(await screen.findByText("3M", {}, { timeout: 3000 }));
+    await user.click(await within(popup).findByText("3M", {}, { timeout: 3000 }));
 
     await waitFor(() => expect(query()).toContain("{Manufacturer}='3M'"));
   });
