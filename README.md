@@ -8,6 +8,7 @@
 - [Getting Started](#getting-started)
   - [Prerequisites](#prerequisites)
   - [Installation](#installation)
+- [Managing SKU Group Cards](#managing-sku-group-cards-no-code-required)
 - [Committing Changes, Building, and Deploying](#committing-changes-building-and-deploying)
 - [Code Documentation](#code-documentation)
   - [Project Structure](#project-structure)
@@ -73,6 +74,61 @@ Before you begin, ensure you have met the following requirements:
    ```
 
 7. **Access the Application:** Open your web browser and access the application at localhost:5173/inventory/.
+
+## Managing SKU Group Cards (No Code Required)
+
+Group cards are managed in the **SKU Groups** table in Airtable. Changes made there do not require a code change, build, or deployment. Refresh an already-open inventory browser tab to load the latest configuration.
+
+### Airtable Fields
+
+| Field | Type | How it is used |
+| --- | --- | --- |
+| Name | Primary text | Card title. Image accessibility text is generated from this value. |
+| Key | Single line text | Stable URL identifier, such as `orthotics` or `adb-m`. |
+| SKUs | Linked records | The SKU records included in the group. One link creates a single-SKU card; multiple links create a category card. |
+| SKU Item Codes | Lookup | Read-only codes resolved from SKUs. The application uses these to query Inventory. This column may be hidden from the maintainer view, but must not be deleted. |
+| Image | Attachment | Optional card image. A neutral placeholder appears when blank or unavailable. |
+| Active | Checkbox | The card can appear only when checked and matching inventory is available. |
+
+### Add a Single-SKU Card
+
+1. Create a record in **SKU Groups**.
+2. Enter the user-facing **Name**.
+3. Enter a unique lowercase **Key** using letters, numbers, and hyphens only, for example `adb-m`.
+4. Link exactly one record in **SKUs**. Select the existing SKU; do not create a duplicate SKU record.
+5. Upload an **Image**, or leave it blank to use the placeholder.
+6. Check **Active**.
+7. Refresh the inventory site, locate the card, open it, and return with **All items**.
+
+### Add or Edit a Category
+
+Create the record as above, but link every member in **SKUs**. To change membership later, add or remove linked SKU records in that field. A category appears only when at least one member has inventory matching the current search and filters.
+
+Each SKU should belong to at most one active group. Do not also create a single-SKU group for a SKU owned by a category. If overlap occurs, the application assigns the SKU to the first group alphabetically and logs a diagnostic; correcting the Airtable links is the permanent fix.
+
+### Rename, Hide, or Replace an Image
+
+- Change **Name** to update the card title. Cards are always ordered alphabetically by Name.
+- Do not change **Key** after publication unless breaking saved/shared group links is acceptable.
+- Clear **Active** to hide a card temporarily instead of deleting it.
+- Replace or remove the **Image** attachment at any time. A missing or broken image falls back to the placeholder.
+
+### Troubleshooting
+
+| Problem | Check |
+| --- | --- |
+| Card is missing | Confirm Active is checked and at least one linked SKU has available inventory under the current filters. |
+| Card shows a placeholder | Confirm Image has a valid Airtable attachment, then refresh the site. |
+| Items appear as individual cards | Confirm the group loaded successfully, SKU Item Codes contains the intended codes, and the token can read SKU Groups. |
+| Wrong items appear in a category | Remove the incorrect linked record from SKUs and select the exact intended SKU code. CSV imports can fuzzy-match similar codes. |
+| A code appears in two groups | Remove it from one group; each SKU should have one active owner. |
+| A configured code shows no items | It may have zero currently available inventory. This is expected for codes such as STAND until stock exists. |
+| Airtable returns 403 | Grant the application personal access token read permission for the SKU Groups table. Never place the token in documentation. |
+| A shared group URL no longer works | Restore the original Key or open the inventory overview; Name can be changed without affecting links. |
+
+### Maintainer Checklist
+
+After changing a group: confirm its Name, Key, linked SKUs, Image, and Active value; refresh the site; verify the card and image; drill into the group; return with **All items** or browser Back; test relevant search/filters and mobile layout; and confirm adding an item still places a concrete inventory item in the cart.
 
 ### Committing Changes, Building, and Deploying
 
@@ -215,6 +271,7 @@ This user manual will guide you through each step of using our solution. Whether
 
 1. **Pagination**: There are two sets of pagination. The bottom buttons allow you to quickly navigate back to the top for easier access.
 2. **Mobile-Friendly**: The site is designed to be mobile-friendly, so feel free to use it on various platforms.
+3. **Group Cards**: Group cards organize one or more related SKUs. Opening one shows the available individual inventory items in that group. Use **All items** or browser Back to return without clearing search or sidebar filters.
 
 ### Interacting with the Inventory
 

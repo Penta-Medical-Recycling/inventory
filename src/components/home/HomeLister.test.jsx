@@ -30,13 +30,18 @@ describe("Home search debounce", () => {
       </>
     );
 
-    await user.type(screen.getByPlaceholderText("Search"), "abc");
+    await user.type(
+      screen.getByPlaceholderText("Search by keyword, matches all terms"),
+      "abc"
+    );
 
     // Exactly one request carries the fully-typed term.
     await waitFor(
       () =>
         expect(
-          queries.filter((q) => q.includes('SEARCH("abc",')).length
+          queries.filter(
+            (q) => q.includes('SEARCH("abc",') && !q.includes("maxRecords=1")
+          ).length
         ).toBe(1),
       { timeout: 4000 }
     );
@@ -45,6 +50,11 @@ describe("Home search debounce", () => {
     expect(
       queries.filter(
         (q) => q.includes('SEARCH("a",') || q.includes('SEARCH("ab",')
+      )
+    ).toHaveLength(0);
+    expect(
+      queries.filter(
+        (q) => q.includes('SEARCH("abc",') && q.includes("maxRecords=1")
       )
     ).toHaveLength(0);
   });

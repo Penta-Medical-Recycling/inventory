@@ -32,17 +32,17 @@ const Search = () => {
       >
         {/* Override the theme ring (Penta coral) with the blue theme locally so
             the search box focuses blue instead of orange. */}
-        <InputGroup className="h-9 w-full rounded-full bg-white [--ring:#35b0fb] has-[[data-slot=input-group-control]:focus-visible]:border-input">
+        <InputGroup className="h-11 w-full rounded-full bg-white text-base [--ring:#35b0fb] [&_svg:not([class*='size-'])]:size-5 has-[[data-slot=input-group-control]:focus-visible]:border-input">
           {/* Search Icon */}
-          <InputGroupAddon align="inline-start">
+          <InputGroupAddon align="inline-start" className="pl-4">
             <SearchIcon />
           </InputGroupAddon>
 
           {/* Search Input */}
           <InputGroupInput
             type="text"
-            placeholder="Search"
-            className="pl-3"
+            placeholder="Search by keyword, matches all terms"
+            className="pl-2"
             value={searchInput}
             onChange={onSearchChange}
           />

@@ -7,6 +7,11 @@ import * as XLSX from "xlsx";
 import { cn } from "@/lib/utils";
 import { buttonVariants } from "@/components/ui/button";
 import {
+  Tooltip,
+  TooltipTrigger,
+  TooltipContent,
+} from "@/components/ui/tooltip";
+import {
   DropdownMenu,
   DropdownMenuTrigger,
   DropdownMenuContent,
@@ -116,17 +121,24 @@ const DownloadButton = () => {
   return (
     <div>
       <DropdownMenu>
-        <DropdownMenuTrigger
-          aria-label="Download"
-          className={cn(
-            buttonVariants({ variant: "outline", size: "lg" }),
-            "gap-2 rounded-full px-4 [&_svg:not([class*='size-'])]:size-6"
-          )}
-        >
-          {/* Loading spinner while downloading, otherwise the download icon. */}
-          {isDownloading ? <LittleSpinner size={24} /> : <DownloadLogo />}
-          <ChevronDown className="size-4" aria-hidden="true" />
-        </DropdownMenuTrigger>
+        <Tooltip>
+          <TooltipTrigger
+            render={
+              <DropdownMenuTrigger
+                aria-label="Download"
+                className={cn(
+                  buttonVariants({ variant: "outline", size: "lg" }),
+                  "h-11 gap-2 rounded-full px-5 [&_svg:not([class*='size-'])]:size-6"
+                )}
+              >
+                {/* Loading spinner while downloading, otherwise the download icon. */}
+                {isDownloading ? <LittleSpinner size={24} /> : <DownloadLogo />}
+                <ChevronDown className="size-4" aria-hidden="true" />
+              </DropdownMenuTrigger>
+            }
+          />
+          <TooltipContent>Download this page as CSV or Excel</TooltipContent>
+        </Tooltip>
         <DropdownMenuContent align="end">
           <DropdownMenuItem onClick={() => createBlob("csv")}>
             .csv

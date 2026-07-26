@@ -14,6 +14,23 @@ function UrlProbe({ part }) {
   return <div data-testid="url">{decodeURIComponent(urlCreator())}</div>;
 }
 
+function GroupUrlProbe() {
+  const { urlCreator } = useContext(PentaContext);
+  return (
+    <div data-testid="group-url">
+      {decodeURIComponent(
+        urlCreator({
+          pageSize: 12,
+          includeSkuCodes: ["AAFO", "ABL"],
+          excludeSkuCodes: ["ADB-M"],
+          maxRecords: 1,
+          fields: ["SKU Item Code"],
+        })
+      )}
+    </div>
+  );
+}
+
 const url = () => screen.getByTestId("url").textContent;
 
 describe("urlCreator Limb Guide part filter", () => {
@@ -31,5 +48,20 @@ describe("urlCreator Limb Guide part filter", () => {
     // Give the effect a tick, then confirm the condition is absent.
     await waitFor(() => expect(url()).toContain("filterByFormula"));
     expect(url()).not.toContain("Limb Guide");
+  });
+});
+
+describe("urlCreator grouped inventory options", () => {
+  it("adds SKU constraints and request sizing", () => {
+    renderWithProviders(<GroupUrlProbe />);
+    const groupUrl = screen.getByTestId("group-url").textContent;
+
+    expect(groupUrl).toContain("pageSize=12");
+    expect(groupUrl).toContain("maxRecords=1");
+    expect(groupUrl).toContain("fields[]=SKU Item Code");
+    expect(groupUrl).toContain(
+      'OR({SKU Item Code}="AAFO",{SKU Item Code}="ABL")'
+    );
+    expect(groupUrl).toContain('NOT(OR({SKU Item Code}="ADB-M"))');
   });
 });

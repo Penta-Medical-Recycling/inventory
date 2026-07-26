@@ -62,7 +62,10 @@ describe("Filter integration → Airtable query", () => {
     const user = userEvent.setup();
     await setup();
 
-    await user.type(screen.getByPlaceholderText("Search"), "foot");
+    await user.type(
+      screen.getByPlaceholderText("Search by keyword, matches all terms"),
+      "foot"
+    );
 
     await waitFor(() =>
       expect(query()).toContain('SEARCH("foot", {StringSearch})')
@@ -89,7 +92,7 @@ describe("Filter integration → Airtable query", () => {
     const user = userEvent.setup();
     await setup();
 
-    await chooseAssistive(user, "Orthosis");
+    await chooseAssistive(user, "Prosthesis");
     await chooseExtremity(user, "Upper");
 
     // Upper extremity shows no Parts selector / leg diagram.
@@ -102,8 +105,34 @@ describe("Filter integration → Airtable query", () => {
 
     await waitFor(() => {
       const q = query();
-      expect(q).toContain('FIND("Orthosis", ARRAYJOIN({Tag}))');
+      expect(q).toContain('FIND("Prosthesis", ARRAYJOIN({Tag}))');
       expect(q).toContain('FIND("Arms/ Hands", ARRAYJOIN({Limb Guide}))');
+    });
+  });
+
+  it("orthosis hides the Extremity filter and drops any extremity condition", async () => {
+    const user = userEvent.setup();
+    await setup();
+
+    // Select Lower first so an extremity condition is present in the query.
+    await chooseAssistive(user, "Prosthesis");
+    await chooseExtremity(user, "Lower");
+    await waitFor(() =>
+      expect(query()).toContain('NOT(FIND("Arms/ Hands", ARRAYJOIN({Limb Guide})))')
+    );
+
+    // Switching to Orthosis removes the Extremity filter entirely.
+    await user.click(
+      group("Assistive Device").getByRole("button", { name: "Orthosis" })
+    );
+
+    expect(screen.queryByText("Extremity")).not.toBeInTheDocument();
+
+    // Extremity becomes a no-op: no Arms/Hands condition either way.
+    await waitFor(() => {
+      const q = query();
+      expect(q).toContain('FIND("Orthosis", ARRAYJOIN({Tag}))');
+      expect(q).not.toContain("Arms/ Hands");
     });
   });
 

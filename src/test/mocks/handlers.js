@@ -8,6 +8,7 @@ import {
   inventoryRecords,
   manufacturerRecords,
   skuRecords,
+  skuGroupRecords,
   partnerRecords,
 } from "./fixtures";
 
@@ -48,5 +49,6 @@ export const handlers = [
   // Manufacturers, SKUs, Partners select-option sources.
   http.get(`${BASE}/Manufacturers`, () => list(manufacturerRecords)),
   http.get(`${BASE}/SKUs`, () => list(skuRecords)),
+  http.get(`${BASE}/SKU%20Groups`, () => list(skuGroupRecords)),
   http.get(`${BASE}/Partners`, () => list(partnerRecords)),
 ];

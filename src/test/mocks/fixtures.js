@@ -49,6 +49,7 @@ const inventoryFull = {
     "Model/Type": "dark skin",
     "Item ID": "22-1287",
     SKU: ["recn9R0hzoRbrMWiE"],
+    "SKU Item Code": ["LSHELL"],
     "Qty.": 1,
     Size: 29,
     Manufacturer: ["recvXIvEENLGSMkcV"],
@@ -68,6 +69,7 @@ const inventoryMultiTag = {
     "Model/Type": "Pediatric size socket",
     "Item ID": "23-1689",
     SKU: ["rec9wTWUdCHKpWM1F"],
+    "SKU Item Code": ["LSKT"],
     "Qty.": 1,
     StringSearch: "23-1689 pediatric size socket lskt pediatric, prosthesis socket, left leg",
     Tag: ["Pediatric", "Prosthesis"],
@@ -84,6 +86,7 @@ const inventoryEdgeCase = {
     "Description (from SKU)": ["Pylon, with Integrated Tube Clamp"],
     ImageSearch: "Orthotic Component Pylon, with Integrated Tube Clamp ",
     SKU: ["recjOpONYGbqtxsuS"],
+    "SKU Item Code": ["PYIC"],
     "Qty.": 1,
     "Value (USD)": [15],
     StringSearch: "pyic pylon, with integrated tube clamp",
@@ -120,6 +123,31 @@ export const manufacturerRecords = [
 export const skuRecords = [
   { id: "recpSVXh7I59DgEwC", createdTime: "2021-10-19T14:27:02.000Z", fields: { "Item Code": "AAFO", Description: "Articulated Ankle Foot Orthosis", "In Stock": 4, "$/ Unit": 7.5 } },
   { id: "recT6r77bB283blry", createdTime: "2021-10-14T15:00:46.000Z", fields: { "Item Code": "ABL", Description: "Arm Brace, Left", "In Stock": 1, "$/ Unit": 4.5 } },
+];
+
+export const skuGroupRecords = [
+  {
+    id: "recGroupAdapters",
+    fields: {
+      Name: "Double Adapter - Male",
+      Key: "adb-m",
+      SKUs: ["recSkuAdapter"],
+      "SKU Item Codes": ["ADB-M"],
+      Image: [{ url: "https://example.com/adb-m.png" }],
+      Active: true,
+    },
+  },
+  {
+    id: "recGroupOrthotics",
+    fields: {
+      Name: "Orthotics",
+      Key: "orthotics",
+      SKUs: ["recSkuAafo", "recSkuAbl"],
+      "SKU Item Codes": ["AAFO", "ABL"],
+      Image: [{ url: "https://example.com/orthotics.png" }],
+      Active: true,
+    },
+  },
 ];
 
 // ---- Partners (fields.Partner is the display name; Tag here is a STRING status) ----

@@ -1,5 +1,9 @@
 import { useState, useEffect } from "react";
 import PentaContext from "./PentaContext";
+import {
+  normalizeInventoryGroups,
+  SKU_GROUPS_TABLE,
+} from "../config/inventoryGroups";
 
 function PentaProvider({ children }) {
   const [selectedPartner, setSelectedPartner] = useState(
@@ -43,6 +47,8 @@ function PentaProvider({ children }) {
   const isRangeOn = minValue > 1 || maxValue < largestSize;
   const [offset, setOffset] = useState(0);
   const [offsetArray, setOffsetArray] = useState([""]);
+  const [inventoryGroups, setInventoryGroups] = useState([]);
+  const [areInventoryGroupsLoading, setAreInventoryGroupsLoading] = useState(true);
 
   useEffect(() => {
     const fetchStatus = async () => {
@@ -71,7 +77,33 @@ function PentaProvider({ children }) {
     fetchStatus();
   }, []);
 
-  function urlCreator(pageSizeValue = 36) {
+  useEffect(() => {
+    let cancelled = false;
+
+    async function loadInventoryGroups() {
+      try {
+        const records = await fetchTableRecordsWithOffset(SKU_GROUPS_TABLE);
+        if (!cancelled) setInventoryGroups(normalizeInventoryGroups(records));
+      } catch (error) {
+        console.error("Error fetching SKU Groups:", error);
+        if (!cancelled) setInventoryGroups([]);
+      } finally {
+        if (!cancelled) setAreInventoryGroupsLoading(false);
+      }
+    }
+
+    loadInventoryGroups();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  function urlCreator(pageSizeOrOptions = 36) {
+    const options =
+      typeof pageSizeOrOptions === "number"
+        ? { pageSize: pageSizeOrOptions }
+        : pageSizeOrOptions || {};
+    const pageSizeValue = options.pageSize ?? 36;
     const baseUrl = "https://api.airtable.com/v0/appHFwcwuXLTNCjtN/Inventory?";
     const sort = `sort[0][field]=Item ID&sort[0][direction]=asc`;
     const pageSize = `pageSize=${pageSizeValue}`;
@@ -82,6 +114,15 @@ function PentaProvider({ children }) {
       "{Shipment Status}=BLANK()",
       'NOT({SKU}="")',
     ];
+
+    const codeCondition = (code) =>
+      `{SKU Item Code}="${String(code).replace(/\\/g, "\\\\").replace(/"/g, '\\"')}"`;
+    if (options.includeSkuCodes?.length) {
+      filters.push(`OR(${options.includeSkuCodes.map(codeCondition).join(",")})`);
+    }
+    if (options.excludeSkuCodes?.length) {
+      filters.push(`NOT(OR(${options.excludeSkuCodes.map(codeCondition).join(",")}))`);
+    }
 
     const skus = selectedSKU.map((option) => option.value);
     if (selectedSKU.length > 0) {
@@ -176,7 +217,12 @@ if (selectedSKU.length > 0) {
     }
 
     filterFunction += encodeURIComponent(`AND(${filters.join(",")})`);
-    return baseUrl + [pageSize, sort, filterFunction].join("&");
+    const params = [pageSize, sort, filterFunction];
+    if (options.maxRecords) params.push(`maxRecords=${options.maxRecords}`);
+    options.fields?.forEach((field) => {
+      params.push(`fields%5B%5D=${encodeURIComponent(field)}`);
+    });
+    return baseUrl + params.join("&");
 
     
   }
@@ -199,7 +245,7 @@ if (selectedSKU.length > 0) {
 
   async function fetchTableRecords(tableName, offset = null) {
     const baseId = "appHFwcwuXLTNCjtN";
-    const url = `https://api.airtable.com/v0/${baseId}/${tableName}?${
+    const url = `https://api.airtable.com/v0/${baseId}/${encodeURIComponent(tableName)}?${
       offset ? `offset=${offset}` : ""
     }`;
     return fetchAPI(url);
@@ -354,6 +400,8 @@ if (selectedSKU.length > 0) {
         setSelectedPart,
         extremity,
         setExtremity,
+        inventoryGroups,
+        areInventoryGroupsLoading,
       }}
     >
       {children}

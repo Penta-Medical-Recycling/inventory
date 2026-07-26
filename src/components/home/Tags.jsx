@@ -41,9 +41,9 @@ const Tags = ({}) => {
         size="lg"
         onClick={activeToggle}
         aria-pressed={Boolean(isActive)}
-        className={`gap-2.5 rounded-full px-4 [&_svg]:fill-current ${
+        className={`h-11 gap-2.5 rounded-full px-5 text-base ${
           isActive
-            ? "border-[#ff5c48] bg-[#ff5c48] text-white hover:bg-[#ff5c48]/90 hover:text-white"
+            ? "border-[#ff5c48] bg-[#ff5c48] text-white hover:bg-[#ff5c48]/90 hover:text-white [&_svg]:fill-current"
             : ""
         }`}
       >
