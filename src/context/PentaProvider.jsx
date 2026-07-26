@@ -104,6 +104,10 @@ function PentaProvider({ children }) {
         ? { pageSize: pageSizeOrOptions }
         : pageSizeOrOptions || {};
     const pageSizeValue = options.pageSize ?? 36;
+    // When false, only the base availability filters (and any include/exclude SKU
+    // codes) are applied - the user-selected filters/search are skipped. Used to
+    // build the full inventory master list regardless of the active filter state.
+    const includeUserFilters = options.includeUserFilters !== false;
     const baseUrl = "https://api.airtable.com/v0/appHFwcwuXLTNCjtN/Inventory?";
     const sort = `sort[0][field]=Item ID&sort[0][direction]=asc`;
     const pageSize = `pageSize=${pageSizeValue}`;
@@ -124,6 +128,7 @@ function PentaProvider({ children }) {
       filters.push(`NOT(OR(${options.excludeSkuCodes.map(codeCondition).join(",")}))`);
     }
 
+    if (includeUserFilters) {
     const skus = selectedSKU.map((option) => option.value);
     if (selectedSKU.length > 0) {
   filters.push(
@@ -214,6 +219,7 @@ if (selectedSKU.length > 0) {
       filters.push(`FIND("Arms/ Hands", ARRAYJOIN({Limb Guide}))`);
     } else if (extremity === "Lower") {
       filters.push(`NOT(FIND("Arms/ Hands", ARRAYJOIN({Limb Guide})))`);
+    }
     }
 
     filterFunction += encodeURIComponent(`AND(${filters.join(",")})`);

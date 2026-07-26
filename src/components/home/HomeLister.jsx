@@ -42,6 +42,10 @@ const HomeLister = ({ onRemove, setOnRemove, activeGroup, onSelectGroup }) => {
 
   const cardDiv = useRef(null);
   const availabilityCache = useRef(new Map());
+  // Tracks the query identity (active group + filter signature) that the current
+  // pagination offset/offsetArray belong to, so a stale Airtable offset token is
+  // never replayed against a different query. See the pagination reset below.
+  const loadedQueryKeyRef = useRef(null);
 
   // Debounce only the search text so rapid typing coalesces into one fetch.
   // Other filters (manufacturer, size, part, page) are discrete and fetch
@@ -85,7 +89,14 @@ const HomeLister = ({ onRemove, setOnRemove, activeGroup, onSelectGroup }) => {
         // Airtable runs out of pages. Larger pages (100 is the Airtable max)
         // cut the request count vs the visible 36/page pagination.
         const maxPages = 1000;
-        const baseUrl = urlCreator(AIRTABLE_MAX_PAGE_SIZE).split("&offset=")[0];
+        // The master list must represent the full sellable inventory regardless
+        // of the active filters, so availability is derived from a complete set.
+        // Building it with user filters applied would cache a filtered subset and
+        // wrongly hide groups (e.g. after an order redirects home with filters on).
+        const baseUrl = urlCreator({
+          pageSize: AIRTABLE_MAX_PAGE_SIZE,
+          includeUserFilters: false,
+        }).split("&offset=")[0];
 
         while (pageCounter < maxPages) {
           const url = baseUrl + nextOffset;
@@ -178,6 +189,20 @@ const HomeLister = ({ onRemove, setOnRemove, activeGroup, onSelectGroup }) => {
     ) {
       return;
     }
+
+    // Airtable offset tokens are specific to the exact query that produced them.
+    // When the query identity changes (filters, search, or the active group), any
+    // offset carried over from a page > 0 belongs to a different formula. Reset
+    // pagination first rather than replaying a stale token, which Airtable would
+    // reject or answer with the wrong page.
+    const queryKey = `${activeGroup ? activeGroup.key : "overview"}::${currentFilterSignature}`;
+    if (loadedQueryKeyRef.current !== queryKey && offset !== 0) {
+      loadedQueryKeyRef.current = queryKey;
+      setOffset(0);
+      setOffsetArray([""]);
+      return;
+    }
+    loadedQueryKeyRef.current = queryKey;
 
     let cancelled = false;
 

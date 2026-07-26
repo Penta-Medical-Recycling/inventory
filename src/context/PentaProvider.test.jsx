@@ -14,6 +14,25 @@ function UrlProbe({ part }) {
   return <div data-testid="url">{decodeURIComponent(urlCreator())}</div>;
 }
 
+function MasterUrlProbe() {
+  const { urlCreator, setSelectedManufacturer, setSearchInput } =
+    useContext(PentaContext);
+  useEffect(() => {
+    setSelectedManufacturer([
+      { label: "Freedom Innovation", value: encodeURIComponent("Freedom Innovation") },
+    ]);
+    setSearchInput("pylon");
+  }, [setSelectedManufacturer, setSearchInput]);
+  return (
+    <>
+      <div data-testid="filtered">{decodeURIComponent(urlCreator())}</div>
+      <div data-testid="master">
+        {decodeURIComponent(urlCreator({ includeUserFilters: false }))}
+      </div>
+    </>
+  );
+}
+
 function GroupUrlProbe() {
   const { urlCreator } = useContext(PentaContext);
   return (
@@ -63,5 +82,32 @@ describe("urlCreator grouped inventory options", () => {
       'OR({SKU Item Code}="AAFO",{SKU Item Code}="ABL")'
     );
     expect(groupUrl).toContain('NOT(OR({SKU Item Code}="ADB-M"))');
+  });
+});
+
+describe("urlCreator master list (includeUserFilters=false)", () => {
+  it("keeps base availability filters but drops user filters/search", async () => {
+    renderWithProviders(<MasterUrlProbe />);
+
+    // Wait until the user filters are reflected in the default URL.
+    await waitFor(() =>
+      expect(screen.getByTestId("filtered").textContent).toContain(
+        "{Manufacturer}='Freedom Innovation'"
+      )
+    );
+
+    const filtered = screen.getByTestId("filtered").textContent;
+    const master = screen.getByTestId("master").textContent;
+
+    // The normal URL applies the selected manufacturer and search.
+    expect(filtered).toContain("{Manufacturer}='Freedom Innovation'");
+    expect(filtered).toContain('SEARCH("pylon"');
+
+    // The master-list URL keeps the base availability filters...
+    expect(master).toContain("{Requests}=BLANK()");
+    expect(master).toContain("{Shipment Status}=BLANK()");
+    // ...but omits the user-selected filters and search.
+    expect(master).not.toContain("{Manufacturer}=");
+    expect(master).not.toContain('SEARCH("pylon"');
   });
 });

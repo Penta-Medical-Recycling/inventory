@@ -9,8 +9,12 @@ export function getAvailableSkuCodes(items, filters) {
     .map((option) => option.label.toLowerCase().replace(/[^a-z0-9\s]/gi, ""))
     .filter(Boolean);
   const skuValues = filters.selectedSKU.map((option) => decodeURIComponent(option.value));
+  // Manufacturer options carry the (URL-encoded) manufacturer NAME as their value,
+  // which is what the Airtable query matches against {Manufacturer}. Locally we must
+  // therefore compare against the item's "Name (from Manufacturer)" lookup - NOT the
+  // "Manufacturer" field, which holds opaque Airtable record IDs.
   const manufacturerValues = filters.selectedManufacturer.map((option) =>
-    decodeURIComponent(option.value)
+    decodeURIComponent(option.value).trim().toLowerCase()
   );
   const selectedTags = Object.keys(filters.selectedFilter).filter(
     (key) => filters.selectedFilter[key]
@@ -32,7 +36,14 @@ export function getAvailableSkuCodes(items, filters) {
   for (const item of items) {
     const stringSearch = normalizedText(item.StringSearch);
     const itemSkus = Array.isArray(item.SKU) ? item.SKU : [];
-    const manufacturers = Array.isArray(item.Manufacturer) ? item.Manufacturer : [];
+    const manufacturerField = item["Name (from Manufacturer)"];
+    const manufacturerNames = (
+      Array.isArray(manufacturerField)
+        ? manufacturerField
+        : manufacturerField
+        ? [manufacturerField]
+        : []
+    ).map((name) => String(name).trim().toLowerCase());
     const tags = Array.isArray(item.Tag) ? item.Tag : [];
     const limbGuides = Array.isArray(item["Limb Guide"]) ? item["Limb Guide"] : [];
     const size = Number(item.Size);
@@ -49,12 +60,19 @@ export function getAvailableSkuCodes(items, filters) {
     }
     if (
       manufacturerValues.length &&
-      !manufacturerValues.some((value) => manufacturers.includes(value))
+      !manufacturerValues.some((value) => manufacturerNames.includes(value))
     ) {
       continue;
     }
     if (selectedTags.some((tag) => !tags.includes(tag))) continue;
-    if (filters.isRangeOn && (size < filters.minValue || size > filters.maxValue)) continue;
+    // A blank size becomes NaN. The Airtable range query excludes blank sizes, so
+    // exclude them locally too - otherwise the group shows but opens to no results.
+    if (
+      filters.isRangeOn &&
+      (Number.isNaN(size) || size < filters.minValue || size > filters.maxValue)
+    ) {
+      continue;
+    }
     if (searchTerms.some((term) => !stringSearch.includes(term))) continue;
     if (limbGuide && !limbGuides.includes(limbGuide)) continue;
     if (filters.extremity === "Upper" && !limbGuides.includes("Arms/ Hands")) continue;
