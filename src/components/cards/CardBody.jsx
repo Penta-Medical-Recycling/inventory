@@ -1,74 +1,56 @@
 import React from "react";
 
-// CardBody component displays the details of an inventory item
+// CardBody renders the information display for an inventory item.
+// variant: "stock" (default) or "cart". The "cart" variant adds top spacing so the
+// content clears the "Unavailable" status pill in OutOfStockCard.
+const CardBody = ({ item, variant = "stock" }) => {
+  const rawTags = item["Tag"];
+  const tags = Array.isArray(rawTags) ? rawTags : rawTags ? [rawTags] : [];
 
-const CardBody = ({ item, centered }) => {
-  // Centered prop is used in the case the item is out of stock, there is an overlayed banner that shifts the text.
+  const description = item["Description (from SKU)"];
+  const itemId = item["Item ID"];
+  const manufacturer = item["Name (from Manufacturer)"];
+  const size = item["Size"];
+  const model = item["Model/Type"];
+
+  const specs = [
+    manufacturer && { label: "Manufacturer", value: manufacturer },
+    size !== undefined && size !== null && size !== "" && { label: "Size", value: size },
+    model && { label: "Model", value: model },
+  ].filter(Boolean);
+
   return (
-    <>
-      <header className="card-header">
-        {/* Display item description and ID */}
-        <div
-          className={centered ? "has-text-centered" : "has-text-right mr-5"}
-          style={
-            centered ? { width: "100%" } : { width: "50%", marginLeft: "auto" }
-          }
-        >
-          <p
-            className="has-text-weight-bold ml-3 my-3"
-            style={{ fontSize: "18px" }}
-          >
-            {item["Description (from SKU)"]}
-          </p>
-          <p style={{ marginTop: "-12px" }} className="ml-3 mb-3">
-            {item["Item ID"]}
-          </p>
+    <div
+      className={`card-body-content ${
+        variant === "cart" ? "card-body-content--cart" : ""
+      }`}
+    >
+      {tags.length > 0 && (
+        <div className="card-tag-row">
+          {tags.map((tag, index) => (
+            <span key={`${tag}-${index}`} className="card-tag-chip">
+              {tag}
+            </span>
+          ))}
         </div>
-      </header>
-      {/* Display item tag */}
-      <p
-        className="has-text-weight-bold has-text-centered mt-4"
-        style={{ fontSize: "18px" }}
-      >
-        {item["Tag"]}
-      </p>
-      <hr className="mb-4 mt-3" style={{ margin: "0 auto", width: "80%" }}></hr>
-      <div className="content mx-5 mb-5">
-        {item["Name (from Manufacturer)"] && (
-          // Display item manufacturer if available
-          <div className="mb-4 has-text-centered" style={{ width: "50%" }}>
-            <p className="has-text-weight-bold" style={{ margin: "0" }}>
-              Manufacturer
-            </p>
-            <p>{item["Name (from Manufacturer)"]}</p>
-          </div>
-        )}
-        {item["Size"] && (
-          // Display item size if available
-          <div className="has-text-centered" style={{ width: "50%" }}>
-            <p
-              className="has-text-weight-bold has-text-centered"
-              style={{ margin: "0" }}
-            >
-              Size
-            </p>
-            <p>{item["Size"]}</p>
-          </div>
-        )}
-        {item["Model/Type"] && (
-          // Display item model/type if available
-          <div className="has-text-centered" style={{ width: "50%" }}>
-            <p
-              className="has-text-weight-bold has-text-centered"
-              style={{ margin: "0" }}
-            >
-              Model
-            </p>
-            <p>{item["Model/Type"]}</p>
-          </div>
-        )}
+      )}
+
+      <div className="card-heading">
+        <h3 className="card-title">{description}</h3>
+        {itemId && <p className="card-item-id">{itemId}</p>}
       </div>
-    </>
+
+      {specs.length > 0 && (
+        <dl className="card-specs">
+          {specs.map((spec) => (
+            <React.Fragment key={spec.label}>
+              <dt className="card-spec-label">{spec.label}</dt>
+              <dd className="card-spec-value">{spec.value}</dd>
+            </React.Fragment>
+          ))}
+        </dl>
+      )}
+    </div>
   );
 };
 

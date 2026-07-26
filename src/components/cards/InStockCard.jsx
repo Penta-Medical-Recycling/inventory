@@ -166,8 +166,29 @@ const InStockCard = ({ item, onRemove, inCart, allVisibleItems }) => {
   return (
     <>
       <div className={`outer-card fade-in ${onRemove || (discard && inCart) ? "fade-out" : ""}`}>
-        <div className={`card fade-in ${onRemove || (discard && inCart) ? "fade-out" : ""}`} key={item["Item ID"]}>
-          <CardBody item={item} centered={true} />
+        <div className={`card fade-in ${qtyInCart > 0 ? "is-in-cart" : ""} ${onRemove || (discard && inCart) ? "fade-out" : ""}`} key={item["Item ID"]}>
+          {qtyInCart > 0 && (
+            <div className="card-incart-pill">
+              <svg
+                className="card-incart-check"
+                width="11"
+                height="11"
+                viewBox="0 0 12 12"
+                fill="none"
+                aria-hidden="true"
+              >
+                <path
+                  d="M2.5 6.5l2.5 2.5 4.5-5"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+              </svg>
+              In cart
+            </div>
+          )}
+          <CardBody item={item} variant="stock" />
 
           <footer className="card-footer">
             <a
@@ -210,8 +231,6 @@ const InStockCard = ({ item, onRemove, inCart, allVisibleItems }) => {
             )}
           </footer>
         </div>
-
-        {qtyInCart > 0 && <div className="card-badge">{qtyInCart} pcs</div>}
       </div>
 
       {showModal && (
