@@ -10,6 +10,10 @@ import {
   AIRTABLE_BASE_ID,
 } from "../config/airtable";
 
+// Airtable's maximum page size. Used for the background master-list fetch so it
+// pulls the full inventory in as few requests as possible.
+const AIRTABLE_MAX_PAGE_SIZE = 100;
+
 function PentaProvider({ children }) {
   const [selectedPartner, setSelectedPartner] = useState(
     localStorage.getItem("partner") || ""
@@ -55,6 +59,23 @@ function PentaProvider({ children }) {
   const [offsetArray, setOffsetArray] = useState([""]);
   const [inventoryGroups, setInventoryGroups] = useState([]);
   const [areInventoryGroupsLoading, setAreInventoryGroupsLoading] = useState(true);
+
+  // Full sellable inventory (filter-independent), cached for the tab session and
+  // shared across the app so availability checks and the bulk add flow read a
+  // single reactive source instead of poking sessionStorage directly.
+  const [masterInventoryItems, setMasterInventoryItems] = useState([]);
+  const [isInventoryReady, setIsInventoryReady] = useState(false);
+  // Set when the master-list fetch fails outright, so the UI can distinguish a
+  // real failure (offer a retry) from a genuinely empty inventory.
+  const [masterInventoryError, setMasterInventoryError] = useState(false);
+  // Bumping this re-runs the master fetch effect (used by the retry affordance).
+  const [masterInventoryReloadKey, setMasterInventoryReloadKey] = useState(0);
+  const reloadMasterInventory = () => {
+    sessionStorage.removeItem("allInventoryItems");
+    setIsInventoryReady(false);
+    setMasterInventoryError(false);
+    setMasterInventoryReloadKey((key) => key + 1);
+  };
 
   useEffect(() => {
     const fetchStatus = async () => {
@@ -105,6 +126,75 @@ function PentaProvider({ children }) {
       cancelled = true;
     };
   }, []);
+
+  // Background fetch of the full inventory (all pages, filter-independent).
+  // Reuses the sessionStorage cache across in-app navigation; only re-fetches
+  // when the cache is missing/empty or a retry was requested.
+  useEffect(() => {
+    let cancelled = false;
+
+    const cached = sessionStorage.getItem("allInventoryItems");
+    if (cached) {
+      try {
+        const parsed = JSON.parse(cached);
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          setMasterInventoryItems(parsed);
+          setMasterInventoryError(false);
+          setIsInventoryReady(true);
+          return;
+        }
+      } catch {
+        // Malformed cache - fall through and refetch.
+      }
+    }
+
+    async function fetchAllInventory() {
+      let allRecords = [];
+      let nextOffset = "";
+      let pageCounter = 0;
+      // Safety bound only - the loop exits on the missing offset once Airtable
+      // runs out of pages. 100 (the Airtable max) cuts the request count.
+      const maxPages = 1000;
+      // The master list must represent the full sellable inventory regardless of
+      // the active filters, so availability is derived from a complete set.
+      const baseUrl = urlCreator({
+        pageSize: AIRTABLE_MAX_PAGE_SIZE,
+        includeUserFilters: false,
+      }).split("&offset=")[0];
+
+      while (pageCounter < maxPages && !cancelled) {
+        const url = baseUrl + nextOffset;
+        const res = await fetchAPI(url);
+        if (cancelled) return;
+        // fetchAPI returns null on a failed request. Treat that as an error
+        // rather than an empty page, so we don't cache/expose a partial list
+        // that would wrongly hide every group.
+        if (!res) {
+          setMasterInventoryError(true);
+          setIsInventoryReady(true);
+          return;
+        }
+        if (res.records) {
+          allRecords.push(...res.records.map((r) => r.fields));
+        }
+        if (!res.offset) break;
+        nextOffset = `&offset=${res.offset}`;
+        pageCounter++;
+      }
+
+      if (cancelled) return;
+      sessionStorage.setItem("allInventoryItems", JSON.stringify(allRecords));
+      setMasterInventoryItems(allRecords);
+      setMasterInventoryError(false);
+      setIsInventoryReady(true);
+    }
+
+    fetchAllInventory();
+    return () => {
+      cancelled = true;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [masterInventoryReloadKey]);
 
   function urlCreator(pageSizeOrOptions = 36) {
     const options =
@@ -416,6 +506,10 @@ if (selectedSKU.length > 0) {
         setExtremity,
         inventoryGroups,
         areInventoryGroupsLoading,
+        masterInventoryItems,
+        isInventoryReady,
+        masterInventoryError,
+        reloadMasterInventory,
       }}
     >
       {children}

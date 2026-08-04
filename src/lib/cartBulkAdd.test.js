@@ -58,6 +58,38 @@ describe("bulkAddToCart", () => {
     expect(localStorage.getItem("c")).toBeNull();
   });
 
+  it("fills oldest-first by Date Added regardless of list order", () => {
+    const items = [
+      makeItem("newer", { ["Date Added"]: "2024-03-01" }),
+      makeItem("oldest", { ["Date Added"]: "2024-01-01" }),
+      makeItem("middle", { ["Date Added"]: "2024-02-01" }),
+    ];
+    const result = bulkAddToCart({
+      items,
+      matcher: bySku("LSHELL"),
+      unitsRequested: 2,
+    });
+    expect(result.addedCount).toBe(2);
+    expect(localStorage.getItem("oldest")).toBeTruthy();
+    expect(localStorage.getItem("middle")).toBeTruthy();
+    expect(localStorage.getItem("newer")).toBeNull();
+  });
+
+  it("prefers units with a known Date Added over undated ones", () => {
+    const items = [
+      makeItem("undated"),
+      makeItem("dated", { ["Date Added"]: "2024-01-01" }),
+    ];
+    const result = bulkAddToCart({
+      items,
+      matcher: bySku("LSHELL"),
+      unitsRequested: 1,
+    });
+    expect(result.addedCount).toBe(1);
+    expect(localStorage.getItem("dated")).toBeTruthy();
+    expect(localStorage.getItem("undated")).toBeNull();
+  });
+
   it("adds the priority item first even when it is not first in the list", () => {
     const items = [makeItem("a"), makeItem("b"), makeItem("c")];
     const result = bulkAddToCart({

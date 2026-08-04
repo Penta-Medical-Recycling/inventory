@@ -37,17 +37,18 @@ describe("App status gate", () => {
     expect(screen.queryByAltText("logo")).not.toBeInTheDocument();
   });
 
-  it("renders the Home UI immediately while the status fetch is still loading", async () => {
+  it("holds a loading screen until the status resolves, then shows Home", async () => {
     renderWithProviders(<App />);
 
-    // serverStatus starts as null (unknown), but the app is no longer gated on
-    // the fetch - the Home UI (NavBar logo) renders right away.
-    expect(screen.getByAltText("logo")).toBeInTheDocument();
-    // The Maintenance page uses a different alt text; it should be absent.
-    expect(screen.queryByAltText("Company Logo")).not.toBeInTheDocument();
+    // serverStatus starts as null (unknown). The app must NOT render inventory
+    // yet - it holds a loading screen so a request can't start before an
+    // eventual "Offline" response would replace the UI.
+    expect(screen.getByText("Loading...")).toBeInTheDocument();
+    expect(screen.queryByAltText("logo")).not.toBeInTheDocument();
 
-    // The status resolves to Online, so the Home UI stays.
+    // Once the status resolves to Online, the Home UI appears.
     expect(await screen.findByAltText("logo")).toBeInTheDocument();
+    expect(screen.queryByAltText("Company Logo")).not.toBeInTheDocument();
   });
 
   it("shows an error message when the status fetch fails", async () => {

@@ -1,7 +1,11 @@
 const normalizedText = (value) => String(value || "").toLowerCase();
 const firstArrayValue = (value) => (Array.isArray(value) ? value[0] : value);
 
-export function getAvailableSkuCodes(items, filters) {
+// Builds a predicate that reports whether a single inventory item passes the
+// currently active user filters. Shared by getAvailableSkuCodes (group
+// availability) and the group-level bulk add flow, so bulk selection is scoped
+// to the same visible stock the shopper sees rather than the whole master list.
+export function createInventoryFilterPredicate(filters) {
   const descriptionTerms = filters.selectedDescriptions
     .map((option) => option.label.toLowerCase().replace(/[^a-z0-9\s]/gi, ""))
     .filter(Boolean);
@@ -31,9 +35,7 @@ export function getAvailableSkuCodes(items, filters) {
     Accessories: "Accessory/ Misc.",
   }[filters.selectedPart];
 
-  const matchingCodes = new Set();
-
-  for (const item of items) {
+  return (item) => {
     const stringSearch = normalizedText(item.StringSearch);
     const itemSkus = Array.isArray(item.SKU) ? item.SKU : [];
     const manufacturerField = item["Name (from Manufacturer)"];
@@ -53,31 +55,41 @@ export function getAvailableSkuCodes(items, filters) {
       (!skuValues.some((value) => itemSkus.includes(value)) ||
         !skuLabels.some((term) => stringSearch.includes(term)))
     ) {
-      continue;
+      return false;
     }
     if (descriptionTerms.length && !descriptionTerms.some((term) => stringSearch.includes(term))) {
-      continue;
+      return false;
     }
     if (
       manufacturerValues.length &&
       !manufacturerValues.some((value) => manufacturerNames.includes(value))
     ) {
-      continue;
+      return false;
     }
-    if (selectedTags.some((tag) => !tags.includes(tag))) continue;
+    if (selectedTags.some((tag) => !tags.includes(tag))) return false;
     // A blank size becomes NaN. The Airtable range query excludes blank sizes, so
     // exclude them locally too - otherwise the group shows but opens to no results.
     if (
       filters.isRangeOn &&
       (Number.isNaN(size) || size < filters.minValue || size > filters.maxValue)
     ) {
-      continue;
+      return false;
     }
-    if (searchTerms.some((term) => !stringSearch.includes(term))) continue;
-    if (limbGuide && !limbGuides.includes(limbGuide)) continue;
-    if (filters.extremity === "Upper" && !limbGuides.includes("Arms/ Hands")) continue;
-    if (filters.extremity === "Lower" && limbGuides.includes("Arms/ Hands")) continue;
+    if (searchTerms.some((term) => !stringSearch.includes(term))) return false;
+    if (limbGuide && !limbGuides.includes(limbGuide)) return false;
+    if (filters.extremity === "Upper" && !limbGuides.includes("Arms/ Hands")) return false;
+    if (filters.extremity === "Lower" && limbGuides.includes("Arms/ Hands")) return false;
 
+    return true;
+  };
+}
+
+export function getAvailableSkuCodes(items, filters) {
+  const matchesFilters = createInventoryFilterPredicate(filters);
+  const matchingCodes = new Set();
+
+  for (const item of items) {
+    if (!matchesFilters(item)) continue;
     const code = firstArrayValue(item["SKU Item Code"]);
     if (code) matchingCodes.add(code);
   }

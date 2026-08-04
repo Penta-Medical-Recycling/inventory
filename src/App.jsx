@@ -8,6 +8,7 @@ import Maintenance from "./pages/Maintenance";
 import { Toaster } from "./components/ui/sonner";
 import { useContext } from "react";
 import PentaContext from "./context/PentaContext";
+import BigSpinner from "./assets/BigSpinner";
 
 /**
  * Main application component.
@@ -43,8 +44,14 @@ function App() {
     );
   }
 
-  // While the status is still loading (serverStatus === null), render the app
-  // normally instead of gating on the fetch.
+  // While the status is still unresolved (serverStatus === null), hold a loading
+  // screen instead of rendering the full app. Otherwise users could browse
+  // inventory and start a request in the brief window before an eventual
+  // "Offline" response would have replaced the UI.
+  if (serverStatus === null) {
+    return <BigSpinner size={75} />;
+  }
+
   return (
     <>
       <SideBar />

@@ -1,5 +1,7 @@
 // Shared FIFO bulk add-to-cart logic used by both the in-cart quantity modal
 // (single SKU, prioritising the clicked unit) and the group-level bulk order flow.
+// FIFO order is defined by "Date Added" (oldest first) to match the request
+// fulfillment path, not by the master cache's Item ID ordering.
 
 // Writes one cart entry (Qty 1) per physical unit into localStorage, keyed by Item ID.
 function writeCartEntry(entry, selectedSize) {
@@ -13,23 +15,37 @@ function writeCartEntry(entry, selectedSize) {
   );
 }
 
+// Oldest-first by "Date Added" so bulk selection matches the request
+// fulfillment path (getCartItemsSortedFIFO), which drains stock by Date Added.
+// Records without a parseable date sort last so known-older units go first.
+function dateAddedOrder(a, b) {
+  const at = Date.parse(a?.["Date Added"]);
+  const bt = Date.parse(b?.["Date Added"]);
+  const aKey = Number.isNaN(at) ? Number.POSITIVE_INFINITY : at;
+  const bKey = Number.isNaN(bt) ? Number.POSITIVE_INFINITY : bt;
+  return aKey - bKey;
+}
+
 // Filters `items` down to units that match `matcher`, aren't already in the
-// cart, and (when a size is chosen) fall within the selected size.
+// cart, and (when a size is chosen) fall within the selected size. The result
+// is returned in FIFO (Date Added) order so units are consumed oldest-first.
 function filterAvailableItems(items, matcher, selectedSize) {
   if (!Array.isArray(items)) return [];
-  return items.filter((entry) => {
-    if (!matcher(entry)) return false;
-    if (localStorage.getItem(entry["Item ID"])) return false;
+  return items
+    .filter((entry) => {
+      if (!matcher(entry)) return false;
+      if (localStorage.getItem(entry["Item ID"])) return false;
 
-    const itemSize = parseFloat(entry?.["Size"]);
-    if (selectedSize?.exact) {
-      return itemSize === parseFloat(selectedSize.exact);
-    }
-    if (selectedSize?.range) {
-      return itemSize >= selectedSize.range[0] && itemSize <= selectedSize.range[1];
-    }
-    return true;
-  });
+      const itemSize = parseFloat(entry?.["Size"]);
+      if (selectedSize?.exact) {
+        return itemSize === parseFloat(selectedSize.exact);
+      }
+      if (selectedSize?.range) {
+        return itemSize >= selectedSize.range[0] && itemSize <= selectedSize.range[1];
+      }
+      return true;
+    })
+    .sort(dateAddedOrder);
 }
 
 // Number of units currently addable for `matcher` (and optional size). Lets the

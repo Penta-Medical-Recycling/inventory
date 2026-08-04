@@ -10,6 +10,7 @@ import QuantityModal from "../components/cards/QuantityModal";
 import MessageModal from "../components/cards/MessageModal";
 import Toast from "../components/Toast";
 import { bulkAddToCart, countAvailableUnits, getItemDisplayName } from "../lib/cartBulkAdd";
+import { createInventoryFilterPredicate } from "../lib/inventoryAvailability";
 
 // {SKU Item Code} is a lookup field that arrives as an array locally but coerces
 // to a scalar in Airtable formulas, so match against either shape.
@@ -31,6 +32,18 @@ function Home() {
     setIsLoading,
     setCartCount,
     setIsCartPressed,
+    masterInventoryItems,
+    isInventoryReady,
+    selectedManufacturer,
+    selectedSKU,
+    selectedFilter,
+    selectedDescriptions,
+    minValue,
+    maxValue,
+    isRangeOn,
+    searchInput,
+    selectedPart,
+    extremity,
   } = useContext(PentaContext);
   const [searchParams, setSearchParams] = useSearchParams();
   const groupKey = searchParams.get("group");
@@ -48,19 +61,53 @@ function Home() {
   const [showBulkMessage, setShowBulkMessage] = useState(false);
   const [bulkMessageContent, setBulkMessageContent] = useState("");
 
+  // The active user filters constrain which physical units are eligible for a
+  // bulk add, so hidden stock (filtered out of the visible list) can't be added.
+  const filterPredicate = useMemo(
+    () =>
+      createInventoryFilterPredicate({
+        selectedManufacturer,
+        selectedSKU,
+        selectedFilter,
+        selectedDescriptions,
+        searchInput,
+        selectedPart,
+        extremity,
+        isRangeOn,
+        minValue,
+        maxValue,
+      }),
+    [
+      selectedManufacturer,
+      selectedSKU,
+      selectedFilter,
+      selectedDescriptions,
+      searchInput,
+      selectedPart,
+      extremity,
+      isRangeOn,
+      minValue,
+      maxValue,
+    ]
+  );
+
+  // Combines the single-SKU match with the active filters so every bulk code
+  // path (availability, count, submit) selects from the same visible stock.
+  const bulkMatcher = useCallback(
+    (entry) => {
+      const code = activeGroup?.skuCodes?.[0];
+      return matchesSkuCode(entry, code) && filterPredicate(entry);
+    },
+    [activeGroup?.skuCodes, filterPredicate]
+  );
+
   // Derive the display name / size affordance for the active single-SKU group
-  // from the cached master inventory.
+  // from the cached master inventory. Recomputes once the master list is ready
+  // so sized stock is never treated as unsized before the fetch completes.
   const bulkInfo = useMemo(() => {
     if (!isSingleSkuGroup) return null;
-    const code = activeGroup.skuCodes[0];
-    let items = [];
-    try {
-      items = JSON.parse(sessionStorage.getItem("allInventoryItems") || "[]");
-    } catch {
-      items = [];
-    }
-    const matches = Array.isArray(items)
-      ? items.filter((entry) => matchesSkuCode(entry, code))
+    const matches = isInventoryReady
+      ? (masterInventoryItems || []).filter((entry) => bulkMatcher(entry))
       : [];
     if (matches.length === 0) {
       return { name: activeGroup.title, hasSize: false };
@@ -69,7 +116,7 @@ function Home() {
       name: getItemDisplayName(matches[0]),
       hasSize: matches.some((entry) => !!entry?.Size),
     };
-  }, [isSingleSkuGroup, activeGroup?.id]);
+  }, [isSingleSkuGroup, activeGroup?.id, isInventoryReady, masterInventoryItems, bulkMatcher]);
 
   // Close any open bulk UI when leaving or switching groups.
   useEffect(() => {
@@ -80,21 +127,13 @@ function Home() {
   // How many units of the active single-SKU group are addable for a given size,
   // so the QuantityModal can cap its stepper instead of validating post-submit.
   const countBulkAvailable = useCallback(
-    (selectedSize) => {
-      const code = activeGroup?.skuCodes?.[0];
-      let allItems = [];
-      try {
-        allItems = JSON.parse(sessionStorage.getItem("allInventoryItems") || "[]");
-      } catch {
-        allItems = [];
-      }
-      return countAvailableUnits({
-        items: allItems,
-        matcher: (entry) => matchesSkuCode(entry, code),
+    (selectedSize) =>
+      countAvailableUnits({
+        items: masterInventoryItems || [],
+        matcher: bulkMatcher,
         selectedSize,
-      });
-    },
-    [activeGroup?.skuCodes]
+      }),
+    [masterInventoryItems, bulkMatcher]
   );
 
   useEffect(() => {
@@ -136,17 +175,9 @@ function Home() {
   };
 
   const handleBulkSubmit = (unitsRequested, selectedSize = null) => {
-    const code = activeGroup?.skuCodes?.[0];
-    let allItems = [];
-    try {
-      allItems = JSON.parse(sessionStorage.getItem("allInventoryItems") || "[]");
-    } catch {
-      allItems = [];
-    }
-
     const { addedCount, availableCount, status } = bulkAddToCart({
-      items: allItems,
-      matcher: (entry) => matchesSkuCode(entry, code),
+      items: masterInventoryItems || [],
+      matcher: bulkMatcher,
       unitsRequested,
       selectedSize,
     });

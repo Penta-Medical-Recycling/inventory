@@ -9,10 +9,6 @@ import { getAvailableSkuCodes } from "../../lib/inventoryAvailability";
 
 // HomeLister lists the cards for the home page.
 
-// Airtable's maximum page size. Used for the background master-list fetch so it
-// pulls the full inventory in as few requests as possible.
-const AIRTABLE_MAX_PAGE_SIZE = 100;
-
 const HomeLister = ({ onRemove, setOnRemove, activeGroup, onSelectGroup }) => {
   const {
     isLoading,
@@ -38,6 +34,10 @@ const HomeLister = ({ onRemove, setOnRemove, activeGroup, onSelectGroup }) => {
     setData,
     inventoryGroups,
     areInventoryGroupsLoading,
+    masterInventoryItems,
+    isInventoryReady,
+    masterInventoryError,
+    reloadMasterInventory,
   } = useContext(PentaContext);
 
   const cardDiv = useRef(null);
@@ -51,79 +51,18 @@ const HomeLister = ({ onRemove, setOnRemove, activeGroup, onSelectGroup }) => {
   // Other filters (manufacturer, size, part, page) are discrete and fetch
   // immediately.
   const [debouncedSearch] = useDebounce(searchInput, 400);
-  // Gate the inventory cards behind the full master-list fetch. Until every
-  // inventory page is cached, the add-to-cart stock check can't tell "not
-  // loaded yet" from "actually zero", so we hold the spinner until it's done.
-  const [inventoryReady, setInventoryReady] = useState(false);
-  const [masterInventoryItems, setMasterInventoryItems] = useState([]);
   const [availableGroups, setAvailableGroups] = useState([]);
   const [areAvailableGroupsLoading, setAreAvailableGroupsLoading] = useState(true);
   const [availableGroupsSignature, setAvailableGroupsSignature] = useState("");
+  // Set when the current page request fails, so we surface a retry instead of a
+  // misleading "No Results Found" (and keep the existing page/pagination intact).
+  const [pageError, setPageError] = useState(false);
+  // Bumping this re-runs the page-load effect for the retry affordance.
+  const [pageReloadKey, setPageReloadKey] = useState(0);
   const currentFilterSignature = urlCreator({ pageSize: 1, maxRecords: 1 });
 
-  // ✅ Background fetch of all inventory pages
   useEffect(() => {
-    // Reuse the cached master list across in-app navigation (e.g. Cart -> Home).
-    // sessionStorage persists for the tab session, so only do the full
-    // multi-page fetch when the cache is missing or empty.
-    const cached = sessionStorage.getItem("allInventoryItems");
-    if (cached) {
-      try {
-        const parsed = JSON.parse(cached);
-        if (Array.isArray(parsed) && parsed.length > 0) {
-          setMasterInventoryItems(parsed);
-          setInventoryReady(true);
-          return;
-        }
-      } catch {
-        // Malformed cache - fall through and refetch.
-      }
-    }
-
-    async function fetchAllInventory() {
-      try {
-        let allRecords = [];
-        let nextOffset = "";
-        let pageCounter = 0;
-        // Safety bound only - the loop exits on the missing offset below once
-        // Airtable runs out of pages. Larger pages (100 is the Airtable max)
-        // cut the request count vs the visible 36/page pagination.
-        const maxPages = 1000;
-        // The master list must represent the full sellable inventory regardless
-        // of the active filters, so availability is derived from a complete set.
-        // Building it with user filters applied would cache a filtered subset and
-        // wrongly hide groups (e.g. after an order redirects home with filters on).
-        const baseUrl = urlCreator({
-          pageSize: AIRTABLE_MAX_PAGE_SIZE,
-          includeUserFilters: false,
-        }).split("&offset=")[0];
-
-        while (pageCounter < maxPages) {
-          const url = baseUrl + nextOffset;
-          const res = await fetchAPI(url);
-          if (res.records) {
-            allRecords.push(...res.records.map((r) => r.fields));
-          }
-          if (!res.offset) break;
-          nextOffset = `&offset=${res.offset}`;
-          pageCounter++;
-        }
-
-        sessionStorage.setItem("allInventoryItems", JSON.stringify(allRecords));
-  setMasterInventoryItems(allRecords);
-        console.log(`✅ Fetched ${allRecords.length} total items from inventory.`);
-      } catch (err) {
-        console.error("❌ Error fetching all inventory:", err);
-      } finally {
-        setInventoryReady(true);
-      }
-    }
-
-    fetchAllInventory();
-  }, []);
-
-  useEffect(() => {
-    if (activeGroup || areInventoryGroupsLoading || !inventoryReady) {
+    if (activeGroup || areInventoryGroupsLoading || !isInventoryReady) {
       setAvailableGroups([]);
       setAreAvailableGroupsLoading(false);
       return;
@@ -164,7 +103,7 @@ const HomeLister = ({ onRemove, setOnRemove, activeGroup, onSelectGroup }) => {
   }, [
     activeGroup,
     areInventoryGroupsLoading,
-    inventoryReady,
+    isInventoryReady,
     inventoryGroups,
     masterInventoryItems,
     selectedManufacturer,
@@ -213,6 +152,7 @@ const HomeLister = ({ onRemove, setOnRemove, activeGroup, onSelectGroup }) => {
       const groupedCodes = availableGroups.flatMap((group) => group.skuCodes);
       const pageSize = activeGroup ? 36 : pagePlan.individualCount;
       let response = { records: [] };
+      let requestFailed = false;
 
       if (pageSize > 0) {
         const baseUrl = urlCreator({
@@ -224,6 +164,7 @@ const HomeLister = ({ onRemove, setOnRemove, activeGroup, onSelectGroup }) => {
         response = await fetchAPI(
           baseUrl + (pageOffset ? `&offset=${encodeURIComponent(pageOffset)}` : "")
         );
+        requestFailed = response === null;
       } else if (!pagePlan.hasMoreGroups) {
         response = await fetchAPI(
           urlCreator({
@@ -233,9 +174,21 @@ const HomeLister = ({ onRemove, setOnRemove, activeGroup, onSelectGroup }) => {
             excludeSkuCodes: groupedCodes,
           })
         );
+        requestFailed = response === null;
       }
 
       if (cancelled) return;
+
+      // A failed request (fetchAPI returns null) is not an empty page. Surface a
+      // retry and keep the current data/pagination rather than wiping the page
+      // and showing a misleading "No Results Found".
+      if (requestFailed) {
+        setPageError(true);
+        setIsLoading(false);
+        return;
+      }
+      setPageError(false);
+
       const records = pageSize > 0 ? response?.records || [] : [];
       const hasNext = pagePlan.hasMoreGroups || Boolean(response?.offset) || (pageSize === 0 && Boolean(response?.records?.length));
 
@@ -283,12 +236,39 @@ const HomeLister = ({ onRemove, setOnRemove, activeGroup, onSelectGroup }) => {
     selectedManufacturer,
     selectedPart,
     selectedSKU,
+    pageReloadKey,
   ]);
 
   return (
     <>
-      {isLoading || !inventoryReady || (!activeGroup && areAvailableGroupsLoading) ? (
+      {masterInventoryError ? (
+        <div className="has-text-centered" role="alert">
+          <p className="is-size-4 has-text-weight-bold">
+            We couldn&apos;t load the inventory.
+          </p>
+          <button
+            type="button"
+            className="button is-primary"
+            onClick={reloadMasterInventory}
+          >
+            Retry
+          </button>
+        </div>
+      ) : isLoading || !isInventoryReady || (!activeGroup && areAvailableGroupsLoading) ? (
         <BigSpinner size={75} />
+      ) : pageError ? (
+        <div className="has-text-centered" role="alert">
+          <p className="is-size-4 has-text-weight-bold">
+            We couldn&apos;t load these results.
+          </p>
+          <button
+            type="button"
+            className="button is-primary"
+            onClick={() => setPageReloadKey((key) => key + 1)}
+          >
+            Retry
+          </button>
+        </div>
       ) : pagePlan.groups.length || (data && data.length) ? (
         <div id="cardDiv" ref={cardDiv}>
           {pagePlan.groups.map((group) => (
