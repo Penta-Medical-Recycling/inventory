@@ -49,7 +49,7 @@ const Search = () => {
 
           {/* Clear Search Button */}
           {searchInput && (
-            <InputGroupAddon align="inline-end">
+            <InputGroupAddon align="inline-end" className="pr-3 has-[>button]:mr-0">
               <InputGroupButton
                 id="search-clear"
                 aria-label="ClearSearch"

@@ -57,12 +57,14 @@ Before you begin, ensure you have met the following requirements:
    npm install
    ```
 
-3. **Create the .env File:** In the project root directory, create a .env file.
+3. **Configure Airtable:** Copy `.env.example` to `.env.development.local` and set:
 
-4. **Edit the .env File:**
-   Open the .env file in a text editor.
-   Create a VITE_REACT_APP_API_KEY  variable and replace with Penta's AirTable personal access token.
-   Note: Be cautious with API keys, PATs, and sensitive information. Do not commit your .env file to version control (e.g., Git) to keep your secrets secure.
+   ```dotenv
+   VITE_REACT_APP_API_KEY=your-development-personal-access-token
+   VITE_AIRTABLE_BASE_ID=your-development-base-id
+   ```
+
+   `npm run dev` loads `.env.development.local` after `.env`, so local requests use the development Airtable base. `npm run build` runs in production mode and does not load this development override. Both files are ignored by Git; never commit a personal access token.
 
 5. **Secrets in GitHub:** It's essential to keep your secrets safe. Avoid exposing your API keys or sensitive data in your GitHub repository. If you suspect that your API keys or any other sensitive information stored in GitHub Secrets has been compromised, it's essential to take immediate action to update and secure it. Revoke the current Personal Access Token in AirTable and create a new one.
    In the GitHub repository, navigate to the "Settings" tab, typically located in the top right corner of the repository's main page and find "Secrets". Rename VITE_REACT_APP_API_KEY to the new personal access token, update your .env as well and redeploy these changes.

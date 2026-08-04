@@ -79,7 +79,7 @@ Layout and conventions:
   and stubs `VITE_REACT_APP_API_KEY`. MSW uses `onUnhandledRequest: "error"`, so any Airtable call
   a test makes must have a handler.
 - `src/test/mocks/` holds `fixtures.js` (Airtable-shaped sample data), `handlers.js` (MSW handlers
-  for the base `appHFwcwuXLTNCjtN`), and `server.js` (`setupServer`). Add per-test overrides with
+  for the configured test base), and `server.js` (`setupServer`). Add per-test overrides with
   `server.use(...)`.
 - `src/test/utils.jsx` exports `renderWithProviders` (wraps in `HashRouter` + `PentaProvider`) and
   re-exports Testing Library + `userEvent`. Use `{ withProviders: false }` for pure components.
@@ -99,16 +99,17 @@ Layout and conventions:
 
 ## Environment / secrets
 
-Data fetching requires an Airtable Personal Access Token exposed to Vite as
-`VITE_REACT_APP_API_KEY` in a `.env` file at `inventory/.env`. `.env` is git-ignored and is NOT
-present in fresh clones. Without it:
+Data fetching requires `VITE_REACT_APP_API_KEY` and supports an environment-specific
+`VITE_AIRTABLE_BASE_ID`. Local development values belong in `.env.development.local`, which Vite
+loads after `.env` for `npm run dev`. Both files are git-ignored and are NOT present in fresh clones.
+Without a token:
 
 - `npm install`, `npm run build`, and `npm run dev` all still **succeed**.
 - The running app cannot load inventory/status data (Airtable calls fail); the app may show the
   Maintenance page because `serverStatus` defaults to `"Offline"` until the status fetch resolves.
 
-Never commit `.env` or hardcode the token. The Airtable base id (`appHFwcwuXLTNCjtN`) is used in
-fetch URLs in the context/provider and page components.
+Never commit environment files or hardcode a token. `src/config/airtable.js` centralizes the
+Airtable API URL, base ID, and token. Production builds do not load `.env.development.local`.
 
 ## CI / checks before check-in
 

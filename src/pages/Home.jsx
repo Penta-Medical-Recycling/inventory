@@ -1,11 +1,23 @@
 import HomeLister from "../components/home/HomeLister";
-import { useEffect, useContext, useRef, useState } from "react";
-import { ArrowLeft } from "lucide-react";
+import { useEffect, useContext, useRef, useState, useMemo, useCallback } from "react";
+import { ArrowLeft, Plus } from "lucide-react";
 import { useSearchParams } from "react-router-dom";
 import PentaContext from "../context/PentaContext";
 import Pagination from "../components/home/Pagination";
 import Tags from "../components/home/Tags";
 import Search from "../components/home/Search";
+import QuantityModal from "../components/cards/QuantityModal";
+import MessageModal from "../components/cards/MessageModal";
+import Toast from "../components/Toast";
+import { bulkAddToCart, countAvailableUnits, getItemDisplayName } from "../lib/cartBulkAdd";
+
+// {SKU Item Code} is a lookup field that arrives as an array locally but coerces
+// to a scalar in Airtable formulas, so match against either shape.
+const matchesSkuCode = (entry, code) => {
+  const field = entry?.["SKU Item Code"];
+  if (Array.isArray(field)) return field.map(String).includes(String(code));
+  return String(field) === String(code);
+};
 
 function Home() {
   const {
@@ -17,6 +29,8 @@ function Home() {
     offsetArray,
     setOffsetArray,
     setIsLoading,
+    setCartCount,
+    setIsCartPressed,
   } = useContext(PentaContext);
   const [searchParams, setSearchParams] = useSearchParams();
   const groupKey = searchParams.get("group");
@@ -26,6 +40,62 @@ function Home() {
 
   // State to control card removal animation.
   const [onRemove, setOnRemove] = useState(false);
+
+  // Bulk order flow lives inside a single-SKU group view (Option D). Multi-SKU
+  // groups stay drill-down only.
+  const isSingleSkuGroup = activeGroup?.skuCodes?.length === 1;
+  const [showBulkModal, setShowBulkModal] = useState(false);
+  const [showBulkMessage, setShowBulkMessage] = useState(false);
+  const [bulkMessageContent, setBulkMessageContent] = useState("");
+
+  // Derive the display name / size affordance for the active single-SKU group
+  // from the cached master inventory.
+  const bulkInfo = useMemo(() => {
+    if (!isSingleSkuGroup) return null;
+    const code = activeGroup.skuCodes[0];
+    let items = [];
+    try {
+      items = JSON.parse(sessionStorage.getItem("allInventoryItems") || "[]");
+    } catch {
+      items = [];
+    }
+    const matches = Array.isArray(items)
+      ? items.filter((entry) => matchesSkuCode(entry, code))
+      : [];
+    if (matches.length === 0) {
+      return { name: activeGroup.title, hasSize: false };
+    }
+    return {
+      name: getItemDisplayName(matches[0]),
+      hasSize: matches.some((entry) => !!entry?.Size),
+    };
+  }, [isSingleSkuGroup, activeGroup?.id]);
+
+  // Close any open bulk UI when leaving or switching groups.
+  useEffect(() => {
+    setShowBulkModal(false);
+    setShowBulkMessage(false);
+  }, [groupKey]);
+
+  // How many units of the active single-SKU group are addable for a given size,
+  // so the QuantityModal can cap its stepper instead of validating post-submit.
+  const countBulkAvailable = useCallback(
+    (selectedSize) => {
+      const code = activeGroup?.skuCodes?.[0];
+      let allItems = [];
+      try {
+        allItems = JSON.parse(sessionStorage.getItem("allInventoryItems") || "[]");
+      } catch {
+        allItems = [];
+      }
+      return countAvailableUnits({
+        items: allItems,
+        matcher: (entry) => matchesSkuCode(entry, code),
+        selectedSize,
+      });
+    },
+    [activeGroup?.skuCodes]
+  );
 
   useEffect(() => {
     if (!areInventoryGroupsLoading && groupKey && !activeGroup) {
@@ -65,6 +135,52 @@ function Home() {
     setSearchParams(next);
   };
 
+  const handleBulkSubmit = (unitsRequested, selectedSize = null) => {
+    const code = activeGroup?.skuCodes?.[0];
+    let allItems = [];
+    try {
+      allItems = JSON.parse(sessionStorage.getItem("allInventoryItems") || "[]");
+    } catch {
+      allItems = [];
+    }
+
+    const { addedCount, availableCount, status } = bulkAddToCart({
+      items: allItems,
+      matcher: (entry) => matchesSkuCode(entry, code),
+      unitsRequested,
+      selectedSize,
+    });
+
+    const name = bulkInfo?.name || activeGroup?.title || "item";
+
+    if (status === "invalid-quantity") {
+      setShowBulkModal(false);
+      return;
+    }
+    if (status === "inventory-unavailable") {
+      setBulkMessageContent(
+        `"${name}" inventory is still loading. Please wait a moment and try again.`
+      );
+      setShowBulkMessage(true);
+      setShowBulkModal(false);
+      return;
+    }
+    if (status === "insufficient-stock") {
+      setBulkMessageContent(
+        `Only ${availableCount} unit(s) of "${name}" are currently in stock. Please lower your quantity.`
+      );
+      setShowBulkMessage(true);
+      setShowBulkModal(false);
+      return;
+    }
+
+    setCartCount((prev) => prev + addedCount);
+    setShowBulkModal(false);
+    setIsCartPressed(true);
+    setTimeout(() => setIsCartPressed(false), 1000);
+    Toast({ message: `"${name}" added to cart`, type: "is-success" });
+  };
+
   return (
     <div className={isSideBarActive ? "sidebar-active" : ""}>
       <div id="text-section">
@@ -91,6 +207,17 @@ function Home() {
               All items
             </button>
             <h2 className="group-context__title">{activeGroup.title}</h2>
+            {isSingleSkuGroup && (
+              <button
+                type="button"
+                className="group-context__bulk"
+                onClick={() => setShowBulkModal(true)}
+                aria-label={`Bulk add ${activeGroup.title}`}
+              >
+                <Plus size={16} aria-hidden="true" />
+                Bulk add
+              </button>
+            )}
           </div>
         </div>
       )}
@@ -105,6 +232,26 @@ function Home() {
       />
       {/* Bottom Pagination */}
       <Pagination bottom={true} onRemove={onRemove}></Pagination>
+
+      {showBulkModal && bulkInfo && (
+        <QuantityModal
+          itemName={bulkInfo.name}
+          currentItemId={null}
+          hasSize={bulkInfo.hasSize}
+          getAvailableCount={countBulkAvailable}
+          onSubmit={(unitsRequested, selectedSize) =>
+            handleBulkSubmit(unitsRequested, selectedSize)
+          }
+          onClose={() => setShowBulkModal(false)}
+        />
+      )}
+
+      {showBulkMessage && (
+        <MessageModal
+          message={bulkMessageContent}
+          onClose={() => setShowBulkMessage(false)}
+        />
+      )}
     </div>
   );
 }

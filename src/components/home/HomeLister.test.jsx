@@ -5,10 +5,11 @@ import { http, HttpResponse } from "msw";
 import { renderWithProviders, screen, userEvent, waitFor } from "../../test/utils";
 import { server } from "../../test/mocks/server";
 import { inventoryRecords } from "../../test/mocks/fixtures";
+import { AIRTABLE_API_URL, AIRTABLE_BASE_ID } from "../../config/airtable";
 import Search from "./Search";
 import HomeLister from "./HomeLister";
 
-const INVENTORY_URL = "https://api.airtable.com/v0/appHFwcwuXLTNCjtN/Inventory";
+const INVENTORY_URL = `${AIRTABLE_API_URL}/${AIRTABLE_BASE_ID}/Inventory`;
 
 describe("Home search debounce", () => {
   it("issues a single request for the final term when typing quickly", async () => {

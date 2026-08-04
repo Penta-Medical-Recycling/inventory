@@ -22,18 +22,30 @@ import PentaContext from "./context/PentaContext";
 
 function App() {
 
-  const { serverStatus, serverMessage } = useContext(PentaContext)
+  const { serverStatus, serverMessage, serverError } = useContext(PentaContext)
 
-  // Status not yet known - render nothing to avoid flashing the Maintenance
-  // (logo-only) screen before the /Site-Status fetch resolves.
-  if (serverStatus === null) return null;
+  // The /Site-Status fetch failed (Airtable host issue) - show an error rather
+  // than blocking the whole app.
+  if (serverError) {
+    return (
+      <div style={{ textAlign: "center", marginTop: "50px" }}>
+        <p>{serverError}</p>
+      </div>
+    );
+  }
 
-  return serverStatus ===  "Offline" ? (
-    <Routes>
-      <Route path="*" element={<Maintenance message = {serverMessage} />}></Route>
-    </Routes>
-  ) : 
-  (
+  // Intentional maintenance toggle from the Site-Status record.
+  if (serverStatus === "Offline") {
+    return (
+      <Routes>
+        <Route path="*" element={<Maintenance message={serverMessage} />}></Route>
+      </Routes>
+    );
+  }
+
+  // While the status is still loading (serverStatus === null), render the app
+  // normally instead of gating on the fetch.
+  return (
     <>
       <SideBar />
       <main>

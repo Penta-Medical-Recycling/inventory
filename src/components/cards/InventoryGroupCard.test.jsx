@@ -20,6 +20,21 @@ describe("InventoryGroupCard", () => {
     expect(onSelect).toHaveBeenCalledWith(group);
   });
 
+  it("renders every image as a cross-fade slide when the group has multiple", () => {
+    render(
+      <InventoryGroupCard
+        group={{
+          ...group,
+          imageUrls: ["https://example.com/a.png", "https://example.com/b.png"],
+        }}
+        onSelect={() => {}}
+      />
+    );
+
+    expect(screen.getByAltText("Double Adapter - Male inventory 1")).toBeInTheDocument();
+    expect(screen.getByAltText("Double Adapter - Male inventory 2")).toBeInTheDocument();
+  });
+
   it("renders a placeholder when no image is configured", () => {
     render(
       <InventoryGroupCard

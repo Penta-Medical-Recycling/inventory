@@ -6,6 +6,7 @@ import { server } from "./mocks/server";
 // The app reads import.meta.env.VITE_REACT_APP_API_KEY at module load; provide a stub so the
 // Bearer header is well-formed in tests.
 vi.stubEnv("VITE_REACT_APP_API_KEY", "test-api-key");
+vi.stubEnv("VITE_AIRTABLE_BASE_ID", "appHFwcwuXLTNCjtN");
 
 // Start MSW. Fail on any request that isn't explicitly handled so missed endpoints surface.
 beforeAll(() => server.listen({ onUnhandledRequest: "error" }));

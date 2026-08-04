@@ -18,13 +18,17 @@ export function normalizeInventoryGroups(records = []) {
       continue;
     }
 
-    const image = Array.isArray(fields.Image) ? fields.Image[0] : null;
+    const images = Array.isArray(fields.Image) ? fields.Image : [];
+    const imageUrls = images
+      .map((img) => img?.thumbnails?.large?.url || img?.url || null)
+      .filter(Boolean);
     candidates.push({
       id: record.id,
       key,
       title,
       skuCodes,
-      imageUrl: image?.thumbnails?.large?.url || image?.url || null,
+      imageUrl: imageUrls[0] || null,
+      imageUrls,
     });
 
     seenKeys.add(key);

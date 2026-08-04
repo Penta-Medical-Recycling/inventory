@@ -8,7 +8,7 @@ function BigSpinner({ size }) {
     <div className="loading-container fade-in-out-Spin">
       <div className="logo-container">
         <LittleSpinner size={size} />
-        <p className="loading-text">Loading ...</p>
+        <p className="loading-text">Loading...</p>
       </div>
     </div>
   );

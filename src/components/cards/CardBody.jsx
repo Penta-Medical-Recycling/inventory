@@ -15,8 +15,8 @@ const CardBody = ({ item, variant = "stock" }) => {
 
   const specs = [
     manufacturer && { label: "Manufacturer", value: manufacturer },
-    size !== undefined && size !== null && size !== "" && { label: "Size", value: size },
     model && { label: "Model", value: model },
+    size !== undefined && size !== null && size !== "" && { label: "Size", value: size },
   ].filter(Boolean);
 
   return (

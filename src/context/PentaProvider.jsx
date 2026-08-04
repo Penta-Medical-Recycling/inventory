@@ -4,20 +4,26 @@ import {
   normalizeInventoryGroups,
   SKU_GROUPS_TABLE,
 } from "../config/inventoryGroups";
+import {
+  AIRTABLE_API_KEY,
+  AIRTABLE_API_URL,
+  AIRTABLE_BASE_ID,
+} from "../config/airtable";
 
 function PentaProvider({ children }) {
   const [selectedPartner, setSelectedPartner] = useState(
     localStorage.getItem("partner") || ""
   );
-  const APIKey = import.meta.env.VITE_REACT_APP_API_KEY;
-
   const [cartCount, setCartCount] = useState(
     Object.keys(localStorage).filter((k) => k !== "partner" && k !== "notes").length
   );
-  // null = status not yet known. App renders nothing until the /Site-Status
-  // fetch resolves, so the Maintenance screen doesn't flash on every load.
+  // null = status not yet known. The app renders normally while this resolves;
+  // "Offline" is the intentional maintenance toggle from the Site-Status record.
   const [serverStatus, setServerStatus] = useState(null);
   const [serverMessage, setServerMessage] = useState("");
+  // Set when the /Site-Status fetch itself fails (Airtable host issue), so the
+  // app can surface an error instead of being conflated with maintenance.
+  const [serverError, setServerError] = useState(null);
   const [popUpStatus, setPopUpStatus] = useState("Offline");
   const [message, setMessage] = useState("");
   const [isCartPressed, setIsCartPressed] = useState(false);
@@ -53,11 +59,11 @@ function PentaProvider({ children }) {
   useEffect(() => {
     const fetchStatus = async () => {
       try {
-        const data = await fetch("https://api.airtable.com/v0/appHFwcwuXLTNCjtN/Site-Status", {
+        const data = await fetch(`${AIRTABLE_API_URL}/${AIRTABLE_BASE_ID}/Site-Status`, {
           method: "GET",
           headers: {
             "Content-Type": "application/json",
-            "authorization": `Bearer ${APIKey}`
+            "authorization": `Bearer ${AIRTABLE_API_KEY}`
           }
         });
 
@@ -67,10 +73,12 @@ function PentaProvider({ children }) {
         setServerStatus(response.records[1].fields.Status);
         setServerMessage(response.records[1].fields.Message);
       } catch (error) {
-        // If the status can't be fetched, fall back to Maintenance rather than
-        // leaving the app blank forever.
+        // A failed status fetch is a host problem, not intentional maintenance -
+        // surface an error message instead of the Maintenance screen.
         console.error("Error fetching site status:", error);
-        setServerStatus("Offline");
+        setServerError(
+          "We're having trouble reaching the inventory service. Please try again later."
+        );
       }
     };
 
@@ -108,7 +116,7 @@ function PentaProvider({ children }) {
     // codes) are applied - the user-selected filters/search are skipped. Used to
     // build the full inventory master list regardless of the active filter state.
     const includeUserFilters = options.includeUserFilters !== false;
-    const baseUrl = "https://api.airtable.com/v0/appHFwcwuXLTNCjtN/Inventory?";
+    const baseUrl = `${AIRTABLE_API_URL}/${AIRTABLE_BASE_ID}/Inventory?`;
     const sort = `sort[0][field]=Item ID&sort[0][direction]=asc`;
     const pageSize = `pageSize=${pageSizeValue}`;
     let filterFunction = "filterByFormula=";
@@ -237,7 +245,7 @@ if (selectedSKU.length > 0) {
     try {
       const response = await fetch(url, {
         headers: {
-          Authorization: `Bearer ${APIKey}`,
+          Authorization: `Bearer ${AIRTABLE_API_KEY}`,
         },
       });
 
@@ -250,8 +258,7 @@ if (selectedSKU.length > 0) {
   }
 
   async function fetchTableRecords(tableName, offset = null) {
-    const baseId = "appHFwcwuXLTNCjtN";
-    const url = `https://api.airtable.com/v0/${baseId}/${encodeURIComponent(tableName)}?${
+    const url = `${AIRTABLE_API_URL}/${AIRTABLE_BASE_ID}/${encodeURIComponent(tableName)}?${
       offset ? `offset=${offset}` : ""
     }`;
     return fetchAPI(url);
@@ -270,7 +277,7 @@ if (selectedSKU.length > 0) {
   }
 
   async function fetchMaxSize() {
-    const url = `https://api.airtable.com/v0/appHFwcwuXLTNCjtN/Inventory?pageSize=1&sort[0][field]=Size&sort[0][direction]=desc&filterByFormula=AND(AND({Requests}="",{Shipment Status}=""),NOT({SKU}=""))`;
+    const url = `${AIRTABLE_API_URL}/${AIRTABLE_BASE_ID}/Inventory?pageSize=1&sort[0][field]=Size&sort[0][direction]=desc&filterByFormula=AND(AND({Requests}="",{Shipment Status}=""),NOT({SKU}=""))`;
     const data = await fetchAPI(url);
     if (data?.records?.length > 0) return data.records[0].fields.Size;
     return null;
@@ -304,7 +311,7 @@ if (selectedSKU.length > 0) {
 };
 
   const getCartItemsSortedFIFO = async () => {
-    const url = `https://api.airtable.com/v0/appHFwcwuXLTNCjtN/Inventory?sort[0][field]=Date Added&sort[0][direction]=asc&filterByFormula=AND(NOT({Requests}!=""), {Quantity In Stock}>0)`;
+    const url = `${AIRTABLE_API_URL}/${AIRTABLE_BASE_ID}/Inventory?sort[0][field]=Date Added&sort[0][direction]=asc&filterByFormula=AND(NOT({Requests}!=""), {Quantity In Stock}>0)`;
     const data = await fetchAPI(url);
     return data?.records || [];
   };
@@ -317,10 +324,10 @@ if (selectedSKU.length > 0) {
         if (record.fields.SKU === item.sku && quantityToFulfill > 0) {
           const availableQty = record.fields["Quantity In Stock"] || 0;
           const fulfillQty = Math.min(availableQty, quantityToFulfill);
-          await fetch(`https://api.airtable.com/v0/appHFwcwuXLTNCjtN/Inventory/${record.id}`, {
+          await fetch(`${AIRTABLE_API_URL}/${AIRTABLE_BASE_ID}/Inventory/${record.id}`, {
             method: "PATCH",
             headers: {
-              Authorization: `Bearer ${APIKey}`,
+              Authorization: `Bearer ${AIRTABLE_API_KEY}`,
               "Content-Type": "application/json",
             },
             body: JSON.stringify({
@@ -338,8 +345,7 @@ if (selectedSKU.length > 0) {
   };
 
   const getTotalInStockBySKU = async (sku) => {
-    const baseId = "appHFwcwuXLTNCjtN";
-    const url = `https://api.airtable.com/v0/${baseId}/Inventory?filterByFormula=AND({SKU} = '${sku}', {Requests} = BLANK(), {Shipment Status} = BLANK())`;
+    const url = `${AIRTABLE_API_URL}/${AIRTABLE_BASE_ID}/Inventory?filterByFormula=AND({SKU} = '${sku}', {Requests} = BLANK(), {Shipment Status} = BLANK())`;
     const data = await fetchAPI(url);
     if (!data || !data.records) return 0;
     return data.records.reduce((total, record) => total + (record.fields["Quantity In Stock"] || 0), 0);
@@ -387,6 +393,8 @@ if (selectedSKU.length > 0) {
         setServerMessage,
         serverStatus,
         setServerStatus,
+        serverError,
+        setServerError,
         popUpStatus,
         setPopUpStatus,
         message,

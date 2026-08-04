@@ -5,11 +5,12 @@ import { describe, it, expect } from "vitest";
 import { http, HttpResponse } from "msw";
 import { renderWithProviders, screen } from "./test/utils";
 import App from "./App";
+import { AIRTABLE_API_URL, AIRTABLE_BASE_ID } from "./config/airtable";
 import { server } from "./test/mocks/server";
 import { siteStatusOfflineRecords } from "./test/mocks/fixtures";
 
 const SITE_STATUS_URL =
-  "https://api.airtable.com/v0/appHFwcwuXLTNCjtN/Site-Status";
+  `${AIRTABLE_API_URL}/${AIRTABLE_BASE_ID}/Site-Status`;
 
 describe("App status gate", () => {
   it("renders the Home UI when the platform status is Online (default handler)", async () => {
@@ -36,25 +37,28 @@ describe("App status gate", () => {
     expect(screen.queryByAltText("logo")).not.toBeInTheDocument();
   });
 
-  it("renders nothing until the status fetch resolves (no Maintenance flash)", async () => {
-    const { container } = renderWithProviders(<App />);
+  it("renders the Home UI immediately while the status fetch is still loading", async () => {
+    renderWithProviders(<App />);
 
-    // serverStatus starts as null (unknown), so App renders nothing initially -
-    // neither the Home UI nor the logo-only Maintenance screen.
-    expect(container).toBeEmptyDOMElement();
+    // serverStatus starts as null (unknown), but the app is no longer gated on
+    // the fetch - the Home UI (NavBar logo) renders right away.
+    expect(screen.getByAltText("logo")).toBeInTheDocument();
+    // The Maintenance page uses a different alt text; it should be absent.
     expect(screen.queryByAltText("Company Logo")).not.toBeInTheDocument();
 
-    // Once the status resolves (Online via default handler), the Home UI appears.
+    // The status resolves to Online, so the Home UI stays.
     expect(await screen.findByAltText("logo")).toBeInTheDocument();
   });
 
-  it("falls back to the Maintenance page when the status fetch fails", async () => {
+  it("shows an error message when the status fetch fails", async () => {
     server.use(http.get(SITE_STATUS_URL, () => HttpResponse.error()));
 
     renderWithProviders(<App />);
 
-    // The Maintenance page uses alt="Company Logo"; the NavBar (alt="logo") is absent.
-    expect(await screen.findByAltText("Company Logo")).toBeInTheDocument();
-    expect(screen.queryByAltText("logo")).not.toBeInTheDocument();
+    // A host failure surfaces an error rather than the Maintenance screen.
+    expect(
+      await screen.findByText(/trouble reaching the inventory service/i)
+    ).toBeInTheDocument();
+    expect(screen.queryByAltText("Company Logo")).not.toBeInTheDocument();
   });
 });

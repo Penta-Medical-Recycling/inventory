@@ -4,8 +4,8 @@
 // builds after validating each Item ID against the backend. These tests drive that
 // branching through real localStorage the same way the cart does.
 import { describe, it, expect, vi } from "vitest";
-import { renderWithProviders, screen } from "../test/utils";
-import CartLister from "./CartLister";
+import { renderWithProviders, screen, userEvent } from "../test/utils";
+import CartLister, { getCartItemImageUrl } from "./CartLister";
 import { inventoryRecords } from "../test/mocks/fixtures";
 
 const item = inventoryRecords[0].fields; // "Left Foot Shell", Item ID "22-1287"
@@ -14,6 +14,14 @@ const itemId = item["Item ID"];
 // The cart persists each unit in localStorage keyed by its Item ID.
 const seedCartItem = (fields) =>
   localStorage.setItem(fields["Item ID"], JSON.stringify(fields));
+
+it("resolves a cart item image from its SKU group", () => {
+  expect(
+    getCartItemImageUrl(item, [
+      { skuCodes: ["LSHELL"], imageUrl: "https://example.com/left-foot-shell.png" },
+    ])
+  ).toBe("https://example.com/left-foot-shell.png");
+});
 
 describe("cart unavailable state", () => {
   it("renders an item as Unavailable when its id is in the out-of-stock set", () => {
@@ -30,14 +38,37 @@ describe("cart unavailable state", () => {
     // The muted status pill is shown...
     expect(screen.getByText("Unavailable")).toBeInTheDocument();
     // ...alongside the single "remove from cart" action.
-    expect(screen.getByLabelText("RemoveFromCart")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /remove left foot shell from cart/i })).toBeInTheDocument();
     // The item is NOT rendered as an orderable in-stock card.
     expect(screen.queryByLabelText("AddToCart")).not.toBeInTheDocument();
     expect(screen.queryByLabelText("IncrementQty")).not.toBeInTheDocument();
-    expect(screen.queryByText("In cart")).not.toBeInTheDocument();
   });
 
   it("renders the same item as an in-stock cart card when it is not flagged", () => {
+    seedCartItem({
+      ...item,
+      Image: [{ thumbnails: { small: { url: "https://example.com/item-small.png" } } }],
+    });
+
+    const { container } = renderWithProviders(
+      <CartLister
+        outOfStock={new Set()}
+        setOutOfStock={vi.fn()}
+        itemValidationStatus={{ [itemId]: "done" }}
+      />
+    );
+
+    // No unavailable state: the item shows the normal removable cart row instead.
+    expect(screen.queryByText("Unavailable")).not.toBeInTheDocument();
+    expect(container.querySelector(".cart-list__media img")).toHaveAttribute(
+      "src",
+      "https://example.com/item-small.png"
+    );
+    expect(screen.getByRole("button", { name: /remove left foot shell from cart/i })).toBeInTheDocument();
+  });
+
+  it("removes a physical item from the cart list", async () => {
+    const user = userEvent.setup();
     seedCartItem(item);
 
     renderWithProviders(
@@ -48,9 +79,26 @@ describe("cart unavailable state", () => {
       />
     );
 
-    // No unavailable state: the item shows the normal in-cart controls instead.
-    expect(screen.queryByText("Unavailable")).not.toBeInTheDocument();
-    expect(screen.getByText("In cart")).toBeInTheDocument();
-    expect(screen.getByLabelText("DecrementQty")).toBeInTheDocument();
+    await user.click(screen.getByRole("button", { name: /remove left foot shell from cart/i }));
+
+    expect(localStorage.getItem(itemId)).toBeNull();
+    expect(screen.getByText("Your cart is empty.")).toBeInTheDocument();
+  });
+
+  it("keeps an unverifiable item visible and removable", () => {
+    seedCartItem(item);
+
+    renderWithProviders(
+      <CartLister
+        outOfStock={new Set()}
+        setOutOfStock={vi.fn()}
+        itemValidationStatus={{ [itemId]: "error" }}
+      />
+    );
+
+    expect(screen.getByText("Couldn't verify")).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: /remove left foot shell from cart/i })
+    ).toBeEnabled();
   });
 });

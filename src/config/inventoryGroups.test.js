@@ -11,7 +11,10 @@ describe("normalizeInventoryGroups", () => {
         Key: "zeta",
         Active: true,
         "SKU Item Codes": ["A", "B", "A"],
-        Image: [{ url: "original.png", thumbnails: { large: { url: "large.png" } } }],
+        Image: [
+          { url: "original.png", thumbnails: { large: { url: "large.png" } } },
+          { url: "second.png" },
+        ],
       }),
       record("rec-a", {
         Name: "Alpha",
@@ -46,6 +49,7 @@ describe("normalizeInventoryGroups", () => {
         title: "Alpha",
         skuCodes: ["B", "C"],
         imageUrl: null,
+        imageUrls: [],
       },
       {
         id: "rec-z",
@@ -53,6 +57,7 @@ describe("normalizeInventoryGroups", () => {
         title: "Zeta",
         skuCodes: ["A"],
         imageUrl: "large.png",
+        imageUrls: ["large.png", "second.png"],
       },
     ]);
   });

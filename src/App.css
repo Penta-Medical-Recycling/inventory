@@ -24,13 +24,182 @@ main {
   display: grid;
   grid-template-columns: repeat(auto-fill, 340px);
   justify-content: space-between;
-  margin: 2rem 2rem 3rem 2rem;
+  margin: 2rem 2rem 3rem;
   align-items: stretch;
+}
+.cart-list {
+  width: min(760px, calc(100% - 2rem));
+  margin: 2rem auto 3rem;
+}
+.cart-list__header {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  padding: 0 0.25rem 0.75rem;
+  border-bottom: 1px solid #dfe3e8;
+}
+.cart-list__header h2 {
+  margin: 0;
+  color: #111827;
+  font-size: 1rem;
+  font-weight: 700;
+}
+.cart-list__header span {
+  color: #6b7280;
+  font-size: 0.85rem;
+}
+.cart-list__rows {
+  display: flex;
+  flex-direction: column;
+}
+.cart-list__row {
+  display: grid;
+  grid-template-columns: 44px minmax(0, 1fr) 40px;
+  align-items: center;
+  gap: 1rem;
+  min-height: 88px;
+  padding: 1rem 0.25rem;
+  border-bottom: 1px solid #e5e7eb;
+  transition: background-color 0.15s ease, opacity 0.15s ease;
+}
+.cart-list__row:hover {
+  background: #f8fafc;
+}
+.cart-list__row.is-loading {
+  opacity: 0.45;
+}
+.cart-list__media {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  overflow: hidden;
+  border-radius: 8px;
+  background: #eef8fd;
+  color: #1a7fb5;
+}
+.cart-list__media img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+.cart-list__content {
+  min-width: 0;
+}
+.cart-list__title-line {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+.cart-list__title-line h3 {
+  min-width: 0;
+  margin: 0;
+  overflow: hidden;
+  color: #1f2937;
+  font-size: 1rem;
+  font-weight: 650;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.cart-list__status {
+  flex: none;
+  padding: 2px 7px;
+  border-radius: 999px;
+  background: #fef3f2;
+  color: #b42318;
+  font-size: 0.7rem;
+  font-weight: 650;
+}
+.cart-list__status.is-warning {
+  background: #fff7ed;
+  color: #b45309;
+}
+.cart-validation-alert {
+  display: flex;
+  width: min(760px, calc(100% - 2rem));
+  margin: -1.5rem auto 2rem;
+  padding: 1rem;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  border: 1px solid #fed7aa;
+  border-radius: 8px;
+  background: #fff7ed;
+  color: #7c2d12;
+}
+.cart-validation-alert strong {
+  font-size: 0.9rem;
+}
+.cart-validation-alert p {
+  margin: 0.2rem 0 0;
+  font-size: 0.82rem;
+}
+.cart-list__item-id,
+.cart-list__details {
+  margin: 0.2rem 0 0;
+  overflow: hidden;
+  color: #6b7280;
+  font-size: 0.82rem;
+  line-height: 1.35;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.cart-list__item-id {
+  color: #2563eb;
+  font-weight: 600;
+}
+.cart-list__remove {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  padding: 0;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  color: #6b7280;
+  cursor: pointer;
+  transition: background-color 0.15s ease, color 0.15s ease;
+}
+.cart-list__remove:hover {
+  background: #fef3f2;
+  color: #d92d20;
+}
+.cart-list__remove:focus-visible {
+  outline: 3px solid rgba(217, 45, 32, 0.2);
+  outline-offset: 2px;
+}
+.cart-list__remove:disabled {
+  cursor: not-allowed;
+}
+.cart-list__empty {
+  margin: 2rem 0;
+  color: #6b7280;
+  text-align: center;
+}
+@media (max-width: 560px) {
+  .cart-validation-alert {
+    align-items: stretch;
+    flex-direction: column;
+  }
+  .cart-list__row {
+    grid-template-columns: 36px minmax(0, 1fr) 40px;
+    gap: 0.75rem;
+    min-height: 80px;
+  }
+  .cart-list__media {
+    width: 36px;
+    height: 36px;
+  }
+  .cart-list__details {
+    white-space: normal;
+  }
 }
 .inventory-group-card {
   display: flex;
   width: 300px;
-  min-height: 390px;
   margin: 20px;
   padding: 0;
   flex-direction: column;
@@ -42,12 +211,12 @@ main {
   color: #111827;
   box-shadow: 0 2px 8px rgba(17, 24, 39, 0.06);
   opacity: 0;
-  transform: translateY(20px);
+  transform: translateY(0);
   transition: opacity 1s ease, transform 1s ease, box-shadow 0.2s ease,
     border-color 0.2s ease;
 }
 .inventory-group-card:hover {
-  transform: translateY(-2px);
+  transform: translateY(-3px);
   border-color: #b9e5fb;
   box-shadow: 0 4px 12px rgba(17, 24, 39, 0.1);
 }
@@ -57,6 +226,7 @@ main {
 }
 .inventory-group-card__media {
   display: flex;
+  position: relative;
   width: 100%;
   aspect-ratio: 4 / 3;
   align-items: center;
@@ -68,6 +238,36 @@ main {
   width: 100%;
   height: 100%;
   object-fit: contain;
+}
+.inventory-group-card__frame {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+.inventory-group-card__slide {
+  position: absolute;
+  inset: 0;
+  transition: opacity 0.25s ease;
+}
+.inventory-group-card__dots {
+  position: absolute;
+  bottom: 12px;
+  left: 0;
+  display: flex;
+  width: 100%;
+  justify-content: center;
+  gap: 6px;
+}
+.inventory-group-card__dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #d1d5db;
+  transition: background 0.3s ease, transform 0.3s ease;
+}
+.inventory-group-card__dot.is-active {
+  background: #35b0fb;
+  transform: scale(1.2);
 }
 .inventory-group-card__placeholder {
   display: flex;
@@ -81,13 +281,13 @@ main {
 }
 .inventory-group-card__title {
   display: flex;
-  min-height: 112px;
+  min-height: 84px;
   flex: 1;
   align-items: center;
   justify-content: center;
   padding: 24px;
   font-size: 20px;
-  font-weight: 700;
+  font-weight: 600;
   line-height: 1.3;
   text-align: center;
 }
@@ -97,15 +297,17 @@ main {
   color: #4b5563;
 }
 .group-context__inner {
-  display: flex;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
   width: 100%;
-  flex-direction: column;
-  align-items: flex-start;
+  align-items: center;
   gap: 10px;
   padding-left: 20px;
 }
 .group-context__back {
   display: inline-flex;
+  grid-column: 1 / -1;
+  justify-self: start;
   align-items: center;
   gap: 6px;
   padding: 0;
@@ -129,12 +331,38 @@ main {
   outline-offset: 3px;
 }
 .group-context__title {
+  min-width: 0;
   margin: 0;
   color: #111827;
   font-size: 28px;
-  font-weight: 700;
+  font-weight: 600;
   line-height: 1.15;
   letter-spacing: -0.01em;
+}
+.group-context__bulk {
+  display: inline-flex;
+  align-items: center;
+  justify-self: end;
+  gap: 8px;
+  padding: 8px 16px;
+  cursor: pointer;
+  border: 1px solid #cbd5e1;
+  border-radius: 999px;
+  background: #ffffff;
+  color: #374151;
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+}
+.group-context__bulk:hover {
+  border-color: #9ca3af;
+  background: #f3f4f6;
+  color: #111827;
+}
+.group-context__bulk:focus-visible {
+  outline: 3px solid rgba(107, 114, 128, 0.3);
+  outline-offset: 3px;
 }
 @media (max-width: 640px) {
   .inventory-group-card {
@@ -146,6 +374,9 @@ main {
   .group-context__title {
     font-size: 23px;
   }
+  .group-context__bulk {
+    grid-column: 1 / -1;
+  }
 }
 .card {
   display: flex;
@@ -155,7 +386,7 @@ main {
   width: 300px;
   margin: 20px;
   opacity: 0;
-  transform: translateY(20px);
+  transform: translateY(0);
   transition: opacity 1s ease, transform 1s ease, box-shadow .2s ease-in;
  /* transition: opacity 1s ease, transform 1s ease;
   */
@@ -169,32 +400,32 @@ main {
   box-shadow: 0 0 0 2px #78d3fb;
 }
 .card.is-in-cart:hover {
-  box-shadow: 0 0 0 2px #78d3fb, 0px 2px 10px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 0 0 2px #78d3fb, 0 2px 10px rgba(0, 0, 0, 0.1);
 }
-.card-incart-pill {
+.card-status-pill {
   position: absolute;
   top: 12px;
-  right: 12px;
   z-index: 3;
   display: inline-flex;
   align-items: center;
   gap: 4px;
-  font-size: 11px;
-  font-weight: 700;
-  letter-spacing: 0.02em;
-  color: #0b4a6f;
-  background: #d6effd;
-  border: 1px solid #9dd8fa;
-  border-radius: 999px;
   padding: 3px 10px;
-  box-shadow: 0 1px 3px rgba(17, 24, 39, 0.12);
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
 }
-.card-incart-check {
+.card-status-pill {
+  left: 12px;
+  border: 1px solid #fecdca;
+  background: #fef3f2;
+  color: #b42318;
+  box-shadow: 0 1px 3px rgba(17, 24, 39, 0.08);
+}
+.card-status-icon {
   display: block;
   flex: none;
 }
-
-/* ---- Inventory card body (redesigned information display) ---- */
 .card-body-content {
   display: flex;
   flex: 1 1 auto;
@@ -216,54 +447,53 @@ main {
 }
 .card-tag-chip {
   display: inline-block;
+  padding: 2px 10px;
+  border: 1px solid #e5e7eb;
+  border-radius: 999px;
+  background: #f3f4f6;
+  color: #4b5563;
   font-size: 11px;
   font-weight: 600;
   letter-spacing: 0.04em;
-  text-transform: uppercase;
-  color: #4b5563;
-  background: #f3f4f6;
-  border: 1px solid #e5e7eb;
-  border-radius: 999px;
-  padding: 2px 10px;
   line-height: 1.5;
+  text-transform: uppercase;
 }
 .card-title {
   margin: 0.125rem 0 0;
+  color: #111827;
   font-size: 16px;
   font-weight: 600;
   line-height: 1.3;
-  color: #111827;
 }
 .card-item-id {
   margin: 0;
+  color: #2563eb;
   font-size: 13px;
   font-weight: 500;
-  letter-spacing: 0.01em;
-  color: #2563eb;
   font-variant-numeric: tabular-nums;
+  letter-spacing: 0.01em;
 }
 .card-specs {
   display: grid;
   grid-template-columns: max-content 1fr;
-  column-gap: 0.75rem;
-  row-gap: 0.375rem;
-  align-items: center;
+  column-gap: 1.75rem;
+  row-gap: 0.475rem;
   margin: 0.375rem 0 0;
   padding-top: 0.75rem;
   border-top: 1px solid #f0f1f3;
 }
 .card-spec-label {
   margin: 0;
+  color: #6b7280;
   font-size: 11px;
   font-weight: 600;
   letter-spacing: 0.04em;
   text-transform: uppercase;
-  color: #6b7280;
 }
 .card-spec-value {
   margin: 0;
-  font-size: 14px;
   color: #1f2937;
+  font-size: 14px;
   word-break: break-word;
 }
 .visible {
@@ -271,11 +501,11 @@ main {
   transform: translateY(0);
 }
 #paginator {
-  padding: 0;
+  padding: 20px;
 }
 .card:hover {
-  transform: translateY(-2px);
-  box-shadow: 0px 2px 10px rgba(0, 0, 0, 0.1);
+  transform: translateY(-3px);
+  box-shadow: 0px 4px 20px rgba(0, 0, 0, 0.2);
 }
 .content {
   display: flex;
@@ -430,7 +660,7 @@ main {
   background-color: #ff5c47e8;
   color: white;
   border: 0;
-  border-radius: 0px 0px 0px 0px;
+  border-radius: 0px 0px 20px 0px;
 }
 .remove-button:hover {
   color: white;
@@ -442,18 +672,22 @@ main {
 .images-button-red {
   border-radius: 0 0 0 20px;
   border: 0;
+  border-top: 1px solid #e5e7eb;
+  border-right: 1px solid #e5e7eb;
 }
 .images-button-blue {
   border-radius: 0 0 0 20px;
   border: 0;
+  border-top: 1px solid #e5e7eb;
+  border-right: 1px solid #e5e7eb;
 }
 .images-button-blue:hover {
-  color: white;
-  background-color: #78d3fb;
+  color: #111827;
+  background-color: #e5e7eb;
 }
 .images-button-red:hover {
-  color: white;
-  background-color: #ff5c48;
+  color: #111827;
+  background-color: #e5e7eb;
 }
 .filter-3 {
   display: flex;
@@ -519,7 +753,7 @@ main {
  ;
 }
 .button:hover .image-component {
-  filter: invert(100%);
+  filter: none;
 }
 @keyframes pulse {
   0%, 100% {
@@ -771,27 +1005,52 @@ input[type="range"]::-moz-range-thumb {
 .card-header {
   border-radius: 20px 20px 0px 0px !important;
 }
-.card-status-pill {
+.ribbon {
+  width: 150px;
+  height: 150px;
+  overflow: hidden;
   position: absolute;
-  top: 12px;
-  left: 12px;
-  z-index: 3;
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  font-size: 11px;
-  font-weight: 700;
-  letter-spacing: 0.02em;
-  color: #b42318;
-  background: #fef3f2;
-  border: 1px solid #fecdca;
-  border-radius: 999px;
-  padding: 3px 10px;
-  box-shadow: 0 1px 3px rgba(17, 24, 39, 0.08);
 }
-.card-status-icon {
+.ribbon::before, .ribbon::after {
+  position: absolute;
+  z-index: -1;
+  content: '';
   display: block;
-  flex: none;
+  border: 5px solid #db402b;
+}
+.ribbon span {
+  position: absolute;
+  display: block;
+  width: 225px;
+  padding: 15px 0;
+  background-color: #ff6b58;
+  box-shadow: 0 5px 10px rgba(0, 0, 0, 0.1);
+  color: #fff;
+  font: 700 18px/1 'Lato', sans-serif;
+  text-shadow: 0 1px 1px rgba(0, 0, 0, 0.2);
+  text-transform: uppercase;
+  text-align: center;
+}
+.ribbon-top-left {
+  top: -10px;
+  left: -10px;
+}
+.ribbon-top-left::before, .ribbon-top-left::after {
+  border-top-color: transparent;
+  border-left-color: transparent;
+}
+.ribbon-top-left::before {
+  top: 0;
+  right: 0;
+}
+.ribbon-top-left::after {
+  bottom: 0;
+  left: 0;
+}
+.ribbon-top-left span {
+  right: -25px;
+  top: 30px;
+  transform: rotate(-45deg);
 }
 .search-bar{
   width:75vw;
@@ -823,24 +1082,6 @@ input[type="range"]::-moz-range-thumb {
       display: none;
  }
 }
-@media screen and (max-width: 640px) {
-  #search-row {
-    width: 100%;
-    gap: 8px;
-    padding: 0 16px;
-  }
-  #filter-buttons {
-    flex-shrink: 0;
-  }
-  #search-form {
-    width: auto;
-    min-width: 0;
-    flex: 1;
-  }
-  #search-form form {
-    min-width: 0;
-  }
-}
 .notification.is-info {
   background-color: #fe5c47ea;
   color: #fff;
@@ -864,7 +1105,7 @@ input[type="range"]::-moz-range-thumb {
 .loading-text {
   font-size: 18px;
   margin-top: 15px;
-  font-weight: bold;
+  font-weight: 600;
 }
 .loading-spinner {
   border: 4px solid rgba(0, 0, 0, 0.1);
@@ -989,6 +1230,24 @@ input[type="range"]::-moz-range-thumb {
   box-shadow: 0 0 0 0;
   border-color: #70b9d7;
 }
+.card-badge{
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: rgb(62, 61, 61);
+  height: 50px;
+  min-width: 50px;
+  border-radius: 50px;
+  background-color: #78d4fbe0;
+  margin-left: -57px;
+  margin-top: 8px;
+  box-shadow: rgba(0, 0, 0, 0.24) 0px 3px 8px;
+  z-index: 10;
+}
+.card-badge p{
+  padding: 3px;
+}
 .outer-card{
   display:flex 
 }
@@ -1005,10 +1264,11 @@ input[type="range"]::-moz-range-thumb {
 }
 
 .modal-content {
+  box-sizing: border-box;
   background: white;
   padding: 2rem;
   border-radius: 12px;
-  width: 100%;
+  width: calc(100% - 2rem);
   max-width: 400px;
   text-align: center;
   box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
@@ -1019,6 +1279,13 @@ input[type="range"]::-moz-range-thumb {
   padding: 0.5rem;
   font-size: 1rem;
   margin-top: 1rem;
+}
+
+/* The shared Stepper controls its own layout; undo the legacy modal input rule
+   that otherwise inflates its height and pushes the value off-center. */
+.modal-content .quantity-control input {
+  margin-top: 0;
+  padding: 0;
 }
 
 .modal-buttons {
@@ -1032,7 +1299,7 @@ input[type="range"]::-moz-range-thumb {
   border: none;
   border-radius: 6px;
   cursor: pointer;
-  font-weight: bold;
+  font-weight: 600;
   font-size: 1rem;
 }
 
@@ -1041,7 +1308,7 @@ input[type="range"]::-moz-range-thumb {
 }
 
 .modal-buttons button:first-child:hover {
-  background: #55b9f7;
+  background: #c5cdd1;
 }
 
 .modal-buttons button:last-child {
@@ -1060,13 +1327,195 @@ button.modal-button-primary {
   border: none;
   padding: 0.6rem 1.5rem;
   border-radius: 6px;
-  font-weight: bold;
+  font-weight: 600;
   font-size: 1rem;
   cursor: pointer;
 }
 
 button.modal-button-primary:hover {
   background-color: #55b9f7;
+}
+
+.modal-buttons button.modal-button-submit {
+  background-color: #35b0fb;
+}
+
+.modal-buttons button.modal-button-submit:hover {
+  background-color: #159ee8;
+}
+
+/* Quantity modal: a deliberate vertical rhythm - tight title/subtitle pairing,
+   then larger gaps that separate the copy, the control, and the actions. */
+.quantity-modal {
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  max-width: 440px;
+  padding: 1.5rem;
+}
+
+.quantity-modal__header {
+  display: grid;
+  grid-template-columns: 36px minmax(0, 1fr) 36px;
+  align-items: center;
+  min-height: 36px;
+}
+
+.quantity-modal__header h2 {
+  grid-column: 2;
+}
+
+.quantity-modal__back {
+  display: inline-flex;
+  grid-column: 1;
+  grid-row: 1;
+  justify-self: start;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: #4b5563;
+  border-radius: 50%;
+  cursor: pointer;
+  transition: background-color 0.15s ease;
+}
+
+.quantity-modal__back:hover {
+  background-color: #f3f4f6;
+}
+
+.quantity-modal h2 {
+  margin: 0;
+  font-size: 1.3rem;
+  font-weight: 600;
+  line-height: 1.4;
+  color: #1f2937;
+}
+
+.quantity-modal__meta {
+  margin: 0.875rem 0 0;
+  font-size: 0.9rem;
+  color: #6b7280;
+}
+
+.quantity-modal__size-controls {
+  margin-top: 1.75rem;
+  text-align: left;
+}
+
+.quantity-modal__mode {
+  display: flex;
+  gap: 0.25rem;
+  padding: 0.25rem;
+  background: #f3f4f6;
+  border-radius: 9999px;
+}
+
+.quantity-modal__mode-tab {
+  flex: 1;
+  padding: 0.5rem 0.75rem;
+  border: none;
+  background: transparent;
+  color: #6b7280;
+  font-size: 0.875rem;
+  font-weight: 600;
+  border-radius: 9999px;
+  cursor: pointer;
+  transition: background-color 0.15s ease, color 0.15s ease;
+}
+
+.quantity-modal__mode-tab.is-active {
+  background: #ffffff;
+  color: #111827;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.08);
+}
+
+/* Fixed height keeps the modal from jumping when switching between modes. */
+.quantity-modal__mode-panel {
+  margin-top: 1.25rem;
+}
+
+.quantity-modal__range-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  color: #374151;
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+.quantity-modal__range-heading output {
+  color: #111827;
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+.quantity-modal__slider {
+  padding: 1.25rem 0.25rem 0.5rem;
+}
+
+.quantity-modal__hint {
+  margin: 0.5rem 0 0;
+  font-size: 0.8rem;
+  color: #9ca3af;
+}
+
+.modal-content input.quantity-modal__exact-input {
+  box-sizing: border-box;
+  margin-top: 0;
+  padding: 0.75rem;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  outline: none;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.modal-content input.quantity-modal__exact-input:focus {
+  border-color: #35b0fb;
+  box-shadow: 0 0 0 3px rgba(53, 176, 251, 0.2);
+}
+
+.quantity-modal__warning {
+  margin: 1rem 0 0;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #d9534f;
+}
+
+.quantity-modal .quantity-control {
+  margin: 1.5rem auto 0;
+  width: 100%;
+}
+
+.quantity-modal .modal-buttons {
+  margin-top: 1.75rem;
+  gap: 0.75rem;
+}
+
+.quantity-modal .modal-buttons button {
+  flex: 1;
+}
+
+.quantity-modal .modal-buttons button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+@media (max-width: 480px) {
+  .modal-content {
+    padding: 1.5rem;
+  }
+
+  .quantity-modal {
+    padding: 1.25rem;
+  }
+
+  .quantity-modal h2 {
+    font-size: 1.2rem;
+  }
 }
 
 .cart-grid {
@@ -1092,7 +1541,7 @@ button.modal-button-primary:hover {
 
 .cart-card-header {
   margin-bottom: 0.5rem;
-  font-weight: bold;
+  font-weight: 600;
   font-size: 1.1rem;
   border-bottom: 1px solid #eee;
   padding-bottom: 0.5rem;
