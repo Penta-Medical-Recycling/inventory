@@ -17,12 +17,12 @@ const Description = () => {
   const {
     selectedDescriptions,
     setSelectedDescriptions,
-    allInventoryItems,
+    masterInventoryItems,
   } = useContext(PentaContext);
   const anchor = useComboboxAnchor();
 
   const descriptions = new Set();
-  allInventoryItems.forEach((record) => {
+  masterInventoryItems.forEach((record) => {
     const description = Array.isArray(record?.["Description (from SKU)"])
       ? record["Description (from SKU)"][0]
       : record?.["Description (from SKU)"];

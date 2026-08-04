@@ -1,19 +1,15 @@
-import React, { useState, useEffect, useContext, useRef } from "react";
+import { useState, useEffect, useContext, useRef } from "react";
 import { useDebounce } from "use-debounce";
 import PentaContext from "../../context/PentaContext";
 import BigSpinner from "../../assets/BigSpinner";
 import InStockCard from "../cards/InStockCard";
+import InventoryGroupCard from "../cards/InventoryGroupCard";
+import { getInventoryPagePlan } from "../../lib/inventoryPagination";
+import { getAvailableSkuCodes } from "../../lib/inventoryAvailability";
 
 // HomeLister lists the cards for the home page.
 
-// Duration of the card fade in/out, kept in sync with the .fade-in/.fade-out
-// CSS rules in App.css.
-const FADE_MS = 400;
-// Airtable's maximum page size. Used for the background master-list fetch so it
-// pulls the full inventory in as few requests as possible.
-const AIRTABLE_MAX_PAGE_SIZE = 100;
-
-const HomeLister = ({ onRemove, setOnRemove }) => {
+const HomeLister = ({ onRemove, setOnRemove, activeGroup, onSelectGroup }) => {
   const {
     isLoading,
     data,
@@ -36,166 +32,80 @@ const HomeLister = ({ onRemove, setOnRemove }) => {
     urlCreator,
     fetchAPI,
     setData,
-    allInventoryItems,
-    setAllInventoryItems,
+    inventoryGroups,
+    areInventoryGroupsLoading,
+    masterInventoryItems,
+    isInventoryReady,
+    masterInventoryError,
+    reloadMasterInventory,
   } = useContext(PentaContext);
 
-  const globalUrl = useRef("");
-  const offsetKey = useRef("&offset=");
   const cardDiv = useRef(null);
+  const availabilityCache = useRef(new Map());
+  // Tracks the query identity (active group + filter signature) that the current
+  // pagination offset/offsetArray belong to, so a stale Airtable offset token is
+  // never replayed against a different query. See the pagination reset below.
+  const loadedQueryKeyRef = useRef(null);
 
   // Debounce only the search text so rapid typing coalesces into one fetch.
   // Other filters (manufacturer, size, part, page) are discrete and fetch
   // immediately.
   const [debouncedSearch] = useDebounce(searchInput, 400);
-  // Gate the inventory cards behind the full master-list fetch. Until every
-  // inventory page is cached, the add-to-cart stock check can't tell "not
-  // loaded yet" from "actually zero", so we hold the spinner until it's done.
-  const [inventoryReady, setInventoryReady] = useState(false);
+  const [availableGroups, setAvailableGroups] = useState([]);
+  const [areAvailableGroupsLoading, setAreAvailableGroupsLoading] = useState(true);
+  const [availableGroupsSignature, setAvailableGroupsSignature] = useState("");
+  // Set when the current page request fails, so we surface a retry instead of a
+  // misleading "No Results Found" (and keep the existing page/pagination intact).
+  const [pageError, setPageError] = useState(false);
+  // Bumping this re-runs the page-load effect for the retry affordance.
+  const [pageReloadKey, setPageReloadKey] = useState(0);
+  const currentFilterSignature = urlCreator({ pageSize: 1, maxRecords: 1 });
 
-  // ✅ Background fetch of all inventory pages
   useEffect(() => {
-    // Reuse the cached master list across in-app navigation (e.g. Cart -> Home).
-    // sessionStorage persists for the tab session, so only do the full
-    // multi-page fetch when the cache is missing or empty.
-    if (allInventoryItems.length > 0) {
-      setInventoryReady(true);
+    if (activeGroup || areInventoryGroupsLoading || !isInventoryReady) {
+      setAvailableGroups([]);
+      setAreAvailableGroupsLoading(false);
       return;
     }
 
-    async function fetchAllInventory() {
-      try {
-        let allRecords = [];
-        let nextOffset = "";
-        let pageCounter = 0;
-        // Safety bound only - the loop exits on the missing offset below once
-        // Airtable runs out of pages. Larger pages (100 is the Airtable max)
-        // cut the request count vs the visible 36/page pagination.
-        const maxPages = 1000;
-        const baseUrl = urlCreator(AIRTABLE_MAX_PAGE_SIZE).split("&offset=")[0];
-
-        while (pageCounter < maxPages) {
-          const url = baseUrl + nextOffset;
-          const res = await fetchAPI(url);
-          if (res.records) {
-            allRecords.push(...res.records.map((r) => r.fields));
-          }
-          if (!res.offset) break;
-          nextOffset = `&offset=${res.offset}`;
-          pageCounter++;
-        }
-
-        sessionStorage.setItem("allInventoryItems", JSON.stringify(allRecords));
-          setAllInventoryItems(allRecords);
-        console.log(`✅ Fetched ${allRecords.length} total items from inventory.`);
-      } catch (err) {
-        console.error("❌ Error fetching all inventory:", err);
-      } finally {
-        setInventoryReady(true);
-      }
+    const cachedGroups = availabilityCache.current.get(currentFilterSignature);
+    if (cachedGroups) {
+      setAvailableGroups(cachedGroups);
+      setAvailableGroupsSignature(currentFilterSignature);
+      setAreAvailableGroupsLoading(false);
+      return;
     }
 
-    fetchAllInventory();
-  }, []);
+    setAreAvailableGroupsLoading(true);
+    setAvailableGroupsSignature("");
+    setOffset(0);
+    setOffsetArray([""]);
 
-  async function loadNewPage() {
-    const newUrl = urlCreator();
-    const newOffset = "&offset=" + offsetArray[offset];
-
-    try {
-      if (globalUrl.current !== newUrl) {
-        const res = await fetchAPI(newUrl);
-        if (res.offset) {
-          setOffsetArray(["", res.offset]);
-          setPage("Next");
-        } else {
-          setOffsetArray([""]);
-          setPage("None");
-        }
-
-        // The new filter always lands on page 0, so record the page-0 offset
-        // key. Storing the old page's key here made the follow-up offset reset
-        // look like a page change and replay the loading animation.
-        offsetKey.current = "&offset=";
-        globalUrl.current = newUrl;
-        setOffset(0);
-        setData(res.records);
-        sessionStorage.setItem("allItems", JSON.stringify(res.records.map((r) => r.fields)));
-      } else if (offsetKey.current !== newOffset) {
-        const res = await fetchAPI(newUrl + newOffset);
-        if (res.offset && offsetArray[offset - 1] !== undefined && offset !== 0) {
-          setOffsetArray([...offsetArray, res.offset]);
-          setPage("Next/Previous");
-        } else if (!res.offset && offsetArray[offset - 1] !== undefined && offset !== 0) {
-          setPage("Previous");
-        } else {
-          setPage("Next");
-        }
-
-        offsetKey.current = newOffset;
-        setData(res.records);
-        sessionStorage.setItem("allItems", JSON.stringify(res.records.map((r) => r.fields)));
-      }
-    } catch (err) {
-      console.error("❌ Error loading new page:", err);
-    }
-  }
-
-  // Cheap, synchronous mirror of loadNewPage's fetch decision so the effect can
-  // skip cycles that wouldn't fetch anything - e.g. the async max size arriving
-  // after mount, or the offset reset that follows a filter change. Without this,
-  // those no-op cycles replay the loading animation a second time.
-  function willFetch() {
-    const newUrl = urlCreator();
-    const newOffset = "&offset=" + offsetArray[offset];
-    if (globalUrl.current !== newUrl) return true;
-    if (offsetKey.current !== newOffset) return true;
-    return false;
-  }
-
-  useEffect(() => {
-    // Cancel-safe loading cycle. `cancelled` short-circuits state updates and
-    // every timer is tracked so the cleanup can clear them when the effect
-    // re-runs (a new filter/page), preventing overlapping loading cycles.
-    let cancelled = false;
-    const timers = [];
-    const delay = (ms) =>
-      new Promise((resolve) => timers.push(setTimeout(resolve, ms)));
-
-    async function run() {
-      // Skip cycles that wouldn't change what's displayed. This coalesces the
-      // extra dependency updates that fire right after a load (the async max
-      // size on first render, the offset reset after a filter change) so the
-      // loading animation only ever plays once.
-      if (!willFetch()) {
-        setIsLoading(false);
-        return;
-      }
-
-      // Fade the current cards out before swapping them (skip on first load).
-      if (cardDiv.current) {
-        setOnRemove(true);
-        await delay(FADE_MS);
-        if (cancelled) return;
-      }
-
-      setIsLoading(true);
-      setOnRemove(false);
-      await loadNewPage();
-      if (cancelled) return;
-
-      await delay(FADE_MS);
-      if (cancelled) return;
-      setIsLoading(false);
-    }
-
-    run();
-
-    return () => {
-      cancelled = true;
-      timers.forEach(clearTimeout);
-    };
+    const availableCodes = getAvailableSkuCodes(masterInventoryItems, {
+      selectedDescriptions,
+      selectedSKU,
+      selectedManufacturer,
+      selectedFilter,
+      searchInput: debouncedSearch,
+      selectedPart,
+      extremity,
+      isRangeOn,
+      minValue,
+      maxValue,
+    });
+    const confirmedGroups = inventoryGroups.filter((group) =>
+      group.skuCodes.some((code) => availableCodes.has(code))
+    );
+    availabilityCache.current.set(currentFilterSignature, confirmedGroups);
+    setAvailableGroups(confirmedGroups);
+    setAvailableGroupsSignature(currentFilterSignature);
+    setAreAvailableGroupsLoading(false);
   }, [
+    activeGroup,
+    areInventoryGroupsLoading,
+    isInventoryReady,
+    inventoryGroups,
+    masterInventoryItems,
     selectedManufacturer,
     selectedSKU,
     selectedFilter,
@@ -206,22 +116,171 @@ const HomeLister = ({ onRemove, setOnRemove }) => {
     debouncedSearch,
     selectedPart,
     extremity,
+  ]);
+
+  const pagePlan = getInventoryPagePlan(offset, activeGroup ? [] : availableGroups);
+
+  useEffect(() => {
+    if (
+      areInventoryGroupsLoading ||
+      (!activeGroup &&
+        (areAvailableGroupsLoading || availableGroupsSignature !== currentFilterSignature))
+    ) {
+      return;
+    }
+
+    // Airtable offset tokens are specific to the exact query that produced them.
+    // When the query identity changes (filters, search, or the active group), any
+    // offset carried over from a page > 0 belongs to a different formula. Reset
+    // pagination first rather than replaying a stale token, which Airtable would
+    // reject or answer with the wrong page.
+    const queryKey = `${activeGroup ? activeGroup.key : "overview"}::${currentFilterSignature}`;
+    if (loadedQueryKeyRef.current !== queryKey && offset !== 0) {
+      loadedQueryKeyRef.current = queryKey;
+      setOffset(0);
+      setOffsetArray([""]);
+      return;
+    }
+    loadedQueryKeyRef.current = queryKey;
+
+    let cancelled = false;
+
+    async function loadPage() {
+      setIsLoading(true);
+      setOnRemove(false);
+
+      const groupedCodes = availableGroups.flatMap((group) => group.skuCodes);
+      const pageSize = activeGroup ? 36 : pagePlan.individualCount;
+      let response = { records: [] };
+      let requestFailed = false;
+
+      if (pageSize > 0) {
+        const baseUrl = urlCreator({
+          pageSize,
+          includeSkuCodes: activeGroup?.skuCodes,
+          excludeSkuCodes: activeGroup ? undefined : groupedCodes,
+        });
+        const pageOffset = offsetArray[offset];
+        response = await fetchAPI(
+          baseUrl + (pageOffset ? `&offset=${encodeURIComponent(pageOffset)}` : "")
+        );
+        requestFailed = response === null;
+      } else if (!pagePlan.hasMoreGroups) {
+        response = await fetchAPI(
+          urlCreator({
+            pageSize: 1,
+            maxRecords: 1,
+            fields: ["Item ID"],
+            excludeSkuCodes: groupedCodes,
+          })
+        );
+        requestFailed = response === null;
+      }
+
+      if (cancelled) return;
+
+      // A failed request (fetchAPI returns null) is not an empty page. Surface a
+      // retry and keep the current data/pagination rather than wiping the page
+      // and showing a misleading "No Results Found".
+      if (requestFailed) {
+        setPageError(true);
+        setIsLoading(false);
+        return;
+      }
+      setPageError(false);
+
+      const records = pageSize > 0 ? response?.records || [] : [];
+      const hasNext = pagePlan.hasMoreGroups || Boolean(response?.offset) || (pageSize === 0 && Boolean(response?.records?.length));
+
+      if (response?.offset) {
+        setOffsetArray((current) => {
+          const next = [...current];
+          next[offset + 1] = response.offset;
+          return next;
+        });
+      }
+
+      setPage(
+        offset > 0
+          ? hasNext
+            ? "Next/Previous"
+            : "Previous"
+          : hasNext
+            ? "Next"
+            : "None"
+      );
+      setData(records);
+      sessionStorage.setItem("allItems", JSON.stringify(records.map((record) => record.fields)));
+      setIsLoading(false);
+    }
+
+    loadPage();
+    return () => {
+      cancelled = true;
+    };
+  }, [
+    activeGroup,
+    areInventoryGroupsLoading,
+    areAvailableGroupsLoading,
+    availableGroupsSignature,
+    availableGroups,
+    currentFilterSignature,
+    debouncedSearch,
+    extremity,
+    isRangeOn,
+    maxValue,
+    minValue,
     offset,
+    selectedDescriptions,
+    selectedFilter,
+    selectedManufacturer,
+    selectedPart,
+    selectedSKU,
+    pageReloadKey,
   ]);
 
   return (
     <>
-      {isLoading || !inventoryReady ? (
+      {masterInventoryError ? (
+        <div className="has-text-centered" role="alert">
+          <p className="is-size-4 has-text-weight-bold">
+            We couldn&apos;t load the inventory.
+          </p>
+          <button
+            type="button"
+            className="button is-primary"
+            onClick={reloadMasterInventory}
+          >
+            Retry
+          </button>
+        </div>
+      ) : isLoading || !isInventoryReady || (!activeGroup && areAvailableGroupsLoading) ? (
         <BigSpinner size={75} />
-      ) : data && data.length ? (
+      ) : pageError ? (
+        <div className="has-text-centered" role="alert">
+          <p className="is-size-4 has-text-weight-bold">
+            We couldn&apos;t load these results.
+          </p>
+          <button
+            type="button"
+            className="button is-primary"
+            onClick={() => setPageReloadKey((key) => key + 1)}
+          >
+            Retry
+          </button>
+        </div>
+      ) : pagePlan.groups.length || (data && data.length) ? (
         <div id="cardDiv" ref={cardDiv}>
-          {data.map((item, index) => (
+          {pagePlan.groups.map((group) => (
+            <InventoryGroupCard key={group.key} group={group} onSelect={onSelectGroup} />
+          ))}
+          {(data || []).map((item, index) => (
             <InStockCard
               key={item.fields["Item ID"] || index}
               item={item.fields}
               onRemove={onRemove}
               setOnRemove={setOnRemove}
-              allVisibleItems={data.map((i) => i.fields)}
+              allVisibleItems={(data || []).map((i) => i.fields)}
             />
           ))}
         </div>

@@ -7,11 +7,51 @@ import PentaContext from "../context/PentaContext";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import {
+  AIRTABLE_API_KEY,
+  AIRTABLE_API_URL,
+  AIRTABLE_BASE_ID,
+} from "../config/airtable";
 
 // You should implement or import this method properly
 const getTotalInStockBySKU = async (sku) => {
   // TODO: Replace with actual API call
   return 10;
+};
+
+export const getCartItemKeys = (storage = localStorage) =>
+  Object.keys(storage).filter((key) => key !== "notes" && key !== "partner");
+
+export const checkCartItemAvailability = async (itemIds, fetchImpl = fetch) => {
+  const statuses = Object.fromEntries(itemIds.map((id) => [id, "pending"]));
+  const unavailableIds = [];
+  const failedIds = [];
+
+  await Promise.all(
+    itemIds.map(async (id) => {
+      const url = `${AIRTABLE_API_URL}/${AIRTABLE_BASE_ID}/Inventory?filterByFormula=AND({Requests}=BLANK(),{Shipment Status}=BLANK(),NOT({SKU}=""),AND({Item ID}='${encodeURIComponent(
+        id
+      )}'))&maxRecords=1`;
+
+      try {
+        const response = await fetchImpl(url, {
+          headers: { Authorization: `Bearer ${AIRTABLE_API_KEY}` },
+        });
+        if (!response.ok) throw new Error(`Inventory check failed with ${response.status}`);
+
+        const data = await response.json();
+        if (!Array.isArray(data.records)) throw new Error("Invalid inventory response");
+        if (data.records.length === 0) unavailableIds.push(id);
+        statuses[id] = "done";
+      } catch (error) {
+        console.error(`Error fetching data for ID ${id}:`, error);
+        statuses[id] = "error";
+        failedIds.push(id);
+      }
+    })
+  );
+
+  return { statuses, unavailableIds, failedIds };
 };
 
 function Cart() {
@@ -25,32 +65,18 @@ function Cart() {
   const [numOfChildren, setNumOfChildren] = useState("");
   const [showResetModal, setShowResetModal] = useState(false);
   const [itemValidationStatus, setItemValidationStatus] = useState({});
-  const [loadingItems, setLoadingItems] = useState(true);
   const [isCartReady, setIsCartReady] = useState(false);
+  const [isRetryingAvailability, setIsRetryingAvailability] = useState(false);
 // Filter valid cart item keys (skip notes/partner/etc)
-const itemKeys = Object.keys(localStorage).filter(
-  (key) => key !== "notes" && key !== "partner"
-);
-
-// Check if every item is validated
-const validatedItemCount = itemKeys.filter((key) => {
+const itemKeys = getCartItemKeys();
+const isCartEmpty = itemKeys.length === 0;
+const itemIds = itemKeys.map((key) => {
   const item = JSON.parse(localStorage.getItem(key));
-  const status = itemValidationStatus[item["Item ID"]];
-  console.log(`Item ID ${item["Item ID"]} validation status:`, status);
-  return status === "done";
-}).length;
+  return item["Item ID"];
+}).filter(Boolean);
+const hasValidationErrors = itemIds.some((id) => itemValidationStatus[id] === "error");
+const hasUnavailableItems = outOfStock?.size > 0;
 
-const allItemsValidated = validatedItemCount === itemKeys.length;
-
-console.log("🧾 Total items:", itemKeys.length);
-console.log("✅ Validated items:", validatedItemCount);
-console.log("🌀 All items validated:", allItemsValidated);
-
-
-
-
-
-  const APIKey = import.meta.env.VITE_REACT_APP_API_KEY;
 
   const handleQuantityChange = (id, value) => {
     setQuantities(prev => ({ ...prev, [id]: value }));
@@ -70,6 +96,8 @@ console.log("🌀 All items validated:", allItemsValidated);
   };
 
   const handleConfirmOrder = async () => {
+    if (isCartEmpty) return;
+
     const cartItems = Object.entries(quantities).map(([sku, quantity]) => ({
       sku,
       quantity: parseInt(quantity)
@@ -106,47 +134,23 @@ const confirmResetCart = () => {
     localStorage.setItem("notes", event.target.value);
   };
 
-  const idFetcher = async () => {
-  const ids = [];
-  const validationStatus = {};
+  const idFetcher = async (itemIds = getCartItemKeys().map((key) => {
+    const item = JSON.parse(localStorage.getItem(key));
+    return item["Item ID"];
+  }).filter(Boolean)) => {
+    setItemValidationStatus(Object.fromEntries(itemIds.map((id) => [id, "pending"])));
+    const result = await checkCartItemAvailability(itemIds);
+    setItemValidationStatus(result.statuses);
+    setOutOfStock(new Set(result.unavailableIds));
+    setIsCartReady(true);
+    return result;
+  };
 
-  for (let [key, value] of Object.entries(localStorage)) {
-    if (key !== "partner" && key !== "notes") {
-      const parse = JSON.parse(value);
-      const itemID = parse["Item ID"];
-      if (itemID !== undefined) {
-        ids.push(itemID);
-        validationStatus[itemID] = "pending";
-      }
-    }
-  }
-
-  const idSet = new Set();
-  const fetches = ids.map(async (id) => {
-    const url = `https://api.airtable.com/v0/appHFwcwuXLTNCjtN/Inventory?filterByFormula=AND({Requests}=BLANK(),{Shipment Status}=BLANK(),NOT({SKU}=""),AND({Item ID}='${encodeURIComponent(
-      id
-    )}'))&maxRecords=1`;
-
-    try {
-      const response = await fetch(url, {
-        headers: { Authorization: `Bearer ${APIKey}` },
-      });
-      const data = await response.json();
-      if (data.records && data.records.length === 0) {
-        idSet.add(id);
-      }
-      validationStatus[id] = "done";
-    } catch (error) {
-      console.error(`Error fetching data for ID ${id}:`, error);
-      validationStatus[id] = "error";
-    }
-  });
-
-  await Promise.all(fetches);
-  setItemValidationStatus(validationStatus);
-  setOutOfStock(idSet);
-  setIsCartReady(true);
-};
+  const retryAvailabilityCheck = async () => {
+    setIsRetryingAvailability(true);
+    await idFetcher(itemIds);
+    setIsRetryingAvailability(false);
+  };
 
 
 
@@ -160,11 +164,14 @@ useEffect(() => {
 
   const requestButton = async (event) => {
     setIsLoading(true);
-    
-    setOutOfStock(new Set());
-    const stockCheck = await idFetcher();
 
-    if (stockCheck) {
+    const itemIds = getCartItemKeys().map((key) => {
+      const item = JSON.parse(localStorage.getItem(key));
+      return item["Item ID"];
+    }).filter(Boolean);
+    const stockCheck = await idFetcher(itemIds);
+
+    if (stockCheck.unavailableIds.length > 0) {
       Toast({
         message:
           "Sorry but one or more of your items are unavailable, please remove to checkout.",
@@ -174,14 +181,17 @@ useEffect(() => {
       return;
     }
 
-    const BaseID = "appHFwcwuXLTNCjtN";
+    if (stockCheck.failedIds.length > 0) {
+      Toast({
+        message: "We couldn't verify inventory availability. Please try again.",
+        type: "is-danger",
+      });
+      setIsLoading(false);
+      return;
+    }
+
     const tableName = "Requests";
-    const items = [];
-    Object.entries(localStorage).forEach(([key, value]) => {
-      if (key !== "partner" && key !== "notes")
-        items.push(JSON.parse(value)["Item ID"]);
-    });
-    const url = `https://api.airtable.com/v0/${BaseID}/${tableName}`;
+    const url = `${AIRTABLE_API_URL}/${AIRTABLE_BASE_ID}/${tableName}`;
     const data = {
       records: [
         {
@@ -189,7 +199,7 @@ useEffect(() => {
             Name: generateRandomHexadecimal(),
             Partner: localStorage["partner"],
             "Additional Notes": notes,
-            "Items You Would Like": items,
+            "Items You Would Like": itemIds,
             "Number of patients helped": Number(numOfPatients) || 0,
             "Number of children helped": Number(numOfChildren) || 0
           },
@@ -201,7 +211,7 @@ useEffect(() => {
     fetch(url, {
       method: "POST",
       headers: {
-        Authorization: `Bearer ${APIKey}`,
+        Authorization: `Bearer ${AIRTABLE_API_KEY}`,
         "Content-Type": "application/json",
       },
       body: JSON.stringify(data),
@@ -265,7 +275,7 @@ useEffect(() => {
         </h1>
       </div>
 
-      {(!isCartReady || isLoading || !allItemsValidated) ? (
+      {(!isCartReady || isLoading) ? (
   <BigSpinner size={75} />
 ) : (
   <>
@@ -284,6 +294,23 @@ useEffect(() => {
       setOutOfStock={setOutOfStock}
       itemValidationStatus={itemValidationStatus}
     />
+
+    {hasValidationErrors && (
+      <div className="cart-validation-alert" role="alert">
+        <div>
+          <strong>Some items couldn't be verified.</strong>
+          <p>Check your connection, then retry before submitting your request.</p>
+        </div>
+        <Button
+          type="button"
+          variant="outline"
+          disabled={isRetryingAvailability}
+          onClick={retryAvailabilityCheck}
+        >
+          {isRetryingAvailability ? "Checking..." : "Retry availability check"}
+        </Button>
+      </div>
+    )}
 
           <div style={{ width: "60vw", margin: "auto" }}>
             <p>How many patients do you plan to help with this request?</p>
@@ -321,6 +348,7 @@ useEffect(() => {
               type="button"
               size="lg"
               className="mb-4 w-[142px] rounded-full bg-[#78d3fb] text-white hover:bg-[#78d3fb]/90"
+              disabled={isCartEmpty || hasValidationErrors || hasUnavailableItems}
               onClick={handleConfirmOrder}
             >
               Request Items

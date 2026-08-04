@@ -1,19 +1,33 @@
 import { useState, useEffect } from "react";
 import PentaContext from "./PentaContext";
+import {
+  normalizeInventoryGroups,
+  SKU_GROUPS_TABLE,
+} from "../config/inventoryGroups";
+import {
+  AIRTABLE_API_KEY,
+  AIRTABLE_API_URL,
+  AIRTABLE_BASE_ID,
+} from "../config/airtable";
+
+// Airtable's maximum page size. Used for the background master-list fetch so it
+// pulls the full inventory in as few requests as possible.
+const AIRTABLE_MAX_PAGE_SIZE = 100;
 
 function PentaProvider({ children }) {
   const [selectedPartner, setSelectedPartner] = useState(
     localStorage.getItem("partner") || ""
   );
-  const APIKey = import.meta.env.VITE_REACT_APP_API_KEY;
-
   const [cartCount, setCartCount] = useState(
     Object.keys(localStorage).filter((k) => k !== "partner" && k !== "notes").length
   );
-  // null = status not yet known. App renders nothing until the /Site-Status
-  // fetch resolves, so the Maintenance screen doesn't flash on every load.
+  // null = status not yet known. The app renders normally while this resolves;
+  // "Offline" is the intentional maintenance toggle from the Site-Status record.
   const [serverStatus, setServerStatus] = useState(null);
   const [serverMessage, setServerMessage] = useState("");
+  // Set when the /Site-Status fetch itself fails (Airtable host issue), so the
+  // app can surface an error instead of being conflated with maintenance.
+  const [serverError, setServerError] = useState(null);
   const [popUpStatus, setPopUpStatus] = useState("Offline");
   const [message, setMessage] = useState("");
   const [isCartPressed, setIsCartPressed] = useState(false);
@@ -23,16 +37,6 @@ function PentaProvider({ children }) {
   const [isDownloading, setIsDownloading] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [data, setData] = useState();
-  const [allInventoryItems, setAllInventoryItems] = useState(() => {
-    try {
-      const cached = JSON.parse(
-        sessionStorage.getItem("allInventoryItems") || "[]"
-      );
-      return Array.isArray(cached) ? cached : [];
-    } catch {
-      return [];
-    }
-  });
   const [filteredDescriptions, setFilteredDescriptions] = useState([]);
   const [searchInput, setSearchInput] = useState("");
   const [selectedFilter, setSelectedFilters] = useState({
@@ -53,15 +57,34 @@ function PentaProvider({ children }) {
   const isRangeOn = minValue > 1 || maxValue < largestSize;
   const [offset, setOffset] = useState(0);
   const [offsetArray, setOffsetArray] = useState([""]);
+  const [inventoryGroups, setInventoryGroups] = useState([]);
+  const [areInventoryGroupsLoading, setAreInventoryGroupsLoading] = useState(true);
+
+  // Full sellable inventory (filter-independent), cached for the tab session and
+  // shared across the app so availability checks and the bulk add flow read a
+  // single reactive source instead of poking sessionStorage directly.
+  const [masterInventoryItems, setMasterInventoryItems] = useState([]);
+  const [isInventoryReady, setIsInventoryReady] = useState(false);
+  // Set when the master-list fetch fails outright, so the UI can distinguish a
+  // real failure (offer a retry) from a genuinely empty inventory.
+  const [masterInventoryError, setMasterInventoryError] = useState(false);
+  // Bumping this re-runs the master fetch effect (used by the retry affordance).
+  const [masterInventoryReloadKey, setMasterInventoryReloadKey] = useState(0);
+  const reloadMasterInventory = () => {
+    sessionStorage.removeItem("allInventoryItems");
+    setIsInventoryReady(false);
+    setMasterInventoryError(false);
+    setMasterInventoryReloadKey((key) => key + 1);
+  };
 
   useEffect(() => {
     const fetchStatus = async () => {
       try {
-        const data = await fetch("https://api.airtable.com/v0/appHFwcwuXLTNCjtN/Site-Status", {
+        const data = await fetch(`${AIRTABLE_API_URL}/${AIRTABLE_BASE_ID}/Site-Status`, {
           method: "GET",
           headers: {
             "Content-Type": "application/json",
-            "authorization": `Bearer ${APIKey}`
+            "authorization": `Bearer ${AIRTABLE_API_KEY}`
           }
         });
 
@@ -71,18 +94,119 @@ function PentaProvider({ children }) {
         setServerStatus(response.records[1].fields.Status);
         setServerMessage(response.records[1].fields.Message);
       } catch (error) {
-        // If the status can't be fetched, fall back to Maintenance rather than
-        // leaving the app blank forever.
+        // A failed status fetch is a host problem, not intentional maintenance -
+        // surface an error message instead of the Maintenance screen.
         console.error("Error fetching site status:", error);
-        setServerStatus("Offline");
+        setServerError(
+          "We're having trouble reaching the inventory service. Please try again later."
+        );
       }
     };
 
     fetchStatus();
   }, []);
 
-  function urlCreator(pageSizeValue = 36) {
-    const baseUrl = "https://api.airtable.com/v0/appHFwcwuXLTNCjtN/Inventory?";
+  useEffect(() => {
+    let cancelled = false;
+
+    async function loadInventoryGroups() {
+      try {
+        const records = await fetchTableRecordsWithOffset(SKU_GROUPS_TABLE);
+        if (!cancelled) setInventoryGroups(normalizeInventoryGroups(records));
+      } catch (error) {
+        console.error("Error fetching SKU Groups:", error);
+        if (!cancelled) setInventoryGroups([]);
+      } finally {
+        if (!cancelled) setAreInventoryGroupsLoading(false);
+      }
+    }
+
+    loadInventoryGroups();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  // Background fetch of the full inventory (all pages, filter-independent).
+  // Reuses the sessionStorage cache across in-app navigation; only re-fetches
+  // when the cache is missing/empty or a retry was requested.
+  useEffect(() => {
+    let cancelled = false;
+
+    const cached = sessionStorage.getItem("allInventoryItems");
+    if (cached) {
+      try {
+        const parsed = JSON.parse(cached);
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          setMasterInventoryItems(parsed);
+          setMasterInventoryError(false);
+          setIsInventoryReady(true);
+          return;
+        }
+      } catch {
+        // Malformed cache - fall through and refetch.
+      }
+    }
+
+    async function fetchAllInventory() {
+      let allRecords = [];
+      let nextOffset = "";
+      let pageCounter = 0;
+      // Safety bound only - the loop exits on the missing offset once Airtable
+      // runs out of pages. 100 (the Airtable max) cuts the request count.
+      const maxPages = 1000;
+      // The master list must represent the full sellable inventory regardless of
+      // the active filters, so availability is derived from a complete set.
+      const baseUrl = urlCreator({
+        pageSize: AIRTABLE_MAX_PAGE_SIZE,
+        includeUserFilters: false,
+      }).split("&offset=")[0];
+
+      while (pageCounter < maxPages && !cancelled) {
+        const url = baseUrl + nextOffset;
+        const res = await fetchAPI(url);
+        if (cancelled) return;
+        // fetchAPI returns null on a failed request. Treat that as an error
+        // rather than an empty page, so we don't cache/expose a partial list
+        // that would wrongly hide every group.
+        if (!res) {
+          setMasterInventoryError(true);
+          setIsInventoryReady(true);
+          return;
+        }
+        if (res.records) {
+          allRecords.push(...res.records.map((r) => r.fields));
+        }
+        if (!res.offset) break;
+        nextOffset = `&offset=${res.offset}`;
+        pageCounter++;
+      }
+
+      if (cancelled) return;
+      sessionStorage.setItem("allInventoryItems", JSON.stringify(allRecords));
+      setMasterInventoryItems(allRecords);
+      setMasterInventoryError(false);
+      setIsInventoryReady(true);
+    }
+
+    fetchAllInventory();
+    return () => {
+      cancelled = true;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [masterInventoryReloadKey]);
+
+  function urlCreator(pageSizeOrOptions = 36) {
+    const options =
+      typeof pageSizeOrOptions === "number"
+        ? { pageSize: pageSizeOrOptions }
+        : pageSizeOrOptions || {};
+    const pageSizeValue = options.pageSize ?? 36;
+    // When false, only the base availability filters (and any include/exclude SKU
+    // codes) are applied - the user-selected filters/search are skipped. Used to
+    // build the full inventory master list regardless of the active filter state.
+    const includeUserFilters = options.includeUserFilters !== false;
+    const baseUrl = `${AIRTABLE_API_URL}/${AIRTABLE_BASE_ID}/Inventory?`;
     const sort = `sort[0][field]=Item ID&sort[0][direction]=asc`;
     const pageSize = `pageSize=${pageSizeValue}`;
     let filterFunction = "filterByFormula=";
@@ -93,6 +217,16 @@ function PentaProvider({ children }) {
       'NOT({SKU}="")',
     ];
 
+    const codeCondition = (code) =>
+      `{SKU Item Code}="${String(code).replace(/\\/g, "\\\\").replace(/"/g, '\\"')}"`;
+    if (options.includeSkuCodes?.length) {
+      filters.push(`OR(${options.includeSkuCodes.map(codeCondition).join(",")})`);
+    }
+    if (options.excludeSkuCodes?.length) {
+      filters.push(`NOT(OR(${options.excludeSkuCodes.map(codeCondition).join(",")}))`);
+    }
+
+    if (includeUserFilters) {
     const skus = selectedSKU.map((option) => option.value);
     if (selectedSKU.length > 0) {
   filters.push(
@@ -184,9 +318,15 @@ if (selectedSKU.length > 0) {
     } else if (extremity === "Lower") {
       filters.push(`NOT(FIND("Arms/ Hands", ARRAYJOIN({Limb Guide})))`);
     }
+    }
 
     filterFunction += encodeURIComponent(`AND(${filters.join(",")})`);
-    return baseUrl + [pageSize, sort, filterFunction].join("&");
+    const params = [pageSize, sort, filterFunction];
+    if (options.maxRecords) params.push(`maxRecords=${options.maxRecords}`);
+    options.fields?.forEach((field) => {
+      params.push(`fields%5B%5D=${encodeURIComponent(field)}`);
+    });
+    return baseUrl + params.join("&");
 
     
   }
@@ -195,7 +335,7 @@ if (selectedSKU.length > 0) {
     try {
       const response = await fetch(url, {
         headers: {
-          Authorization: `Bearer ${APIKey}`,
+          Authorization: `Bearer ${AIRTABLE_API_KEY}`,
         },
       });
 
@@ -208,8 +348,7 @@ if (selectedSKU.length > 0) {
   }
 
   async function fetchTableRecords(tableName, offset = null) {
-    const baseId = "appHFwcwuXLTNCjtN";
-    const url = `https://api.airtable.com/v0/${baseId}/${tableName}?${
+    const url = `${AIRTABLE_API_URL}/${AIRTABLE_BASE_ID}/${encodeURIComponent(tableName)}?${
       offset ? `offset=${offset}` : ""
     }`;
     return fetchAPI(url);
@@ -228,7 +367,7 @@ if (selectedSKU.length > 0) {
   }
 
   async function fetchMaxSize() {
-    const url = `https://api.airtable.com/v0/appHFwcwuXLTNCjtN/Inventory?pageSize=1&sort[0][field]=Size&sort[0][direction]=desc&filterByFormula=AND(AND({Requests}="",{Shipment Status}=""),NOT({SKU}=""))`;
+    const url = `${AIRTABLE_API_URL}/${AIRTABLE_BASE_ID}/Inventory?pageSize=1&sort[0][field]=Size&sort[0][direction]=desc&filterByFormula=AND(AND({Requests}="",{Shipment Status}=""),NOT({SKU}=""))`;
     const data = await fetchAPI(url);
     if (data?.records?.length > 0) return data.records[0].fields.Size;
     return null;
@@ -262,7 +401,7 @@ if (selectedSKU.length > 0) {
 };
 
   const getCartItemsSortedFIFO = async () => {
-    const url = `https://api.airtable.com/v0/appHFwcwuXLTNCjtN/Inventory?sort[0][field]=Date Added&sort[0][direction]=asc&filterByFormula=AND(NOT({Requests}!=""), {Quantity In Stock}>0)`;
+    const url = `${AIRTABLE_API_URL}/${AIRTABLE_BASE_ID}/Inventory?sort[0][field]=Date Added&sort[0][direction]=asc&filterByFormula=AND(NOT({Requests}!=""), {Quantity In Stock}>0)`;
     const data = await fetchAPI(url);
     return data?.records || [];
   };
@@ -275,10 +414,10 @@ if (selectedSKU.length > 0) {
         if (record.fields.SKU === item.sku && quantityToFulfill > 0) {
           const availableQty = record.fields["Quantity In Stock"] || 0;
           const fulfillQty = Math.min(availableQty, quantityToFulfill);
-          await fetch(`https://api.airtable.com/v0/appHFwcwuXLTNCjtN/Inventory/${record.id}`, {
+          await fetch(`${AIRTABLE_API_URL}/${AIRTABLE_BASE_ID}/Inventory/${record.id}`, {
             method: "PATCH",
             headers: {
-              Authorization: `Bearer ${APIKey}`,
+              Authorization: `Bearer ${AIRTABLE_API_KEY}`,
               "Content-Type": "application/json",
             },
             body: JSON.stringify({
@@ -296,8 +435,7 @@ if (selectedSKU.length > 0) {
   };
 
   const getTotalInStockBySKU = async (sku) => {
-    const baseId = "appHFwcwuXLTNCjtN";
-    const url = `https://api.airtable.com/v0/${baseId}/Inventory?filterByFormula=AND({SKU} = '${sku}', {Requests} = BLANK(), {Shipment Status} = BLANK())`;
+    const url = `${AIRTABLE_API_URL}/${AIRTABLE_BASE_ID}/Inventory?filterByFormula=AND({SKU} = '${sku}', {Requests} = BLANK(), {Shipment Status} = BLANK())`;
     const data = await fetchAPI(url);
     if (!data || !data.records) return 0;
     return data.records.reduce((total, record) => total + (record.fields["Quantity In Stock"] || 0), 0);
@@ -341,12 +479,12 @@ if (selectedSKU.length > 0) {
         setSelectedFilters,
         data,
         setData,
-        allInventoryItems,
-        setAllInventoryItems,
         serverMessage,
         setServerMessage,
         serverStatus,
         setServerStatus,
+        serverError,
+        setServerError,
         popUpStatus,
         setPopUpStatus,
         message,
@@ -366,6 +504,12 @@ if (selectedSKU.length > 0) {
         setSelectedPart,
         extremity,
         setExtremity,
+        inventoryGroups,
+        areInventoryGroupsLoading,
+        masterInventoryItems,
+        isInventoryReady,
+        masterInventoryError,
+        reloadMasterInventory,
       }}
     >
       {children}

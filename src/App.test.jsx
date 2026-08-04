@@ -5,11 +5,12 @@ import { describe, it, expect } from "vitest";
 import { http, HttpResponse } from "msw";
 import { renderWithProviders, screen } from "./test/utils";
 import App from "./App";
+import { AIRTABLE_API_URL, AIRTABLE_BASE_ID } from "./config/airtable";
 import { server } from "./test/mocks/server";
 import { siteStatusOfflineRecords } from "./test/mocks/fixtures";
 
 const SITE_STATUS_URL =
-  "https://api.airtable.com/v0/appHFwcwuXLTNCjtN/Site-Status";
+  `${AIRTABLE_API_URL}/${AIRTABLE_BASE_ID}/Site-Status`;
 
 describe("App status gate", () => {
   it("renders the Home UI when the platform status is Online (default handler)", async () => {
@@ -36,25 +37,29 @@ describe("App status gate", () => {
     expect(screen.queryByAltText("logo")).not.toBeInTheDocument();
   });
 
-  it("renders nothing until the status fetch resolves (no Maintenance flash)", async () => {
-    const { container } = renderWithProviders(<App />);
+  it("holds a loading screen until the status resolves, then shows Home", async () => {
+    renderWithProviders(<App />);
 
-    // serverStatus starts as null (unknown), so App renders nothing initially -
-    // neither the Home UI nor the logo-only Maintenance screen.
-    expect(container).toBeEmptyDOMElement();
-    expect(screen.queryByAltText("Company Logo")).not.toBeInTheDocument();
+    // serverStatus starts as null (unknown). The app must NOT render inventory
+    // yet - it holds a loading screen so a request can't start before an
+    // eventual "Offline" response would replace the UI.
+    expect(screen.getByText("Loading...")).toBeInTheDocument();
+    expect(screen.queryByAltText("logo")).not.toBeInTheDocument();
 
-    // Once the status resolves (Online via default handler), the Home UI appears.
+    // Once the status resolves to Online, the Home UI appears.
     expect(await screen.findByAltText("logo")).toBeInTheDocument();
+    expect(screen.queryByAltText("Company Logo")).not.toBeInTheDocument();
   });
 
-  it("falls back to the Maintenance page when the status fetch fails", async () => {
+  it("shows an error message when the status fetch fails", async () => {
     server.use(http.get(SITE_STATUS_URL, () => HttpResponse.error()));
 
     renderWithProviders(<App />);
 
-    // The Maintenance page uses alt="Company Logo"; the NavBar (alt="logo") is absent.
-    expect(await screen.findByAltText("Company Logo")).toBeInTheDocument();
-    expect(screen.queryByAltText("logo")).not.toBeInTheDocument();
+    // A host failure surfaces an error rather than the Maintenance screen.
+    expect(
+      await screen.findByText(/trouble reaching the inventory service/i)
+    ).toBeInTheDocument();
+    expect(screen.queryByAltText("Company Logo")).not.toBeInTheDocument();
   });
 });

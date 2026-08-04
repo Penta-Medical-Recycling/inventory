@@ -6,6 +6,7 @@ import CartLogo from "../assets/CartLogo";
 import Cookies from "js-cookie";
 import NotificationLogo from "../assets/NotificationLogo";
 import PopUpCard from "../components/cards/PopUpCard";
+import HowItWorks from "./home/HowItWorks";
 
 const NavBar = () => {
   const { selectedPartner, cartCount, isCartPressed, isSideBarActive, popUpStatus } = useContext(PentaContext);
@@ -32,10 +33,13 @@ const NavBar = () => {
             </div>
           </Link>
           
-          {/* Right-aligned group containing the notification and cart icons */}
+          {/* Right-aligned group containing the help, notification and cart icons */}
           <div className="nav-icons">
+            {/* On-demand explanation of the request flow */}
+            <HowItWorks />
+
             { popUpStatus === "Online" &&
-              <div className="logo" onClick={() => setShowModal(!showModal)}>
+              <div className="logo nav-icon-hover" onClick={() => setShowModal(!showModal)}>
                 <NotificationLogo />
               </div>
             }
@@ -43,7 +47,9 @@ const NavBar = () => {
             {/* Link to the cart page if a partner is selected, or partner selection page otherwise */}
             <Link to={selectedPartner ? "/cart" : "/partner"} id="shopping-cart">
               {/* Display the cart icon */}
-              <CartLogo></CartLogo>
+              <span className="nav-icon-hover">
+                <CartLogo></CartLogo>
+              </span>
               <div className={`badge ${isCartPressed ? "animate" : ""}`}>
                 {/* Display the cart count with badge animation if cart is pressed */}
                 <p>{cartCount}</p>
@@ -51,7 +57,7 @@ const NavBar = () => {
             </Link>
           </div>
         </nav>
-        <div style={{ width: "100%", height: "120px" }}></div>
+        <div style={{ width: "100%", height: "104px" }}></div>
       </div>
       
     </>

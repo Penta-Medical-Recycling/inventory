@@ -1,17 +1,19 @@
-// MSW request handlers for the Airtable REST API (base appHFwcwuXLTNCjtN).
+// MSW request handlers for the configured Airtable REST API.
 // Handlers are permissive on query params (filterByFormula / sort / offset) and key off the
 // table path segment. Pagination: an `offset` query param causes the handler to return a page
 // WITHOUT a further `offset` (i.e. one extra page then stop), so paginating loops terminate.
 import { http, HttpResponse } from "msw";
+import { AIRTABLE_API_URL, AIRTABLE_BASE_ID } from "../../config/airtable";
 import {
   siteStatusRecords,
   inventoryRecords,
   manufacturerRecords,
   skuRecords,
+  skuGroupRecords,
   partnerRecords,
 } from "./fixtures";
 
-const BASE = "https://api.airtable.com/v0/appHFwcwuXLTNCjtN";
+const BASE = `${AIRTABLE_API_URL}/${AIRTABLE_BASE_ID}`;
 
 // Airtable envelopes a list response as { records, offset? }.
 const list = (records, { offset } = {}) =>
@@ -48,5 +50,6 @@ export const handlers = [
   // Manufacturers, SKUs, Partners select-option sources.
   http.get(`${BASE}/Manufacturers`, () => list(manufacturerRecords)),
   http.get(`${BASE}/SKUs`, () => list(skuRecords)),
+  http.get(`${BASE}/SKU%20Groups`, () => list(skuGroupRecords)),
   http.get(`${BASE}/Partners`, () => list(partnerRecords)),
 ];

@@ -6,9 +6,10 @@ import { describe, it, expect } from "vitest";
 import { http, HttpResponse } from "msw";
 import { renderWithProviders, screen, userEvent } from "../test/utils";
 import Partner from "./Partner";
+import { AIRTABLE_API_URL, AIRTABLE_BASE_ID } from "../config/airtable";
 import { server } from "../test/mocks/server";
 
-const PARTNERS_URL = "https://api.airtable.com/v0/appHFwcwuXLTNCjtN/Partners";
+const PARTNERS_URL = `${AIRTABLE_API_URL}/${AIRTABLE_BASE_ID}/Partners`;
 
 describe("Partner page", () => {
   it("lists partner names fetched from Airtable, sorted", async () => {

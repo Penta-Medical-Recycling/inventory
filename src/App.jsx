@@ -8,6 +8,7 @@ import Maintenance from "./pages/Maintenance";
 import { Toaster } from "./components/ui/sonner";
 import { useContext } from "react";
 import PentaContext from "./context/PentaContext";
+import BigSpinner from "./assets/BigSpinner";
 
 /**
  * Main application component.
@@ -22,18 +23,36 @@ import PentaContext from "./context/PentaContext";
 
 function App() {
 
-  const { serverStatus, serverMessage } = useContext(PentaContext)
+  const { serverStatus, serverMessage, serverError } = useContext(PentaContext)
 
-  // Status not yet known - render nothing to avoid flashing the Maintenance
-  // (logo-only) screen before the /Site-Status fetch resolves.
-  if (serverStatus === null) return null;
+  // The /Site-Status fetch failed (Airtable host issue) - show an error rather
+  // than blocking the whole app.
+  if (serverError) {
+    return (
+      <div style={{ textAlign: "center", marginTop: "50px" }}>
+        <p>{serverError}</p>
+      </div>
+    );
+  }
 
-  return serverStatus ===  "Offline" ? (
-    <Routes>
-      <Route path="*" element={<Maintenance message = {serverMessage} />}></Route>
-    </Routes>
-  ) : 
-  (
+  // Intentional maintenance toggle from the Site-Status record.
+  if (serverStatus === "Offline") {
+    return (
+      <Routes>
+        <Route path="*" element={<Maintenance message={serverMessage} />}></Route>
+      </Routes>
+    );
+  }
+
+  // While the status is still unresolved (serverStatus === null), hold a loading
+  // screen instead of rendering the full app. Otherwise users could browse
+  // inventory and start a request in the brief window before an eventual
+  // "Offline" response would have replaced the UI.
+  if (serverStatus === null) {
+    return <BigSpinner size={75} />;
+  }
+
+  return (
     <>
       <SideBar />
       <main>

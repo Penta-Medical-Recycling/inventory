@@ -78,6 +78,13 @@ const SideBar = () => {
     );
   }, [pediatric, setSelectedFilters]);
 
+  // Orthosis items aren't split by extremity, so the Extremity filter is hidden
+  // and treated as a no-op. Force it back to "All" so any prior Upper/Lower
+  // selection stops filtering while Orthosis is active.
+  useEffect(() => {
+    if (assistiveDevice === "Orthosis") setExtremity("All");
+  }, [assistiveDevice, setExtremity]);
+
   // Reset all filters
   const removeAllFilters = () => {
     setSelectedManufacturer([]);
@@ -122,7 +129,7 @@ const SideBar = () => {
               setAssistiveDevice={setAssistiveDevice}
             />
 
-            {assistiveDevice && (
+            {assistiveDevice && assistiveDevice !== "Orthosis" && (
               <Extremity extremity={extremity} setExtremity={setExtremity} />
             )}
 

@@ -16,11 +16,12 @@ import {
 } from "../../test/utils";
 import { server } from "../../test/mocks/server";
 import { inventoryRecords } from "../../test/mocks/fixtures";
+import { AIRTABLE_API_URL, AIRTABLE_BASE_ID } from "../../config/airtable";
 import PentaContext from "../../context/PentaContext";
 import SideBar from "../SideBar";
 import HomeLister from "./HomeLister";
 
-const INVENTORY_URL = "https://api.airtable.com/v0/appHFwcwuXLTNCjtN/Inventory";
+const INVENTORY_URL = `${AIRTABLE_API_URL}/${AIRTABLE_BASE_ID}/Inventory`;
 
 // Opens the filters drawer on mount so the sidebar (and Description filter) renders.
 function OpenFilters() {

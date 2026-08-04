@@ -1,4 +1,5 @@
 import { useContext } from "react";
+import { useSearchParams } from "react-router-dom";
 import PentaContext from "../../context/PentaContext";
 import LittleSpinner from "../../assets/LittleSpinner";
 import DownloadLogo from "../../assets/DownloadLogo";
@@ -6,6 +7,11 @@ import { ChevronDown } from "lucide-react";
 import * as XLSX from "xlsx";
 import { cn } from "@/lib/utils";
 import { buttonVariants } from "@/components/ui/button";
+import {
+  Tooltip,
+  TooltipTrigger,
+  TooltipContent,
+} from "@/components/ui/tooltip";
 import {
   DropdownMenu,
   DropdownMenuTrigger,
@@ -16,8 +22,13 @@ import {
 // DownloadButton component is used for downloading the current inventory
 
 const DownloadButton = () => {
-  const { isDownloading, setIsDownloading, urlCreator, fetchAPI } =
+  const { isDownloading, setIsDownloading, urlCreator, fetchAPI, inventoryGroups } =
     useContext(PentaContext);
+  const [searchParams] = useSearchParams();
+  // Scope the export to the currently opened inventory group (if any) so it
+  // matches what the user is viewing, rather than every group's inventory.
+  const activeGroup =
+    inventoryGroups?.find((group) => group.key === searchParams.get("group")) || null;
 
   /**
    * Create and initiate the download of a blob containing inventory data in the chosen file format.
@@ -33,7 +44,11 @@ const DownloadButton = () => {
       // Generate the base URL for fetching data.
       // If there are no active search or filters, the base URL will fetch the entire inventory.
       // Otherwise, the base URL will retrieve items that match the applied search and filters criteria.
-      const base = urlCreator().replace("pageSize=36&", ""); // Removes the page size limit to reduce the number of fetch requests.
+      // When a group is open, restrict the export to that group's SKU codes.
+      const base = urlCreator({ includeSkuCodes: activeGroup?.skuCodes }).replace(
+        "pageSize=36&",
+        ""
+      ); // Removes the page size limit to reduce the number of fetch requests.
       let url = base;
       let allRecords = [];
       let shouldContinue = true;
@@ -116,17 +131,24 @@ const DownloadButton = () => {
   return (
     <div>
       <DropdownMenu>
-        <DropdownMenuTrigger
-          aria-label="Download"
-          className={cn(
-            buttonVariants({ variant: "outline", size: "lg" }),
-            "gap-2 rounded-full px-4 [&_svg:not([class*='size-'])]:size-6"
-          )}
-        >
-          {/* Loading spinner while downloading, otherwise the download icon. */}
-          {isDownloading ? <LittleSpinner size={24} /> : <DownloadLogo />}
-          <ChevronDown className="size-4" aria-hidden="true" />
-        </DropdownMenuTrigger>
+        <Tooltip>
+          <TooltipTrigger
+            render={
+              <DropdownMenuTrigger
+                aria-label="Download"
+                className={cn(
+                  buttonVariants({ variant: "outline", size: "lg" }),
+                  "h-11 gap-2 rounded-full px-5 [&_svg:not([class*='size-'])]:size-6"
+                )}
+              >
+                {/* Loading spinner while downloading, otherwise the download icon. */}
+                {isDownloading ? <LittleSpinner size={24} /> : <DownloadLogo />}
+                <ChevronDown className="size-4" aria-hidden="true" />
+              </DropdownMenuTrigger>
+            }
+          />
+          <TooltipContent>Download this page as CSV or Excel</TooltipContent>
+        </Tooltip>
         <DropdownMenuContent align="end">
           <DropdownMenuItem onClick={() => createBlob("csv")}>
             .csv

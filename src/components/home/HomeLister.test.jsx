@@ -5,10 +5,11 @@ import { http, HttpResponse } from "msw";
 import { renderWithProviders, screen, userEvent, waitFor } from "../../test/utils";
 import { server } from "../../test/mocks/server";
 import { inventoryRecords } from "../../test/mocks/fixtures";
+import { AIRTABLE_API_URL, AIRTABLE_BASE_ID } from "../../config/airtable";
 import Search from "./Search";
 import HomeLister from "./HomeLister";
 
-const INVENTORY_URL = "https://api.airtable.com/v0/appHFwcwuXLTNCjtN/Inventory";
+const INVENTORY_URL = `${AIRTABLE_API_URL}/${AIRTABLE_BASE_ID}/Inventory`;
 
 describe("Home search debounce", () => {
   it("issues a single request for the final term when typing quickly", async () => {
@@ -30,13 +31,18 @@ describe("Home search debounce", () => {
       </>
     );
 
-    await user.type(screen.getByPlaceholderText("Search"), "abc");
+    await user.type(
+      screen.getByPlaceholderText("Search by keyword, matches all terms"),
+      "abc"
+    );
 
     // Exactly one request carries the fully-typed term.
     await waitFor(
       () =>
         expect(
-          queries.filter((q) => q.includes('SEARCH("abc",')).length
+          queries.filter(
+            (q) => q.includes('SEARCH("abc",') && !q.includes("maxRecords=1")
+          ).length
         ).toBe(1),
       { timeout: 4000 }
     );
@@ -45,6 +51,11 @@ describe("Home search debounce", () => {
     expect(
       queries.filter(
         (q) => q.includes('SEARCH("a",') || q.includes('SEARCH("ab",')
+      )
+    ).toHaveLength(0);
+    expect(
+      queries.filter(
+        (q) => q.includes('SEARCH("abc",') && q.includes("maxRecords=1")
       )
     ).toHaveLength(0);
   });
