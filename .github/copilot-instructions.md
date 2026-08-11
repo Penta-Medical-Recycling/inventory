@@ -183,6 +183,8 @@ inventory/
 - Keep the Vite `base: "/inventory/"` — changing it breaks GitHub Pages asset paths.
 - A few pre-existing `// TODO:` markers exist (e.g. `Card.jsx`, `CardGrid.jsx`, `Cart.jsx`); they
   are not blocking.
+- UI typography must not use font weights above 600. Use `font-weight: 600` or Tailwind
+  `font-semibold` for emphasis; do not use `bold`, `font-bold`, or numeric weights of 700 or higher.
 
 ### shadcn/ui components — add via CLI, never import Base UI directly
 

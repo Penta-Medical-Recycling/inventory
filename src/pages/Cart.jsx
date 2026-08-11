@@ -22,18 +22,40 @@ const getTotalInStockBySKU = async (sku) => {
 export const getCartItemKeys = (storage = localStorage) =>
   Object.keys(storage).filter((key) => key !== "notes" && key !== "partner");
 
+const AVAILABILITY_BATCH_SIZE = 100;
+
+const escapeFormulaValue = (value) =>
+  String(value).replaceAll("\\", "\\\\").replaceAll("'", "\\'");
+
+const createAvailabilityFormula = (itemIds) => {
+  const itemMatches = itemIds.map(
+    (id) => `{Item ID}='${escapeFormulaValue(id)}'`
+  );
+  const itemFilter =
+    itemMatches.length === 1 ? itemMatches[0] : `OR(${itemMatches.join(",")})`;
+
+  return `AND({Requests}=BLANK(),{Shipment Status}=BLANK(),NOT({SKU}=""),${itemFilter})`;
+};
+
 export const checkCartItemAvailability = async (itemIds, fetchImpl = fetch) => {
-  const statuses = Object.fromEntries(itemIds.map((id) => [id, "pending"]));
-  const unavailableIds = [];
-  const failedIds = [];
+  const uniqueItemIds = [...new Set(itemIds.filter(Boolean).map(String))];
+  const statuses = Object.fromEntries(uniqueItemIds.map((id) => [id, "pending"]));
+  const availableIds = new Set();
 
-  await Promise.all(
-    itemIds.map(async (id) => {
-      const url = `${AIRTABLE_API_URL}/${AIRTABLE_BASE_ID}/Inventory?filterByFormula=AND({Requests}=BLANK(),{Shipment Status}=BLANK(),NOT({SKU}=""),AND({Item ID}='${encodeURIComponent(
-        id
-      )}'))&maxRecords=1`;
+  try {
+    for (let start = 0; start < uniqueItemIds.length; start += AVAILABILITY_BATCH_SIZE) {
+      const batch = uniqueItemIds.slice(start, start + AVAILABILITY_BATCH_SIZE);
+      let offset = null;
 
-      try {
+      do {
+        const params = new URLSearchParams({
+          filterByFormula: createAvailabilityFormula(batch),
+          pageSize: String(AVAILABILITY_BATCH_SIZE),
+        });
+        params.append("fields[]", "Item ID");
+        if (offset) params.set("offset", offset);
+
+        const url = `${AIRTABLE_API_URL}/${AIRTABLE_BASE_ID}/Inventory?${params}`;
         const response = await fetchImpl(url, {
           headers: { Authorization: `Bearer ${AIRTABLE_API_KEY}` },
         });
@@ -41,17 +63,31 @@ export const checkCartItemAvailability = async (itemIds, fetchImpl = fetch) => {
 
         const data = await response.json();
         if (!Array.isArray(data.records)) throw new Error("Invalid inventory response");
-        if (data.records.length === 0) unavailableIds.push(id);
-        statuses[id] = "done";
-      } catch (error) {
-        console.error(`Error fetching data for ID ${id}:`, error);
-        statuses[id] = "error";
-        failedIds.push(id);
-      }
-    })
-  );
+        data.records.forEach((record) => {
+          const itemId = Array.isArray(record?.fields?.["Item ID"])
+            ? record.fields["Item ID"][0]
+            : record?.fields?.["Item ID"];
+          if (itemId != null && itemId !== "") availableIds.add(String(itemId));
+        });
+        offset = data.offset || null;
+      } while (offset);
+    }
 
-  return { statuses, unavailableIds, failedIds };
+    uniqueItemIds.forEach((id) => {
+      statuses[id] = "done";
+    });
+    return {
+      statuses,
+      unavailableIds: uniqueItemIds.filter((id) => !availableIds.has(id)),
+      failedIds: [],
+    };
+  } catch (error) {
+    console.error("Error checking cart inventory availability:", error);
+    uniqueItemIds.forEach((id) => {
+      statuses[id] = "error";
+    });
+    return { statuses, unavailableIds: [], failedIds: uniqueItemIds };
+  }
 };
 
 function Cart() {
@@ -65,7 +101,6 @@ function Cart() {
   const [numOfChildren, setNumOfChildren] = useState("");
   const [showResetModal, setShowResetModal] = useState(false);
   const [itemValidationStatus, setItemValidationStatus] = useState({});
-  const [isCartReady, setIsCartReady] = useState(false);
   const [isRetryingAvailability, setIsRetryingAvailability] = useState(false);
 // Filter valid cart item keys (skip notes/partner/etc)
 const itemKeys = getCartItemKeys();
@@ -142,7 +177,6 @@ const confirmResetCart = () => {
     const result = await checkCartItemAvailability(itemIds);
     setItemValidationStatus(result.statuses);
     setOutOfStock(new Set(result.unavailableIds));
-    setIsCartReady(true);
     return result;
   };
 
@@ -157,7 +191,6 @@ const confirmResetCart = () => {
 
 useEffect(() => {
   if (!selectedPartner) navigate("/partner");
-  idFetcher();
 }, []);
 
 
@@ -270,12 +303,12 @@ useEffect(() => {
     return (
     <>
       <div id="text-section">
-        <h1 className="is-size-3 has-text-weight-bold has-text-centered mt-6">
+        <h1 className="mt-6 text-center text-3xl font-semibold">
           MY CART
         </h1>
       </div>
 
-      {(!isCartReady || isLoading) ? (
+      {isLoading ? (
   <BigSpinner size={75} />
 ) : (
   <>

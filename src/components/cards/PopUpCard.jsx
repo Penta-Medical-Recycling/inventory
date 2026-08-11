@@ -1,17 +1,32 @@
-import React, { useContext, useState } from "react";
+import { useContext } from "react";
 import logo from '../../assets/Penta.png'
 import PentaContext from "../../context/PentaContext";
 
+const BulkOrderAnnouncement = () => (
+    <div className="bulk-announcement">
+        <h2>Bulk ordering has a new workflow</h2>
+        <ol className="bulk-announcement__steps">
+            <li><span>Open an item group.</span></li>
+            <li><span>Select <strong>Bulk add</strong> above the inventory list.</span></li>
+            <li><span>Choose a size when prompted, then select the quantity you need.</span></li>
+        </ol>
+        <p className="bulk-announcement__note">
+            <strong>Before you begin:</strong> Please allow a few moments for inventory availability to load.
+        </p>
+    </div>
+);
+
+// eslint-disable-next-line react/prop-types
 const PopUpCard = ({ showModal, setShowModal }) => {
     const { message } = useContext(PentaContext)
+    const isBulkOrderAnnouncement = /bulk order/i.test(message);
 
     return (
         <>
             <div className= {showModal ? "modal is-active" : "modal"}>
                 <div className="modal-background" onClick={() => setShowModal(false)}></div>
-                <div 
-                    className="modal-card has-text-centered"
-                    style={{ borderRadius: 20, width: "50%", overflow: "hidden" }}
+                <div
+                    className="modal-card popup-card has-text-centered"
                 >
                     <header
                         className="has-background-light"
@@ -24,7 +39,7 @@ const PopUpCard = ({ showModal, setShowModal }) => {
                             borderBottom: "1px solid #dbdbdb",
                         }}
                     >
-                        <p className="modal-card-title" style={{ margin: 0, fontSize: "1.5rem", fontWeight: 700, color: "#363636" }}>Please note</p>
+                        <p className="modal-card-title" style={{ margin: 0, fontSize: "1.5rem", fontWeight: 600, color: "#363636" }}>Please note</p>
                         <button
                             className="delete is-medium"
                             aria-label="close"
@@ -32,18 +47,13 @@ const PopUpCard = ({ showModal, setShowModal }) => {
                             style={{ position: "absolute", right: "1.25rem", backgroundColor: "#c4c4c4", borderRadius: "9999px" }}
                         ></button>
                     </header>
-                    <div style={{ display: "flex", alignItems: "stretch" }}>
+                    <div className="popup-card__body">
                         <div
-                            className="has-background-white"
-                            style={{
-                                flex: "0 0 50%",
-                                display: "flex",
-                                alignItems: "center",
-                                justifyContent: "center",
-                            }}
+                            className="popup-card__image has-background-white"
                         >
                             <img
                                 src={logo}
+                                alt="Penta Medical Recycling"
                                 style={{
                                     width: "100%",
                                     height: "100%",
@@ -52,15 +62,11 @@ const PopUpCard = ({ showModal, setShowModal }) => {
                             />
                         </div>
                         <div
-                            className="has-background-light"
-                            style={{
-                                flex: "1 1 50%",
-                                display: "flex",
-                                alignItems: "center",
-                                justifyContent: "center",
-                            }}
+                            className="popup-card__message has-background-light"
                         >
-                            <article style={{ padding: 20 }}>{message}</article>
+                            <article>
+                                {isBulkOrderAnnouncement ? <BulkOrderAnnouncement /> : message}
+                            </article>
                         </div>
                     </div>
                 </div>

@@ -49,7 +49,11 @@ function App() {
   // inventory and start a request in the brief window before an eventual
   // "Offline" response would have replaced the UI.
   if (serverStatus === null) {
-    return <BigSpinner size={75} />;
+    return (
+      <div className="initial-loading-screen">
+        <BigSpinner size={75} />
+      </div>
+    );
   }
 
   return (
