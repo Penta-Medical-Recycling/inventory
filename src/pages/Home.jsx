@@ -245,7 +245,7 @@ function Home() {
               <Button
                 type="button"
                 size="lg"
-                className="group-context__bulk h-11 gap-2.5 rounded-full bg-[#ff5c48] px-5 text-base text-white hover:bg-[#ff5c48]/90"
+                className="group-context__bulk h-11 gap-2.5 rounded-full border-[#35b0fb] bg-[#35b0fb] px-5 text-base text-white hover:border-[#159ee8] hover:bg-[#159ee8]"
                 onClick={() => setShowBulkModal(true)}
                 aria-label={`Add multiple ${activeGroup.title} items to cart`}
               >

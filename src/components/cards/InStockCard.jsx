@@ -77,7 +77,7 @@ const InStockCard = ({ item, onRemove, inCart, allVisibleItems }) => {
                 aria-label={`Remove ${itemName} from cart`}
                 onClick={handleRemoveOneFromCart}
               >
-                <ShoppingCart size={16} aria-hidden="true" />
+                <ShoppingCart size={14} aria-hidden="true" />
                 Remove from cart
               </button>
             ) : (
@@ -87,7 +87,7 @@ const InStockCard = ({ item, onRemove, inCart, allVisibleItems }) => {
                 aria-label={`Add ${itemName} to cart`}
                 onClick={handleInstantAdd}
               >
-                <ShoppingCart size={16} aria-hidden="true" />
+                <ShoppingCart size={14} aria-hidden="true" />
                 Add to cart
               </button>
             )}
@@ -99,9 +99,9 @@ const InStockCard = ({ item, onRemove, inCart, allVisibleItems }) => {
               rel="noreferrer"
               aria-label={`View reference images for ${itemName}`}
             >
-              <Images size={16} aria-hidden="true" />
+              <Images size={14} aria-hidden="true" />
               <span>View reference images</span>
-              <ExternalLink size={13} aria-hidden="true" />
+              <ExternalLink size={12} aria-hidden="true" />
             </a>
           </footer>
         </div>
