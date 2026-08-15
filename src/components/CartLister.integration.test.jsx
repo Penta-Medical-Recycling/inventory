@@ -38,7 +38,7 @@ describe("cart unavailable state", () => {
     expect(
       screen.getByRole("button", { name: /remove left foot shell 22-1287 from cart/i })
     ).toBeInTheDocument();
-    expect(screen.queryByLabelText("AddToCart")).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: /Add .* to cart/i })).not.toBeInTheDocument();
     expect(screen.queryByLabelText("IncrementQty")).not.toBeInTheDocument();
   });
 

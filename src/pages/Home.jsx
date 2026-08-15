@@ -6,9 +6,11 @@ import PentaContext from "../context/PentaContext";
 import Pagination from "../components/home/Pagination";
 import Tags from "../components/home/Tags";
 import Search from "../components/home/Search";
+import DownloadButton from "../components/home/DownloadButton";
 import QuantityModal from "../components/cards/QuantityModal";
 import MessageModal from "../components/cards/MessageModal";
 import Toast from "../components/Toast";
+import { Button } from "@/components/ui/button";
 import { bulkAddToCart, countAvailableUnits, getItemDisplayName } from "../lib/cartBulkAdd";
 import { createInventoryFilterPredicate } from "../lib/inventoryAvailability";
 
@@ -161,6 +163,7 @@ function Home() {
   }, [groupKey]);
 
   const openGroup = (group) => {
+    document.querySelector(".app-scroll-region")?.scrollTo({ top: 0 });
     setIsLoading(true);
     const next = new URLSearchParams(searchParams);
     next.set("group", group.key);
@@ -223,11 +226,11 @@ function Home() {
           Penta Medical Recycling Inventory
         </h1>
 
-        {/* Search Bar with filter button to its left */}
+        {/* Inventory toolbar */}
         <div id="search-row">
-          {/* Filter button */}
-          <Tags></Tags>
-          <Search></Search>
+          <Tags />
+          <Search />
+          <DownloadButton />
         </div>
       </div>
       {activeGroup && (
@@ -239,15 +242,16 @@ function Home() {
             </button>
             <h2 className="group-context__title">{activeGroup.title}</h2>
             {isSingleSkuGroup && (
-              <button
+              <Button
                 type="button"
-                className="group-context__bulk"
+                size="lg"
+                className="group-context__bulk h-11 gap-2.5 rounded-full bg-[#ff5c48] px-5 text-base text-white hover:bg-[#ff5c48]/90"
                 onClick={() => setShowBulkModal(true)}
-                aria-label={`Bulk add ${activeGroup.title}`}
+                aria-label={`Add multiple ${activeGroup.title} items to cart`}
               >
                 <Plus size={16} aria-hidden="true" />
-                Bulk add
-              </button>
+                Add multiple to cart
+              </Button>
             )}
           </div>
         </div>

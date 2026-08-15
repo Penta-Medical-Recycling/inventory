@@ -1,7 +1,6 @@
 import { useContext } from "react";
 import { Search as SearchIcon, X as XIcon } from "lucide-react";
 import PentaContext from "../../context/PentaContext";
-import DownloadButton from "./DownloadButton";
 import {
   InputGroup,
   InputGroupAddon,
@@ -25,11 +24,7 @@ const Search = () => {
   };
 
   return (
-    <div id="search-form">
-      <form
-        onSubmit={(e) => e.preventDefault()}
-        className="mr-3 flex-1"
-      >
+    <form id="search-form" onSubmit={(e) => e.preventDefault()}>
         {/* Override the theme ring (Penta coral) with the blue theme locally so
             the search box focuses blue instead of orange. */}
         <InputGroup className="h-11 w-full rounded-full bg-white text-base [--ring:#35b0fb] [&_svg:not([class*='size-'])]:size-5 has-[[data-slot=input-group-control]:focus-visible]:border-input">
@@ -42,7 +37,7 @@ const Search = () => {
           <InputGroupInput
             type="text"
             placeholder="Search by keyword, matches all terms"
-            className="pl-2"
+            className="h-full pl-2"
             value={searchInput}
             onChange={onSearchChange}
           />
@@ -61,10 +56,7 @@ const Search = () => {
             </InputGroupAddon>
           )}
         </InputGroup>
-      </form>
-      {/* Download Button Component */}
-      <DownloadButton></DownloadButton>
-    </div>
+    </form>
   );
 };
 

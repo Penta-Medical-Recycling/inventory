@@ -8,11 +8,6 @@ import * as XLSX from "xlsx";
 import { cn } from "@/lib/utils";
 import { buttonVariants } from "@/components/ui/button";
 import {
-  Tooltip,
-  TooltipTrigger,
-  TooltipContent,
-} from "@/components/ui/tooltip";
-import {
   DropdownMenu,
   DropdownMenuTrigger,
   DropdownMenuContent,
@@ -129,31 +124,26 @@ const DownloadButton = () => {
   }
 
   return (
-    <div>
+    <div className="toolbar-export">
       <DropdownMenu>
-        <Tooltip>
-          <TooltipTrigger
-            render={
-              <DropdownMenuTrigger
-                aria-label="Download"
-                className={cn(
-                  buttonVariants({ variant: "outline", size: "lg" }),
-                  "h-11 gap-2 rounded-full px-5 [&_svg:not([class*='size-'])]:size-6"
-                )}
-              >
-                {/* Loading spinner while downloading, otherwise the download icon. */}
-                {isDownloading ? <LittleSpinner size={24} /> : <DownloadLogo />}
-                <ChevronDown className="size-4" aria-hidden="true" />
-              </DropdownMenuTrigger>
-            }
-          />
-          <TooltipContent>Download this page as CSV or Excel</TooltipContent>
-        </Tooltip>
+        <DropdownMenuTrigger
+          aria-label="Export inventory"
+          title="Export current inventory as CSV or Excel"
+          className={cn(
+            buttonVariants({ variant: "outline", size: "lg" }),
+            "h-11 gap-2 rounded-full px-3 sm:px-5 [&_svg:not([class*='size-'])]:size-6"
+          )}
+        >
+          {/* Loading spinner while downloading, otherwise the download icon. */}
+          {isDownloading ? <LittleSpinner size={24} /> : <DownloadLogo />}
+          <span className="hidden sm:inline">Export</span>
+          <ChevronDown className="size-4" aria-hidden="true" />
+        </DropdownMenuTrigger>
         <DropdownMenuContent align="end">
-          <DropdownMenuItem onClick={() => createBlob("csv")}>
+          <DropdownMenuItem className="export-menu-item" onClick={() => createBlob("csv")}>
             .csv
           </DropdownMenuItem>
-          <DropdownMenuItem onClick={() => createBlob("xlsx")}>
+          <DropdownMenuItem className="export-menu-item" onClick={() => createBlob("xlsx")}>
             .xlsx
           </DropdownMenuItem>
         </DropdownMenuContent>

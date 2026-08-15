@@ -7,7 +7,7 @@ const ResetFilters = ({ removeAllFilters }) => {
       <Button
         variant="outline"
         size="lg"
-        className="rounded-full"
+        className="filter-action-button rounded-full"
         onClick={removeAllFilters}
         aria-label="FilterReset"
       >

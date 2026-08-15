@@ -16,12 +16,13 @@ function PopoverContent({
   side = "bottom",
   sideOffset = 8,
   className,
+  positionerClassName,
   ...props
 }) {
   return (
     <PopoverPrimitive.Portal>
       <PopoverPrimitive.Positioner
-        className="isolate z-50 outline-none"
+        className={cn("isolate z-50 outline-none", positionerClassName)}
         align={align}
         alignOffset={alignOffset}
         side={side}

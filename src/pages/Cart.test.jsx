@@ -1,12 +1,27 @@
 import { describe, expect, it, vi } from "vitest";
-import { MemoryRouter } from "react-router-dom";
+import { MemoryRouter, Route, Routes } from "react-router-dom";
 import { render, screen, userEvent, waitFor } from "../test/utils";
 import PentaContext from "../context/PentaContext";
-import Cart, { checkCartItemAvailability, getCartItemKeys } from "./Cart";
+import Cart, {
+  checkCartItemAvailability,
+  createRequestFields,
+  getCartItemKeys,
+} from "./Cart";
+import {
+  ANNOUNCEMENT_DISMISSAL_KEY,
+  getRequestParty,
+  setRequestParty,
+} from "../lib/storage";
 
 describe("Cart item detection", () => {
-  it("treats partner and notes metadata as an empty cart", () => {
-    expect(getCartItemKeys({ partner: "Demo Clinic", notes: "Urgent" })).toEqual([]);
+  it("treats application metadata as an empty cart", () => {
+    expect(
+      getCartItemKeys({
+        partner: "Demo Clinic",
+        notes: "Urgent",
+        [ANNOUNCEMENT_DISMISSAL_KEY]: "bulk-order-workflow-v2",
+      })
+    ).toEqual([]);
   });
 
   it("returns persisted inventory item keys", () => {
@@ -20,6 +35,13 @@ describe("Cart availability checks", () => {
   it("defers the availability request until the user submits the cart", async () => {
     const user = userEvent.setup();
     localStorage.setItem("partner", "Demo Clinic");
+    setRequestParty({
+      partnerId: "recDemoClinic",
+      partnerName: "Demo Clinic",
+      clinicianRequired: false,
+      clinicianId: null,
+      clinicianName: null,
+    });
     localStorage.setItem(
       "22-1287",
       JSON.stringify({
@@ -39,6 +61,7 @@ describe("Cart availability checks", () => {
           value={{
             inventoryGroups: [],
             selectedPartner: "Demo Clinic",
+            setSelectedPartner: vi.fn(),
             setCartCount: vi.fn(),
           }}
         >
@@ -107,5 +130,136 @@ describe("Cart availability checks", () => {
     expect(result.unavailableIds).toEqual([]);
     expect(result.failedIds).toEqual(["22-1287"]);
     expect(result.statuses["22-1287"]).toBe("error");
+  });
+});
+
+describe("Requests payload", () => {
+  const baseInput = {
+    requestName: "#ABC123",
+    itemIds: ["22-1287"],
+    notes: "Urgent",
+    numOfPatients: "2",
+    numOfChildren: "1",
+  };
+
+  it("writes linked Partner and Clinician record IDs", () => {
+    const fields = createRequestFields({
+      ...baseInput,
+      requestParty: {
+        partnerId: "recPartner",
+        partnerName: "Stepping into Grace",
+        clinicianRequired: true,
+        clinicianId: "recClinician",
+        clinicianName: "Alex Morgan",
+      },
+    });
+
+    expect(fields.Partner).toEqual(["recPartner"]);
+    expect(fields.Clinicians).toEqual(["recClinician"]);
+  });
+
+  it("omits Clinicians for a partner without mappings", () => {
+    const fields = createRequestFields({
+      ...baseInput,
+      requestParty: {
+        partnerId: "recPartner",
+        partnerName: "Demo Clinic",
+        clinicianRequired: false,
+        clinicianId: null,
+        clinicianName: null,
+      },
+    });
+
+    expect(fields.Partner).toEqual(["recPartner"]);
+    expect(fields).not.toHaveProperty("Clinicians");
+  });
+
+  it("sends the selected clinician in the Requests POST", async () => {
+    const user = userEvent.setup();
+    const setSelectedPartner = vi.fn();
+    localStorage.setItem("partner", "Stepping into Grace");
+    setRequestParty({
+      partnerId: "recPartner",
+      partnerName: "Stepping into Grace",
+      clinicianRequired: true,
+      clinicianId: "recClinician",
+      clinicianName: "Alex Morgan",
+    });
+    localStorage.setItem(
+      "22-1287",
+      JSON.stringify({
+        "Item ID": "22-1287",
+        "Description (from SKU)": ["Demo Item"],
+      })
+    );
+
+    let requestBody;
+    const fetchSpy = vi.spyOn(globalThis, "fetch").mockImplementation(async (url, options = {}) => {
+      if (String(url).includes("/Inventory?")) {
+        return {
+          ok: true,
+          json: async () => ({ records: [{ fields: { "Item ID": "22-1287" } }] }),
+        };
+      }
+      if (String(url).endsWith("/Requests") && options.method === "POST") {
+        requestBody = JSON.parse(options.body);
+        return { ok: true, json: async () => ({ records: [{ id: "recRequest" }] }) };
+      }
+      throw new Error(`Unexpected request: ${url}`);
+    });
+    const confirmSpy = vi.spyOn(window, "confirm").mockReturnValue(true);
+
+    render(
+      <MemoryRouter initialEntries={["/cart"]}>
+        <PentaContext.Provider
+          value={{
+            inventoryGroups: [],
+            selectedPartner: "Stepping into Grace",
+            setSelectedPartner,
+            setCartCount: vi.fn(),
+          }}
+        >
+          <Cart />
+        </PentaContext.Provider>
+      </MemoryRouter>,
+      { withProviders: false }
+    );
+
+    expect(screen.getByText("Clinician: Alex Morgan")).toBeInTheDocument();
+    await user.click(screen.getByRole("button", { name: "Confirm" }));
+
+    await waitFor(() => expect(requestBody).toBeDefined());
+    expect(requestBody.records[0].fields.Partner).toEqual(["recPartner"]);
+    expect(requestBody.records[0].fields.Clinicians).toEqual(["recClinician"]);
+    await waitFor(() => expect(getRequestParty()).toBeNull());
+    expect(setSelectedPartner).toHaveBeenCalledWith("");
+
+    fetchSpy.mockRestore();
+    confirmSpy.mockRestore();
+  });
+
+  it("redirects a legacy partner-only session to Partner selection", async () => {
+    localStorage.setItem("partner", "Stepping into Grace");
+
+    render(
+      <MemoryRouter initialEntries={["/cart"]}>
+        <PentaContext.Provider
+          value={{
+            inventoryGroups: [],
+            selectedPartner: "Stepping into Grace",
+            setSelectedPartner: vi.fn(),
+            setCartCount: vi.fn(),
+          }}
+        >
+          <Routes>
+            <Route path="/cart" element={<Cart />} />
+            <Route path="/partner" element={<p>Choose request partner</p>} />
+          </Routes>
+        </PentaContext.Provider>
+      </MemoryRouter>,
+      { withProviders: false }
+    );
+
+    expect(await screen.findByText("Choose request partner")).toBeInTheDocument();
   });
 });

@@ -56,7 +56,11 @@ const InventoryGroupCard = ({ group, onSelect }) => {
       onBlur={stopCycling}
       aria-label={`Browse ${group.title}`}
     >
-      <span className="inventory-group-card__media">
+      <span
+        className={`inventory-group-card__media${
+          hasMultiple ? " inventory-group-card__media--multiple" : ""
+        }`}
+      >
         {showImages ? (
           <>
             <span className="inventory-group-card__frame">

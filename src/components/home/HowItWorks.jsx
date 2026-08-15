@@ -29,11 +29,18 @@ const STEPS = [
 const HowItWorks = () => {
   return (
     <Popover>
-      <PopoverTrigger className="inline-flex items-center gap-1.5 rounded-full border border-[#E5E7EB] bg-white px-4 py-2 text-sm font-medium text-[#4b5563] shadow-xs transition-colors hover:border-[#64C8FF] hover:bg-[#D9F1FF] hover:text-[#1a9fe0] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#35b0fb] data-[popup-open]:border-[#64C8FF] data-[popup-open]:bg-[#D9F1FF] data-[popup-open]:text-[#1a9fe0]">
-        <HelpCircle className="size-4" aria-hidden="true" />
-        How it works
+      <PopoverTrigger
+        aria-label="How it works"
+        className="how-it-works-trigger inline-flex items-center gap-1.5 rounded-full border border-[#E5E7EB] bg-white px-4 py-2 text-sm font-medium text-[#4b5563] shadow-xs transition-colors hover:bg-[#f7fafc] hover:text-[#1679ad] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#35b0fb] data-[popup-open]:border-[#64C8FF] data-[popup-open]:bg-[#D9F1FF] data-[popup-open]:text-[#1a9fe0]"
+      >
+        <HelpCircle className="how-it-works-icon shrink-0" aria-hidden="true" />
+        <span className="how-it-works-label">How it works</span>
       </PopoverTrigger>
-      <PopoverContent className="w-96" align="end">
+      <PopoverContent
+        className="how-it-works-content w-[min(24rem,calc(100vw-2rem))]"
+        positionerClassName="how-it-works-positioner"
+        align="end"
+      >
         <p className="mb-3 text-base font-semibold text-[#1f2937]">
           Submitting a request
         </p>

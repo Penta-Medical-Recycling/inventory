@@ -1,6 +1,7 @@
 import { useEffect, useState, useContext } from "react";
 import { useNavigate } from "react-router-dom";
 import PentaContext from "../context/PentaContext";
+import { setRequestParty } from "../lib/storage";
 import { Button } from "@/components/ui/button";
 import {
   Combobox,
@@ -17,31 +18,93 @@ import {
 // filtering, keyboard navigation, and open/close state internally.
 
 const Partner = () => {
-  const { setSelectedPartner, fetchSelectOptions } = useContext(PentaContext);
-  const [partner, setPartner] = useState(""); // Selected partner
-  const [inputValue, setInputValue] = useState(""); // Text shown in the combobox
-  const [data, setData] = useState([]); // List of partner options
-  const [open, setOpen] = useState(false); // Controls the dropdown popup
+  const { setSelectedPartner, fetchTableRecordsWithOffset } =
+    useContext(PentaContext);
+  const [partner, setPartner] = useState(null);
+  const [partnerInput, setPartnerInput] = useState("");
+  const [partners, setPartners] = useState([]);
+  const [clinician, setClinician] = useState(null);
+  const [clinicianInput, setClinicianInput] = useState("");
+  const [clinicians, setClinicians] = useState([]);
+  const [partnerOpen, setPartnerOpen] = useState(false);
+  const [clinicianOpen, setClinicianOpen] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+  const [loadError, setLoadError] = useState(false);
+  const [reloadKey, setReloadKey] = useState(0);
   const navigate = useNavigate();
 
-  // Anchor the dropdown popup to the full-width input so its options render at
-  // the input's width instead of the tiny chevron trigger's width.
-  const anchorRef = useComboboxAnchor();
+  const partnerAnchorRef = useComboboxAnchor();
+  const clinicianAnchorRef = useComboboxAnchor();
 
   useEffect(() => {
-    // Fetch partner options from AirTable
-    const fetchPartners = async () => {
-      const partnerOptions = await fetchSelectOptions("Partners");
-      setData(partnerOptions);
-    };
-    fetchPartners();
-  }, []);
+    let cancelled = false;
 
-  // Submit selected partner to localStorage and navigate to Cart page
+    const fetchRequestParties = async () => {
+      setIsLoading(true);
+      setLoadError(false);
+      try {
+        const [partnerRecords, clinicianRecords] = await Promise.all([
+          fetchTableRecordsWithOffset("Partners"),
+          fetchTableRecordsWithOffset("Clinicians"),
+        ]);
+        if (cancelled) return;
+
+        setPartners(
+          partnerRecords
+            .filter((record) => typeof record.fields.Partner === "string")
+            .map((record) => ({
+              id: record.id,
+              label: record.fields.Partner.trimStart(),
+            }))
+            .sort((left, right) => left.label.localeCompare(right.label))
+        );
+        setClinicians(
+          clinicianRecords
+            .filter((record) => typeof record.fields.Name === "string")
+            .map((record) => ({
+              id: record.id,
+              label: record.fields.Name.trim(),
+              partnerIds: record.fields.Partners || [],
+            }))
+            .sort((left, right) => left.label.localeCompare(right.label))
+        );
+      } catch (error) {
+        console.error("Error loading partners and clinicians:", error);
+        if (!cancelled) {
+          setPartners([]);
+          setClinicians([]);
+          setLoadError(true);
+        }
+      } finally {
+        if (!cancelled) setIsLoading(false);
+      }
+    };
+
+    fetchRequestParties();
+    return () => {
+      cancelled = true;
+    };
+    // `fetchTableRecordsWithOffset` is recreated by the provider on render.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [reloadKey]);
+
+  const partnerClinicians = partner
+    ? clinicians.filter((option) => option.partnerIds.includes(partner.id))
+    : [];
+  const clinicianRequired = partnerClinicians.length > 0;
+
   const submit = async () => {
     try {
-      localStorage.setItem("partner", partner);
-      setSelectedPartner(partner);
+      const requestParty = {
+        partnerId: partner.id,
+        partnerName: partner.label,
+        clinicianRequired,
+        clinicianId: clinician?.id || null,
+        clinicianName: clinician?.label || null,
+      };
+      localStorage.setItem("partner", partner.label);
+      setRequestParty(requestParty);
+      setSelectedPartner(partner.label);
       navigate("/cart");
     } catch (error) {
       console.error("Error updating local storage:", error);
@@ -49,68 +112,125 @@ const Partner = () => {
   };
 
   return (
-    <div
-      className="is-flex is-flex-direction-column is-justify-content-center is-align-items-center"
-      style={{ height: "50vh" }}
-    >
-      {/* Title for the partner selection */}
-      <h1
-        className="is-size-4 has-text-weight-bold has-text-centered my-4"
-      >
+    <div className="flex min-h-[50vh] flex-col items-center justify-center px-4">
+      <h1 className="my-4 text-center text-xl font-semibold">
         Select Partner To View Cart
       </h1>
 
-      {/* Searchable partner combobox */}
-      <div
-        className="w-[90vw] max-w-md sm:max-w-lg md:max-w-xl lg:max-w-2xl"
-      >
-        <Combobox
-          items={data}
-          value={partner}
-          onValueChange={(value) => {
-            setPartner(value ?? "");
-            // Mirror the selection into the input so it shows the chosen partner.
-            setInputValue(value ?? "");
-          }}
-          inputValue={inputValue}
-          onInputValueChange={setInputValue}
-          open={open}
-          onOpenChange={setOpen}
-        >
-          <div ref={anchorRef}>
-            <ComboboxInput
-              className="w-full bg-white [--ring:#35b0fb] has-[[data-slot=input-group-control]:focus-visible]:border-input"
-              placeholder="Select a Partner"
-              aria-label="PartnerDropdown"
-              id="partner-dropdown"
-              onFocus={() => setOpen(true)}
-            />
+      <div className="flex w-full max-w-2xl flex-col gap-5">
+        <div className="flex flex-col gap-2">
+          <label htmlFor="partner-dropdown" className="text-sm font-semibold text-[#374151]">
+            Partner
+          </label>
+          <Combobox
+            items={partners}
+            value={partner}
+            onValueChange={(value) => {
+              setPartner(value ?? null);
+              setPartnerInput(value?.label ?? "");
+              setClinician(null);
+              setClinicianInput("");
+            }}
+            inputValue={partnerInput}
+            onInputValueChange={setPartnerInput}
+            open={partnerOpen}
+            onOpenChange={setPartnerOpen}
+            itemToStringLabel={(item) => item.label}
+            itemToStringValue={(item) => item.id}
+            isItemEqualToValue={(left, right) => left.id === right.id}
+          >
+            <div ref={partnerAnchorRef}>
+              <ComboboxInput
+                className="partner-combobox w-full bg-white [--ring:#35b0fb] has-[[data-slot=input-group-control]:focus-visible]:border-input"
+                placeholder={isLoading ? "Loading partners..." : "Select a Partner"}
+                aria-label="PartnerDropdown"
+                id="partner-dropdown"
+                disabled={isLoading || loadError}
+                onFocus={() => setPartnerOpen(true)}
+              />
+            </div>
+            <ComboboxContent anchor={partnerAnchorRef}>
+              <ComboboxEmpty>No partners found.</ComboboxEmpty>
+              <ComboboxList>
+                {(item) => (
+                  <ComboboxItem key={item.id} value={item}>
+                    {item.label}
+                  </ComboboxItem>
+                )}
+              </ComboboxList>
+            </ComboboxContent>
+          </Combobox>
+        </div>
+
+        {clinicianRequired && (
+          <div className="flex flex-col gap-2">
+            <label htmlFor="clinician-dropdown" className="text-sm font-semibold text-[#374151]">
+              Clinician
+            </label>
+            <Combobox
+              items={partnerClinicians}
+              value={clinician}
+              onValueChange={(value) => {
+                setClinician(value ?? null);
+                setClinicianInput(value?.label ?? "");
+              }}
+              inputValue={clinicianInput}
+              onInputValueChange={setClinicianInput}
+              open={clinicianOpen}
+              onOpenChange={setClinicianOpen}
+              itemToStringLabel={(item) => item.label}
+              itemToStringValue={(item) => item.id}
+              isItemEqualToValue={(left, right) => left.id === right.id}
+            >
+              <div ref={clinicianAnchorRef}>
+                <ComboboxInput
+                  className="partner-combobox w-full bg-white [--ring:#35b0fb] has-[[data-slot=input-group-control]:focus-visible]:border-input"
+                  placeholder="Select a Clinician"
+                  aria-label="ClinicianDropdown"
+                  id="clinician-dropdown"
+                  onFocus={() => setClinicianOpen(true)}
+                />
+              </div>
+              <ComboboxContent anchor={clinicianAnchorRef}>
+                <ComboboxEmpty>No clinicians found.</ComboboxEmpty>
+                <ComboboxList>
+                  {(item) => (
+                    <ComboboxItem key={item.id} value={item}>
+                      {item.label}
+                    </ComboboxItem>
+                  )}
+                </ComboboxList>
+              </ComboboxContent>
+            </Combobox>
           </div>
-          <ComboboxContent anchor={anchorRef}>
-            <ComboboxEmpty>No partners found.</ComboboxEmpty>
-            <ComboboxList>
-              {(item) => (
-                <ComboboxItem key={item} value={item}>
-                  {item}
-                </ComboboxItem>
-              )}
-            </ComboboxList>
-          </ComboboxContent>
-        </Combobox>
+        )}
+
+        {loadError && (
+          <div className="flex items-center justify-between gap-3 rounded-lg border border-[#FED7AA] bg-[#FFF7ED] p-3" role="alert">
+            <p className="text-sm text-[#7C2D12]">
+              We couldn&apos;t load partners and clinicians.
+            </p>
+            <Button type="button" variant="outline" onClick={() => setReloadKey((key) => key + 1)}>
+              Retry
+            </Button>
+          </div>
+        )}
       </div>
 
-      {/* Button to submit the selected partner */}
-      <div
-        className="is-flex is-justify-content-center"
-      >
+      <div className="flex justify-center">
         <Button
           id="partner-button"
           aria-label="SubmitPartner"
           variant="outline"
           size="lg"
-          className="my-4 rounded-full"
+          className="partner-action-button my-4 rounded-full"
           onClick={submit}
-          disabled={!partner}
+          disabled={
+            isLoading ||
+            loadError ||
+            !partner ||
+            (clinicianRequired && !clinician)
+          }
         >
           Submit
         </Button>

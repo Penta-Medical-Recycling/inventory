@@ -4,27 +4,24 @@ import PentaContext from "../../context/PentaContext";
 
 const BulkOrderAnnouncement = () => (
     <div className="bulk-announcement">
-        <h2>Bulk ordering has a new workflow</h2>
+        <h2>Adding multiple items</h2>
         <ol className="bulk-announcement__steps">
             <li><span>Open an item group.</span></li>
-            <li><span>Select <strong>Bulk add</strong> above the inventory list.</span></li>
+            <li><span>Select <strong>Add multiple to cart</strong> above the inventory list.</span></li>
             <li><span>Choose a size when prompted, then select the quantity you need.</span></li>
         </ol>
-        <p className="bulk-announcement__note">
-            <strong>Before you begin:</strong> Please allow a few moments for inventory availability to load.
-        </p>
     </div>
 );
 
 // eslint-disable-next-line react/prop-types
-const PopUpCard = ({ showModal, setShowModal }) => {
+const PopUpCard = ({ showModal, onClose }) => {
     const { message } = useContext(PentaContext)
     const isBulkOrderAnnouncement = /bulk order/i.test(message);
 
     return (
         <>
             <div className= {showModal ? "modal is-active" : "modal"}>
-                <div className="modal-background" onClick={() => setShowModal(false)}></div>
+                <div className="modal-background" onClick={onClose}></div>
                 <div
                     className="modal-card popup-card has-text-centered"
                 >
@@ -43,7 +40,7 @@ const PopUpCard = ({ showModal, setShowModal }) => {
                         <button
                             className="delete is-medium"
                             aria-label="close"
-                            onClick={() => setShowModal(false)}
+                            onClick={onClose}
                             style={{ position: "absolute", right: "1.25rem", backgroundColor: "#c4c4c4", borderRadius: "9999px" }}
                         ></button>
                     </header>

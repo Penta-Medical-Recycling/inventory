@@ -157,4 +157,11 @@ export const partnerRecords = [
   // Sparse record: no Email / Primary Contact.
   { id: "rec13uLfkPTu1Lvhm", createdTime: "2021-10-11T15:14:37.000Z", fields: { Partner: "ENAM", Tag: "INACTIVE" } },
   { id: "recF5bBGGYd4Oezt4", createdTime: "2022-08-03T18:43:16.000Z", fields: { Partner: "2ft Prosthetics", Tag: "ACTIVE", "Primary Contact": "Dave Williams" } },
+  { id: "recSteppingIntoGrace", createdTime: "2026-06-01T12:00:00.000Z", fields: { Partner: "Stepping into Grace", Tag: "ACTIVE" } },
+];
+
+export const clinicianRecords = [
+  { id: "recClinicianA", fields: { Name: "Alex Morgan", Partners: ["recSteppingIntoGrace"], "Partner (from Partners)": ["Stepping into Grace"] } },
+  { id: "recClinicianB", fields: { Name: "Jordan Lee", Partners: ["recSteppingIntoGrace"], "Partner (from Partners)": ["Stepping into Grace"] } },
+  { id: "recClinicianUnassigned", fields: { Name: "Unassigned Clinician" } },
 ];

@@ -18,10 +18,10 @@ describe("cart add flow", () => {
     renderWithProviders(<InStockCard item={noSizeItem} />);
 
     // Precondition: not in the cart yet.
-    expect(screen.getByLabelText("AddToCart")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /Add Socket, Left leg to cart/i })).toBeInTheDocument();
     expect(localStorage.getItem("23-1689")).toBeNull();
 
-    await user.click(screen.getByLabelText("AddToCart"));
+    await user.click(screen.getByRole("button", { name: /Add Socket, Left leg to cart/i }));
 
     // Single add is instant: no quantity modal appears.
     expect(screen.queryByText(/How many units/i)).not.toBeInTheDocument();
@@ -30,9 +30,9 @@ describe("cart add flow", () => {
     expect(JSON.parse(localStorage.getItem("23-1689"))?.["Qty."]).toBe(1);
 
     // The card swapped to the in-cart layout, which offers remove only.
-    expect(await screen.findByLabelText("DecrementQty")).toBeInTheDocument();
+    expect(await screen.findByRole("button", { name: /Remove Socket, Left leg from cart/i })).toBeInTheDocument();
     expect(screen.queryByLabelText("IncrementQty")).not.toBeInTheDocument();
-    expect(screen.queryByLabelText("AddToCart")).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: /Add Socket, Left leg to cart/i })).not.toBeInTheDocument();
   });
 
   it("instantly adds a sized item as the exact unit without a size prompt", async () => {
@@ -40,14 +40,14 @@ describe("cart add flow", () => {
 
     renderWithProviders(<InStockCard item={sizedItem} />);
 
-    await user.click(screen.getByLabelText("AddToCart"));
+    await user.click(screen.getByRole("button", { name: /Add Left Foot Shell to cart/i }));
 
     // No size step for a single add - the exact displayed unit is added.
     expect(
       screen.queryByText(/Select size range for Left Foot Shell/i)
     ).not.toBeInTheDocument();
     expect(JSON.parse(localStorage.getItem("22-1287"))?.["Qty."]).toBe(1);
-    expect(await screen.findByLabelText("DecrementQty")).toBeInTheDocument();
+    expect(await screen.findByRole("button", { name: /Remove Left Foot Shell from cart/i })).toBeInTheDocument();
   });
 });
 
@@ -59,12 +59,12 @@ describe("cart remove flow", () => {
 
     renderWithProviders(<InStockCard item={noSizeItem} />);
 
-    expect(screen.getByLabelText("DecrementQty")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /Remove Socket, Left leg from cart/i })).toBeInTheDocument();
 
-    await user.click(screen.getByLabelText("DecrementQty"));
+    await user.click(screen.getByRole("button", { name: /Remove Socket, Left leg from cart/i }));
 
     // The unit is gone from storage and the card reverts to the add control.
     expect(localStorage.getItem("23-1689")).toBeNull();
-    expect(await screen.findByLabelText("AddToCart")).toBeInTheDocument();
+    expect(await screen.findByRole("button", { name: /Add Socket, Left leg to cart/i })).toBeInTheDocument();
   });
 });

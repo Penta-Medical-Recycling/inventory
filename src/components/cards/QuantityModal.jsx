@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { ArrowLeft } from "lucide-react";
 import { Slider } from "@/components/ui/slider";
 import Stepper from "../ui/Stepper";
+import { getCartItemKeys } from "../../lib/storage";
 
 const QuantityModal = ({ itemName, currentItemId, onSubmit, onClose, hasSize = false, getAvailableCount }) => {
   const defaultSizeRange = [0, 75];
@@ -23,11 +24,9 @@ const QuantityModal = ({ itemName, currentItemId, onSubmit, onClose, hasSize = f
 
   const updateExistingCount = () => {
     let count = 0;
-    const allKeys = Object.keys(localStorage);
+    const allKeys = getCartItemKeys();
 
     allKeys.forEach((key) => {
-      if (key === "partner" || key === "notes") return;
-
       try {
         const item = JSON.parse(localStorage.getItem(key));
         const valuesToCheck = [

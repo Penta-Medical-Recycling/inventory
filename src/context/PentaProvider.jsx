@@ -9,6 +9,7 @@ import {
   AIRTABLE_API_URL,
   AIRTABLE_BASE_ID,
 } from "../config/airtable";
+import { getCartItemKeys } from "../lib/storage";
 
 // Airtable's maximum page size. Used for the background master-list fetch so it
 // pulls the full inventory in as few requests as possible.
@@ -19,7 +20,7 @@ function PentaProvider({ children }) {
     localStorage.getItem("partner") || ""
   );
   const [cartCount, setCartCount] = useState(
-    Object.keys(localStorage).filter((k) => k !== "partner" && k !== "notes").length
+    getCartItemKeys().length
   );
   // null = status not yet known. The app renders normally while this resolves;
   // "Offline" is the intentional maintenance toggle from the Site-Status record.
@@ -59,6 +60,23 @@ function PentaProvider({ children }) {
   const [offsetArray, setOffsetArray] = useState([""]);
   const [inventoryGroups, setInventoryGroups] = useState([]);
   const [areInventoryGroupsLoading, setAreInventoryGroupsLoading] = useState(true);
+
+  const clearFilters = () => {
+    setSelectedManufacturer([]);
+    setSelectedSKU([]);
+    setSelectedDescriptions([]);
+    setSelectedFilters({
+      Prosthesis: false,
+      Orthosis: false,
+      Pediatric: false,
+    });
+    setSelectedPart("");
+    setExtremity("All");
+    setMinValue(1);
+    setMaxValue(largestSize);
+    setOffset(0);
+    setOffsetArray([""]);
+  };
 
   // Full sellable inventory (filter-independent), cached for the tab session and
   // shared across the app so availability checks and the bulk add flow read a
@@ -477,6 +495,7 @@ if (selectedSKU.length > 0) {
         setIsLoading,
         selectedFilter,
         setSelectedFilters,
+        clearFilters,
         data,
         setData,
         serverMessage,

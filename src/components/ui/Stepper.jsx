@@ -66,7 +66,7 @@ const Stepper = ({
           onClick={onDecrement}
           disabled={!canDecrement}
           aria-label={`Decrease ${label}`}
-          className="flex size-8 shrink-0 items-center justify-center rounded-full text-[#4A4A4A] transition-colors hover:bg-[#D9F1FF] hover:text-[#1a9fe0] disabled:opacity-30 disabled:hover:bg-transparent"
+          className="flex size-11 shrink-0 items-center justify-center rounded-full text-[#4A4A4A] transition-colors hover:bg-[#D9F1FF] hover:text-[#1a9fe0] disabled:opacity-30 disabled:hover:bg-transparent"
         >
           <Minus className="size-4" />
         </button>
@@ -84,7 +84,7 @@ const Stepper = ({
           onClick={onIncrement}
           disabled={!canIncrement}
           aria-label={`Increase ${label}`}
-          className="flex size-8 shrink-0 items-center justify-center rounded-full text-[#4A4A4A] transition-colors hover:bg-[#D9F1FF] hover:text-[#1a9fe0] disabled:opacity-30 disabled:hover:bg-transparent"
+          className="flex size-11 shrink-0 items-center justify-center rounded-full text-[#4A4A4A] transition-colors hover:bg-[#D9F1FF] hover:text-[#1a9fe0] disabled:opacity-30 disabled:hover:bg-transparent"
         >
           <Plus className="size-4" />
         </button>

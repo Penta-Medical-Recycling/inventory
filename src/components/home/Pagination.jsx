@@ -12,12 +12,15 @@ const Pagination = ({ bottom, onRemove }) => {
   // Scroll to the top of the page when navigating to the next page
   const scrollToTop = () => {
     setTimeout(() => {
-      const navbarHeight = document.querySelector("#nav").offsetHeight;
+      const scrollRegion = document.querySelector(".app-scroll-region");
       const targetDiv = document.querySelector("#paginator");
 
-      if (targetDiv) {
-        const targetPosition = targetDiv.offsetTop - navbarHeight;
-        window.scrollTo({
+      if (scrollRegion && targetDiv) {
+        const targetPosition =
+          scrollRegion.scrollTop +
+          targetDiv.getBoundingClientRect().top -
+          scrollRegion.getBoundingClientRect().top;
+        scrollRegion.scrollTo({
           top: targetPosition,
         });
       }
@@ -68,34 +71,38 @@ const Pagination = ({ bottom, onRemove }) => {
           >
             <p>{offset + 1}</p>
           </div>
-          <p
+          <button
+            type="button"
+            aria-label="Next page"
+            disabled={isButtonDisabled}
             className={`is-size-4 ml-1 is-text-weight-bold pag-btn ${
               isButtonDisabled ? "disabled" : ""
             }`}
-            style={{ cursor: "pointer" }}
             onClick={() => {
               pageClick(true);
             }}
           >
             <i className="fas fas fa-angle-double-right"></i>
-          </p>
+          </button>
         </div>
       ) : page === "Previous" ? (
         // Display only the "Previous" page button
         <div
           className="is-flex is-justify-content-center is-align-items-center"
         >
-          <p
+          <button
+            type="button"
+            aria-label="Previous page"
+            disabled={isButtonDisabled}
             className={`is-size-4 mr-1 is-text-weight-bold pag-btn ${
               isButtonDisabled ? "disabled" : ""
             }`}
-            style={{ cursor: "pointer" }}
             onClick={() => {
               pageClick(false);
             }}
           >
             <i className="fas fas fa-angle-double-left"></i>
-          </p>
+          </button>
           <div
             style={{ marginRight: "44px" }}
             className="is-flex is-justify-content-center is-align-items-center has-text-weight-bold is-size-5 num-pag"
@@ -108,31 +115,35 @@ const Pagination = ({ bottom, onRemove }) => {
         <div
           className="is-flex is-justify-content-center is-align-items-center"
         >
-          <p
+          <button
+            type="button"
+            aria-label="Previous page"
+            disabled={isButtonDisabled}
             className={`is-size-4 mr-1 is-text-weight-bold pag-btn ${
               isButtonDisabled ? "disabled" : ""
             }`}
-            style={{ cursor: "pointer" }}
             onClick={() => {
               pageClick(false);
             }}
           >
             <i className="fas fas fa-angle-double-left"></i>
-          </p>
+          </button>
           <div className="is-flex is-justify-content-center is-align-items-center has-text-weight-bold is-size-5 num-pag">
             <p>{offset + 1}</p>
           </div>
-          <p
+          <button
+            type="button"
+            aria-label="Next page"
+            disabled={isButtonDisabled}
             className={`is-size-4 ml-1 is-text-weight-bold pag-btn ${
               isButtonDisabled ? "disabled" : ""
             }`}
-            style={{ cursor: "pointer" }}
             onClick={() => {
               pageClick(true);
             }}
           >
             <i className="fas fas fa-angle-double-right"></i>
-          </p>
+          </button>
         </div>
       ) : (
         // No page buttons displayed if page is not "Next," "Previous," or "Next/Previous" (When there is 36 or less results)

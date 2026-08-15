@@ -31,8 +31,12 @@ describe("InventoryGroupCard", () => {
       />
     );
 
-    expect(screen.getByAltText("Double Adapter - Male inventory 1")).toBeInTheDocument();
+    const firstImage = screen.getByAltText("Double Adapter - Male inventory 1");
+    expect(firstImage).toBeInTheDocument();
     expect(screen.getByAltText("Double Adapter - Male inventory 2")).toBeInTheDocument();
+    expect(firstImage.closest(".inventory-group-card__media")).toHaveClass(
+      "inventory-group-card__media--multiple"
+    );
   });
 
   it("renders a placeholder when no image is configured", () => {

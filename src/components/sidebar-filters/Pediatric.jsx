@@ -20,8 +20,8 @@ const Pediatric = ({ pediatric, setPediatric }) => {
         }}
         className={`flex cursor-pointer items-center justify-between rounded-3xl border px-4 py-2.5 transition-all ${
           pediatric
-            ? "border-[#64C8FF] bg-[#D9F1FF]"
-            : "border-[#E5E7EB] bg-transparent"
+            ? "border-[#64C8FF] bg-[#D9F1FF] hover:bg-[#c9eaff]"
+            : "border-[#E5E7EB] bg-transparent hover:border-[#9CA3AF] hover:bg-[#F3F4F6]"
         }`}
       >
         <div className="flex flex-col">

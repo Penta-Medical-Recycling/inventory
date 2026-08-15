@@ -1,3 +1,4 @@
+import * as React from "react";
 import { Tooltip as TooltipPrimitive } from "@base-ui/react/tooltip";
 
 import { cn } from "@/lib/utils";
@@ -16,9 +17,9 @@ function Tooltip({ ...props }) {
   );
 }
 
-function TooltipTrigger({ ...props }) {
-  return <TooltipPrimitive.Trigger data-slot="tooltip-trigger" {...props} />;
-}
+const TooltipTrigger = React.forwardRef(function TooltipTrigger(props, ref) {
+  return <TooltipPrimitive.Trigger ref={ref} data-slot="tooltip-trigger" {...props} />;
+});
 
 function TooltipContent({
   side = "top",

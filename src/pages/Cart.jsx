@@ -12,15 +12,20 @@ import {
   AIRTABLE_API_URL,
   AIRTABLE_BASE_ID,
 } from "../config/airtable";
+import {
+  clearCartItems,
+  clearRequestParty,
+  getCartItemKeys,
+  getRequestParty,
+} from "../lib/storage";
+
+export { getCartItemKeys } from "../lib/storage";
 
 // You should implement or import this method properly
 const getTotalInStockBySKU = async (sku) => {
   // TODO: Replace with actual API call
   return 10;
 };
-
-export const getCartItemKeys = (storage = localStorage) =>
-  Object.keys(storage).filter((key) => key !== "notes" && key !== "partner");
 
 const AVAILABILITY_BATCH_SIZE = 100;
 
@@ -90,8 +95,38 @@ export const checkCartItemAvailability = async (itemIds, fetchImpl = fetch) => {
   }
 };
 
+export const createRequestFields = ({
+  requestName,
+  requestParty,
+  itemIds,
+  notes,
+  numOfPatients,
+  numOfChildren,
+}) => ({
+  Name: requestName,
+  Partner: [requestParty.partnerId],
+  "Additional Notes": notes,
+  "Items You Would Like": itemIds,
+  "Number of patients helped": Number(numOfPatients) || 0,
+  "Number of children helped": Number(numOfChildren) || 0,
+  ...(requestParty.clinicianId
+    ? { Clinicians: [requestParty.clinicianId] }
+    : {}),
+});
+
 function Cart() {
-  const { fulfillCartItems, selectedPartner, setCartCount } = useContext(PentaContext);
+  const {
+    fulfillCartItems,
+    selectedPartner,
+    setSelectedPartner,
+    setCartCount,
+  } = useContext(PentaContext);
+  const requestParty = getRequestParty();
+  const hasValidRequestParty = Boolean(
+    requestParty &&
+      requestParty.partnerName === selectedPartner &&
+      (!requestParty.clinicianRequired || requestParty.clinicianId)
+  );
   const [quantities, setQuantities] = useState({});
   const [outOfStock, setOutOfStock] = useState();
   const navigate = useNavigate();
@@ -149,11 +184,9 @@ const hasUnavailableItems = outOfStock?.size > 0;
 };
 
 const confirmResetCart = () => {
-  const partner = localStorage.getItem("partner");
-  localStorage.clear();
-  if (partner) {
-    localStorage.setItem("partner", partner);
-  }
+  clearCartItems();
+  clearRequestParty();
+  setSelectedPartner("");
   setCartCount(0);
   Toast({ message: "Cart has been reset.", type: "is-info" });
   setShowResetModal(false); // close modal
@@ -190,12 +223,16 @@ const confirmResetCart = () => {
 
 
 useEffect(() => {
-  if (!selectedPartner) navigate("/partner");
-}, []);
+  if (!selectedPartner || !hasValidRequestParty) navigate("/partner");
+}, [hasValidRequestParty, navigate, selectedPartner]);
 
 
 
   const requestButton = async (event) => {
+    if (!hasValidRequestParty) {
+      navigate("/partner");
+      return;
+    }
     setIsLoading(true);
 
     const itemIds = getCartItemKeys().map((key) => {
@@ -228,14 +265,14 @@ useEffect(() => {
     const data = {
       records: [
         {
-          fields: {
-            Name: generateRandomHexadecimal(),
-            Partner: localStorage["partner"],
-            "Additional Notes": notes,
-            "Items You Would Like": itemIds,
-            "Number of patients helped": Number(numOfPatients) || 0,
-            "Number of children helped": Number(numOfChildren) || 0
-          },
+          fields: createRequestFields({
+            requestName: generateRandomHexadecimal(),
+            requestParty,
+            itemIds,
+            notes,
+            numOfPatients,
+            numOfChildren,
+          }),
         },
       ],
       typecast: true,
@@ -258,9 +295,9 @@ useEffect(() => {
     setCartCount(0);
     setNumOfChildren("");
     setNumOfPatients("");
-    const partner = localStorage["partner"];
-    localStorage.clear();
-    localStorage.setItem("partner", partner);
+    clearCartItems();
+    clearRequestParty();
+    setSelectedPartner("");
     // Invalidate the cached master inventory list: the items just requested are
     // no longer available, so the next Home visit must rebuild a fresh list
     // instead of reusing the stale session cache.
@@ -283,8 +320,7 @@ useEffect(() => {
 
   const missingInfo = () => {
     !notes &&
-    Object.keys(localStorage).filter((k) => k !== "partner" && k !== "notes")
-      .length === 0
+    getCartItemKeys().length === 0
       ? Toast({
           message: "Please add additional notes, and add items to your cart",
           type: "is-danger",
@@ -312,12 +348,19 @@ useEffect(() => {
   <BigSpinner size={75} />
 ) : (
   <>
-    <h1 className="has-text-centered is-size-5 my-4">
-      Hello, {selectedPartner} Member!
-    </h1>
+    <div className="my-4 text-center">
+      <h2 className="text-xl font-medium">
+        Hello, {selectedPartner} Member!
+      </h2>
+      {requestParty?.clinicianName && (
+        <p className="mt-1 text-sm text-[#6B7280]">
+          Clinician: {requestParty.clinicianName}
+        </p>
+      )}
+    </div>
 
     <div className="is-flex is-justify-content-center my-3">
-      <Button render={<Link to="/partner" />} variant="outline" size="lg" className="rounded-full w-[142px]">
+      <Button render={<Link to="/partner" />} nativeButton={false} variant="outline" size="lg" className="cart-action-button w-[142px] rounded-full">
         Change Partner
       </Button>
     </div>
@@ -345,10 +388,10 @@ useEffect(() => {
       </div>
     )}
 
-          <div style={{ width: "60vw", margin: "auto" }}>
+          <div className="cart-request-form">
             <p>How many patients do you plan to help with this request?</p>
             <Input
-              className="my-2"
+              className="my-2 h-11"
               type="number"
               placeholder="Please input a number"
               value={numOfPatients}
@@ -356,7 +399,7 @@ useEffect(() => {
             />
             <p>How many of the patients are children (under 21 years old)?</p>
             <Input
-              className="my-2"
+              className="my-2 h-11"
               type="number"
               placeholder="Please input a number"
               value={numOfChildren}
@@ -364,7 +407,7 @@ useEffect(() => {
             />
           </div>
 
-          <div style={{ width: "60vw", margin: "auto" }}>
+          <div className="cart-request-form">
             <Textarea
               className="my-4 min-h-40"
               placeholder="Additional Notes"
@@ -380,7 +423,7 @@ useEffect(() => {
               aria-label="Confirm"
               type="button"
               size="lg"
-              className="mb-4 w-[142px] rounded-full bg-[#78d3fb] text-white hover:bg-[#78d3fb]/90"
+              className="cart-action-button mb-4 w-[142px] rounded-full border-[#35b0fb] bg-[#35b0fb] text-white hover:border-[#159ee8] hover:bg-[#159ee8]"
               disabled={isCartEmpty || hasValidationErrors || hasUnavailableItems}
               onClick={handleConfirmOrder}
             >
@@ -395,7 +438,7 @@ useEffect(() => {
               aria-label="ResetCart"
               type="button"
               size="lg"
-              className="mb-4 w-[142px] rounded-full bg-[#ff5c47] text-white hover:bg-[#ff5c47]/90"
+              className="cart-action-button mb-4 w-[142px] rounded-full border-[#ff5c48] bg-[#ff5c48] text-white hover:border-[#e94f3e] hover:bg-[#e94f3e]"
               onClick={handleResetCart}
             >
               Reset Cart
@@ -412,11 +455,12 @@ useEffect(() => {
                   className="is-flex is-justify-content-center"
                   style={{ gap: "1.5rem", marginTop: "1rem" }}
                 >
-                  <Button variant="destructive" onClick={confirmResetCart}>
+                  <Button className="cart-action-button" variant="destructive" onClick={confirmResetCart}>
                     Reset
                   </Button>
 
                   <Button
+                    className="cart-action-button"
                     variant="outline"
                     onClick={() => setShowResetModal(false)}
                   >

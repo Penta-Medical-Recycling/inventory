@@ -59,13 +59,15 @@ function App() {
   return (
     <>
       <SideBar />
-      <main>
+      <main className="app-shell">
         <NavBar />
-        <Routes>
-          <Route path="/" element={<Home />}></Route>
-          <Route path="/cart" element={<Cart />}></Route>
-          <Route path="/partner" element={<Partner />}></Route>
-        </Routes>
+        <div className="app-scroll-region">
+          <Routes>
+            <Route path="/" element={<Home />}></Route>
+            <Route path="/cart" element={<Cart />}></Route>
+            <Route path="/partner" element={<Partner />}></Route>
+          </Routes>
+        </div>
       </main>
       <Toaster position="top-center" richColors closeButton />
     </>

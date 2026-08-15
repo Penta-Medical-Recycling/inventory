@@ -12,22 +12,25 @@ describe("InStockCard", () => {
   it("shows the add-to-cart control when the item is not in the cart", () => {
     renderWithProviders(<InStockCard item={item} />);
 
-    expect(screen.getByLabelText("AddToCart")).toBeInTheDocument();
-    expect(screen.queryByLabelText("DecrementQty")).not.toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /Add Left Foot Shell to cart/i })).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: /Remove Left Foot Shell from cart/i })).not.toBeInTheDocument();
+    expect(screen.getByRole("link", { name: /View reference images for Left Foot Shell/i })).toBeInTheDocument();
+    expect(screen.queryByLabelText("In cart")).not.toBeInTheDocument();
   });
 
   it("instantly adds the exact unit when add-to-cart is clicked", async () => {
     const user = userEvent.setup();
     renderWithProviders(<InStockCard item={item} />);
 
-    await user.click(screen.getByLabelText("AddToCart"));
+    await user.click(screen.getByRole("button", { name: /Add Left Foot Shell to cart/i }));
 
     // No size prompt for a single add; the exact unit is persisted immediately.
     expect(
       screen.queryByText(/Select size range for Left Foot Shell/i)
     ).not.toBeInTheDocument();
     expect(JSON.parse(localStorage.getItem(item["Item ID"]))?.["Qty."]).toBe(1);
-    expect(await screen.findByLabelText("DecrementQty")).toBeInTheDocument();
+    expect(await screen.findByRole("button", { name: /Remove Left Foot Shell from cart/i })).toBeInTheDocument();
+    expect(screen.getByLabelText("In cart")).toBeInTheDocument();
   });
 
   it("shows only a remove control when the item is in the cart", () => {
@@ -36,8 +39,9 @@ describe("InStockCard", () => {
     renderWithProviders(<InStockCard item={item} />);
 
     // In-cart layout offers remove only - no add/increment affordance.
-    expect(screen.getByLabelText("DecrementQty")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /Remove Left Foot Shell from cart/i })).toBeInTheDocument();
+    expect(screen.getByLabelText("In cart")).toBeInTheDocument();
     expect(screen.queryByLabelText("IncrementQty")).not.toBeInTheDocument();
-    expect(screen.queryByLabelText("AddToCart")).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: /Add Left Foot Shell to cart/i })).not.toBeInTheDocument();
   });
 });

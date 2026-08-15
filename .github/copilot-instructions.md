@@ -186,6 +186,34 @@ inventory/
 - UI typography must not use font weights above 600. Use `font-weight: 600` or Tailwind
   `font-semibold` for emphasis; do not use `bold`, `font-bold`, or numeric weights of 700 or higher.
 
+### Responsive viewport targets
+
+Use these analytics-informed browser viewport sizes when building or validating frontend features.
+Design fluidly between them rather than creating layouts for individual device models.
+
+| Purpose | Viewport | Expectation |
+| --- | --- | --- |
+| Mobile safety floor | `360x800` | No clipping or horizontal page overflow; actions may wrap |
+| Primary mobile | `390x844` | Optimize the core mobile workflow for this size |
+| Wider mobile | `402x874` | Confirm fluid spacing and full-width controls |
+| Compact landscape | `800x600` | Account for both limited width and limited vertical space |
+| Minimum desktop | `1366x768` | Full desktop layout must fit without crowding or overlap |
+| Primary desktop | `1536x864` | Use as the main desktop visual-validation target |
+| Wide desktop | `1920x1080` | Constrain content width; do not stretch controls excessively |
+
+- Treat approximately `768px` through `900px` as a distinct compact/tablet range when a single
+  desktop row becomes crowded. Prefer reorganizing controls over shrinking text or touch targets.
+- Mobile controls must have at least `44x44px` touch targets. Keep primary workflows visible and
+  usable at `390x844`; convert tertiary labeled actions to accessible icon buttons before reducing
+  primary control space.
+- Avoid horizontal page scrolling at every target. Text, cards, drawers, dialogs, dropdowns,
+  toolbars, and fixed controls must remain inside the viewport without incoherent overlap.
+- For meaningful UI changes, browser-check at least `390x844`, `800x600`, `1366x768`, and
+  `1536x864`. Also check `360x800` when changing dense controls, navigation, dialogs, or toolbars,
+  and `1920x1080` when changing page-level composition or maximum content widths.
+- Test height as well as width: important actions must remain reachable at the `600px` and `768px`
+  height targets without relying on accidental overflow behavior.
+
 ### shadcn/ui components — add via CLI, never import Base UI directly
 
 When you need a UI primitive (combobox, dialog, select, popover, etc.), **first add the shadcn

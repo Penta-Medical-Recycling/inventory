@@ -2,7 +2,7 @@ import React from "react";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 
 const itemClass =
-  "h-auto flex-1 cursor-pointer rounded-3xl border border-transparent px-4 py-1.5 text-base font-normal text-[#4A4A4A] transition-all hover:bg-transparent hover:text-[#4A4A4A] aria-pressed:border-[#64C8FF] aria-pressed:bg-[#D9F1FF] aria-pressed:font-semibold aria-pressed:text-[#4A4A4A]";
+  "min-h-11 flex-1 cursor-pointer rounded-3xl border border-transparent px-4 py-1.5 text-base font-normal text-[#4A4A4A] transition-all hover:bg-transparent hover:text-[#4A4A4A] hover:shadow-none aria-pressed:border-[#64C8FF] aria-pressed:bg-[#D9F1FF] aria-pressed:font-semibold aria-pressed:text-[#4A4A4A]";
 
 const ASSISTIVE_DEVICE_OPTIONS = ["All", "Prosthesis", "Orthosis"];
 

@@ -1,4 +1,4 @@
-import { useEffect, useContext, useState } from "react";
+import { useEffect, useContext } from "react";
 import { X } from "lucide-react";
 import PentaContext from "../context/PentaContext";
 import {
@@ -26,21 +26,32 @@ const SideBar = () => {
     isSideBarActive,
     fetchMaxSize,
     setLargestSize,
-    setMinValue,
     setMaxValue,
-    largestSize,
-    setSelectedManufacturer,
-    setSelectedSKU,
-    setSelectedDescriptions,
+    selectedFilter,
     setSelectedFilters,
     selectedPart,
     setSelectedPart,
     extremity,
     setExtremity,
+    clearFilters,
   } = useContext(PentaContext);
 
-  const [assistiveDevice, setAssistiveDevice] = useState("All");
-  const [pediatric, setPediatric] = useState(false);
+  const assistiveDevice = selectedFilter.Prosthesis
+    ? "Prosthesis"
+    : selectedFilter.Orthosis
+      ? "Orthosis"
+      : "All";
+  const setAssistiveDevice = (value) => {
+    setSelectedFilters((prev) => ({
+      ...prev,
+      Prosthesis: value === "Prosthesis",
+      Orthosis: value === "Orthosis",
+    }));
+  };
+  const pediatric = selectedFilter.Pediatric;
+  const setPediatric = (value) => {
+    setSelectedFilters((prev) => ({ ...prev, Pediatric: value }));
+  };
 
   // Fetch max size once
   useEffect(() => {
@@ -62,46 +73,12 @@ const SideBar = () => {
     setSelectedPart(extremity === "Lower" ? "All" : "");
   }, [extremity, setSelectedPart]);
 
-  // Sync the Assistive Device selection to the Tag filter. "All"/none clears it.
-  useEffect(() => {
-    setSelectedFilters((prev) => ({
-      ...prev,
-      Prosthesis: assistiveDevice === "Prosthesis",
-      Orthosis: assistiveDevice === "Orthosis",
-    }));
-  }, [assistiveDevice, setSelectedFilters]);
-
-  // Sync the Pediatric toggle to the Tag filter.
-  useEffect(() => {
-    setSelectedFilters((prev) =>
-      prev.Pediatric === pediatric ? prev : { ...prev, Pediatric: pediatric }
-    );
-  }, [pediatric, setSelectedFilters]);
-
   // Orthosis items aren't split by extremity, so the Extremity filter is hidden
   // and treated as a no-op. Force it back to "All" so any prior Upper/Lower
   // selection stops filtering while Orthosis is active.
   useEffect(() => {
     if (assistiveDevice === "Orthosis") setExtremity("All");
   }, [assistiveDevice, setExtremity]);
-
-  // Reset all filters
-  const removeAllFilters = () => {
-    setSelectedManufacturer([]);
-    setSelectedSKU([]);
-    setSelectedDescriptions([]);
-    setMinValue(1);
-    setMaxValue(largestSize);
-    setSelectedFilters({
-      Prosthesis: false,
-      Orthosis: false,
-      Pediatric: false,
-    });
-    setAssistiveDevice("All");
-    setExtremity("All");
-    setSelectedPart("");
-    setPediatric(false);
-  };
 
   return (
     <Drawer
@@ -116,7 +93,7 @@ const SideBar = () => {
           </DrawerTitle>
           <DrawerClose
             aria-label="Close filters"
-            className="absolute right-4 top-1/2 -translate-y-1/2 cursor-pointer rounded-full p-2 transition-transform hover:scale-110"
+            className="absolute right-4 top-1/2 flex size-11 -translate-y-1/2 cursor-pointer items-center justify-center rounded-full p-0 transition-all hover:scale-110 hover:bg-[#F3F4F6]"
           >
             <X className="h-5 w-5 text-[#4A4A4A]" />
           </DrawerClose>
@@ -159,7 +136,7 @@ const SideBar = () => {
         </ScrollArea>
 
         <DrawerFooter className="border-t border-black/5 pt-4">
-          <ResetFilters removeAllFilters={removeAllFilters} />
+          <ResetFilters removeAllFilters={clearFilters} />
         </DrawerFooter>
       </DrawerContent>
     </Drawer>

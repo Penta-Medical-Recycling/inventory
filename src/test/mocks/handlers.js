@@ -11,6 +11,7 @@ import {
   skuRecords,
   skuGroupRecords,
   partnerRecords,
+  clinicianRecords,
 } from "./fixtures";
 
 const BASE = `${AIRTABLE_API_URL}/${AIRTABLE_BASE_ID}`;
@@ -47,9 +48,10 @@ export const handlers = [
     });
   }),
 
-  // Manufacturers, SKUs, Partners select-option sources.
+  // Manufacturers, SKUs, Partners, and Clinicians select-option sources.
   http.get(`${BASE}/Manufacturers`, () => list(manufacturerRecords)),
   http.get(`${BASE}/SKUs`, () => list(skuRecords)),
   http.get(`${BASE}/SKU%20Groups`, () => list(skuGroupRecords)),
   http.get(`${BASE}/Partners`, () => list(partnerRecords)),
+  http.get(`${BASE}/Clinicians`, () => list(clinicianRecords)),
 ];

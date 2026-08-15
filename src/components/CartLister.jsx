@@ -2,6 +2,7 @@ import { useContext, useState } from "react";
 import { ChevronDown, Package, Trash2 } from "lucide-react";
 import PentaContext from "../context/PentaContext";
 import { getItemDisplayName } from "../lib/cartBulkAdd";
+import { getCartItemKeys } from "../lib/storage";
 
 const naturalCollator = new Intl.Collator(undefined, {
   numeric: true,
@@ -118,9 +119,8 @@ const CartItemImage = ({ item, inventoryGroups }) => {
 // eslint-disable-next-line react/prop-types
 const CartLister = ({ outOfStock, setOutOfStock, itemValidationStatus }) => {
   const { inventoryGroups, setCartCount } = useContext(PentaContext);
-  const cartItems = Object.entries(localStorage)
-    .filter(([key]) => key !== "partner" && key !== "notes")
-    .map(([, value]) => JSON.parse(value))
+  const cartItems = getCartItemKeys()
+    .map((key) => JSON.parse(localStorage.getItem(key)))
     .filter(Boolean);
   const cartGroups = groupCartItems(cartItems);
   const [, setRevision] = useState(0);

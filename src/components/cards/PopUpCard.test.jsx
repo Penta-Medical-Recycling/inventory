@@ -5,7 +5,7 @@ import PopUpCard from "./PopUpCard";
 const renderPopup = (message) =>
   render(
     <PentaContext.Provider value={{ message }}>
-      <PopUpCard showModal setShowModal={() => {}} />
+      <PopUpCard showModal onClose={() => {}} />
     </PentaContext.Provider>,
     { withProviders: false }
   );
@@ -17,13 +17,13 @@ describe("PopUpCard", () => {
     );
 
     expect(
-      screen.getByRole("heading", { name: "Bulk ordering has a new workflow" })
+      screen.getByRole("heading", { name: "Adding multiple items" })
     ).toBeInTheDocument();
     expect(screen.getAllByRole("listitem")).toHaveLength(3);
-    expect(screen.getByText("Bulk add").closest("li")).toHaveTextContent(
-      "Select Bulk add above the inventory list."
+    expect(screen.getByText("Add multiple to cart").closest("li")).toHaveTextContent(
+      "Select Add multiple to cart above the inventory list."
     );
-    expect(screen.getByText(/before you begin/i)).toBeInTheDocument();
+    expect(screen.queryByText(/before you begin/i)).not.toBeInTheDocument();
     expect(screen.queryByText(/when you add the first item/i)).not.toBeInTheDocument();
   });
 
