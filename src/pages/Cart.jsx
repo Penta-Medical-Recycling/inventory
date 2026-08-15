@@ -1,12 +1,22 @@
 import React, { useEffect, useState, useContext } from "react";
-import { useNavigate, Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
+import { Pencil, X } from "lucide-react";
 import BigSpinner from "../assets/BigSpinner";
 import CartLister from "../components/CartLister";
+import RequestPartyPicker from "../components/RequestPartyPicker";
 import Toast from "../components/Toast";
 import PentaContext from "../context/PentaContext";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import {
+  Drawer,
+  DrawerClose,
+  DrawerContent,
+  DrawerDescription,
+  DrawerHeader,
+  DrawerTitle,
+} from "@/components/ui/drawer";
 import {
   AIRTABLE_API_KEY,
   AIRTABLE_API_URL,
@@ -17,6 +27,7 @@ import {
   clearRequestParty,
   getCartItemKeys,
   getRequestParty,
+  setRequestParty,
 } from "../lib/storage";
 
 export { getCartItemKeys } from "../lib/storage";
@@ -135,6 +146,7 @@ function Cart() {
   const [numOfPatients, setNumOfPatients] = useState("");
   const [numOfChildren, setNumOfChildren] = useState("");
   const [showResetModal, setShowResetModal] = useState(false);
+  const [showPartyEditor, setShowPartyEditor] = useState(false);
   const [itemValidationStatus, setItemValidationStatus] = useState({});
   const [isRetryingAvailability, setIsRetryingAvailability] = useState(false);
 // Filter valid cart item keys (skip notes/partner/etc)
@@ -217,6 +229,13 @@ const confirmResetCart = () => {
     setIsRetryingAvailability(true);
     await idFetcher(itemIds);
     setIsRetryingAvailability(false);
+  };
+
+  const updateRequestParty = (nextParty) => {
+    localStorage.setItem("partner", nextParty.partnerName);
+    setRequestParty(nextParty);
+    setSelectedPartner(nextParty.partnerName);
+    setShowPartyEditor(false);
   };
 
 
@@ -348,22 +367,64 @@ useEffect(() => {
   <BigSpinner size={75} />
 ) : (
   <>
-    <div className="my-4 text-center">
-      <h2 className="text-xl font-medium">
-        Hello, {selectedPartner} Member!
-      </h2>
-      {requestParty?.clinicianName && (
-        <p className="mt-1 text-sm text-[#6B7280]">
-          Clinician: {requestParty.clinicianName}
-        </p>
-      )}
+    <div className="cart-request-context" aria-label="Request context">
+      <div className="cart-request-context__header">
+        <h2 className="cart-request-context__title">Request details</h2>
+        <Button
+          type="button"
+          variant="ghost"
+          size="icon-lg"
+          className="cart-action-button size-11 shrink-0 rounded-full text-[#4B5563] hover:bg-[#EEF8FD] hover:text-[#1679AD]"
+          aria-label="Edit request details"
+          title="Edit request details"
+          onClick={() => setShowPartyEditor(true)}
+        >
+          <Pencil className="size-4" aria-hidden="true" />
+        </Button>
+      </div>
+      <div className="cart-request-context__identity">
+        <h2 className="cart-request-context__partner">{selectedPartner}</h2>
+        {requestParty?.clinicianName && (
+          <p className="cart-request-context__clinician">
+            {requestParty.clinicianName}
+          </p>
+        )}
+      </div>
     </div>
 
-    <div className="is-flex is-justify-content-center my-3">
-      <Button render={<Link to="/partner" />} nativeButton={false} variant="outline" size="lg" className="cart-action-button w-[142px] rounded-full">
-        Change Partner
-      </Button>
-    </div>
+    <Drawer
+      open={showPartyEditor}
+      onOpenChange={setShowPartyEditor}
+      swipeDirection="right"
+    >
+      <DrawerContent className="w-[min(520px,94vw)] border-white/40 bg-white/95 backdrop-blur-xl sm:w-[520px]">
+        <DrawerHeader className="relative border-b border-black/5 px-6 pb-4 pt-5">
+          <DrawerTitle className="text-lg font-semibold">
+            Edit request context
+          </DrawerTitle>
+          <DrawerDescription>
+            Update who this inventory request is for. Your cart will stay intact.
+          </DrawerDescription>
+          <DrawerClose
+            aria-label="Close request context editor"
+            className="absolute right-3 top-3 flex size-11 cursor-pointer items-center justify-center rounded-full transition-colors hover:bg-[#F3F4F6]"
+          >
+            <X className="size-5" aria-hidden="true" />
+          </DrawerClose>
+        </DrawerHeader>
+        <div className="min-h-0 flex-1 overflow-y-auto px-6 py-6">
+          {showPartyEditor && (
+            <RequestPartyPicker
+              initialParty={requestParty}
+              onSave={updateRequestParty}
+              onCancel={() => setShowPartyEditor(false)}
+              submitLabel="Save changes"
+              submitAriaLabel="Save request context"
+            />
+          )}
+        </div>
+      </DrawerContent>
+    </Drawer>
 
     <CartLister
       outOfStock={outOfStock}

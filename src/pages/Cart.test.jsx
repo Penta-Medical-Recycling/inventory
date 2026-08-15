@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { describe, expect, it, vi } from "vitest";
 import { MemoryRouter, Route, Routes } from "react-router-dom";
 import { render, screen, userEvent, waitFor } from "../test/utils";
@@ -12,6 +13,7 @@ import {
   getRequestParty,
   setRequestParty,
 } from "../lib/storage";
+import { clinicianRecords, partnerRecords } from "../test/mocks/fixtures";
 
 describe("Cart item detection", () => {
   it("treats application metadata as an empty cart", () => {
@@ -225,7 +227,7 @@ describe("Requests payload", () => {
       { withProviders: false }
     );
 
-    expect(screen.getByText("Clinician: Alex Morgan")).toBeInTheDocument();
+    expect(screen.getByText("Alex Morgan")).toBeInTheDocument();
     await user.click(screen.getByRole("button", { name: "Confirm" }));
 
     await waitFor(() => expect(requestBody).toBeDefined());
@@ -261,5 +263,87 @@ describe("Requests payload", () => {
     );
 
     expect(await screen.findByText("Choose request partner")).toBeInTheDocument();
+  });
+});
+
+describe("Cart request context", () => {
+  it("edits Partner and Clinician in place without losing cart items", async () => {
+    const user = userEvent.setup();
+    const item = {
+      "Item ID": "22-1287",
+      "Description (from SKU)": ["Demo Item"],
+    };
+    localStorage.setItem("partner", "Stepping into Grace");
+    localStorage.setItem(item["Item ID"], JSON.stringify(item));
+    setRequestParty({
+      partnerId: "recSteppingIntoGrace",
+      partnerName: "Stepping into Grace",
+      clinicianRequired: true,
+      clinicianId: "recClinicianA",
+      clinicianName: "Alex Morgan",
+    });
+
+    const Harness = () => {
+      const [selectedPartner, setSelectedPartner] = useState(
+        "Stepping into Grace"
+      );
+      return (
+        <PentaContext.Provider
+          value={{
+            inventoryGroups: [],
+            selectedPartner,
+            setSelectedPartner,
+            setCartCount: vi.fn(),
+            fetchTableRecordsWithOffset: vi.fn(async (table) =>
+              table === "Partners" ? partnerRecords : clinicianRecords
+            ),
+          }}
+        >
+          <Cart />
+        </PentaContext.Provider>
+      );
+    };
+
+    render(
+      <MemoryRouter initialEntries={["/cart"]}>
+        <Harness />
+      </MemoryRouter>,
+      { withProviders: false }
+    );
+
+    await user.click(
+      screen.getByRole("button", { name: "Edit request details" })
+    );
+    expect(
+      await screen.findByRole("heading", { name: "Edit request context" })
+    ).toBeInTheDocument();
+    expect(screen.getByLabelText("PartnerDropdown")).toHaveValue(
+      "Stepping into Grace"
+    );
+    expect(screen.getByLabelText("ClinicianDropdown")).toHaveValue(
+      "Alex Morgan"
+    );
+
+    await user.click(screen.getByLabelText("PartnerDropdown"));
+    await user.click(await screen.findByText("2ft Prosthetics"));
+    expect(screen.queryByLabelText("ClinicianDropdown")).not.toBeInTheDocument();
+    await user.click(
+      screen.getByRole("button", { name: "Save request context" })
+    );
+
+    expect(
+      screen.queryByRole("heading", { name: "Edit request context" })
+    ).not.toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "MY CART" })).toBeInTheDocument();
+    expect(screen.getByText("2ft Prosthetics")).toBeInTheDocument();
+    expect(screen.queryByText("Alex Morgan")).not.toBeInTheDocument();
+    expect(localStorage.getItem(item["Item ID"])).not.toBeNull();
+    expect(getRequestParty()).toEqual({
+      partnerId: "recF5bBGGYd4Oezt4",
+      partnerName: "2ft Prosthetics",
+      clinicianRequired: false,
+      clinicianId: null,
+      clinicianName: null,
+    });
   });
 });

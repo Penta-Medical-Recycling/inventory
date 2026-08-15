@@ -66,6 +66,50 @@ main.app-shell {
   width: min(820px, calc(100% - 2rem));
   margin: 2rem auto 3rem;
 }
+.cart-request-context {
+  width: min(820px, calc(100% - 2rem));
+  margin: 0 auto 1rem;
+  padding: 0.875rem 1rem 1rem;
+  border: 1px solid #dfe3e8;
+  border-radius: 8px;
+  background: #fff;
+}
+.cart-request-context__header {
+  display: flex;
+  margin-bottom: 0.625rem;
+  padding-bottom: 0.625rem;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  border-bottom: 1px solid #eef0f3;
+}
+.cart-request-context__title {
+  margin: 0;
+  color: #4b5563;
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+.cart-request-context__identity {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+.cart-request-context__partner {
+  margin: 0;
+  overflow: hidden;
+  color: #111827;
+  font-size: 1rem;
+  font-weight: 600;
+  line-height: 1.3;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.cart-request-context__clinician {
+  margin: 0;
+  color: #6b7280;
+  font-size: 0.82rem;
+}
 .cart-list__header {
   display: flex;
   align-items: flex-end;

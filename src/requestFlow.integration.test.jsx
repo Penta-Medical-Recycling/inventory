@@ -70,10 +70,9 @@ describe("request flow integration", () => {
     await user.click(screen.getByRole("button", { name: "SubmitPartner" }));
 
     expect(
-      await screen.findByRole("heading", {
-        name: "Hello, 2ft Prosthetics Member!",
-      })
+      await screen.findByRole("heading", { name: "Request details" })
     ).toBeInTheDocument();
+    expect(screen.getByText("2ft Prosthetics")).toBeInTheDocument();
     await submitCartRequest(user);
 
     await waitFor(() => expect(getRequestBody()).toBeDefined());
@@ -104,11 +103,10 @@ describe("request flow integration", () => {
     await user.click(submitPartner);
 
     expect(
-      await screen.findByRole("heading", {
-        name: "Hello, Stepping into Grace Member!",
-      })
+      await screen.findByRole("heading", { name: "Request details" })
     ).toBeInTheDocument();
-    expect(screen.getByText("Clinician: Alex Morgan")).toBeInTheDocument();
+    expect(screen.getByText("Stepping into Grace")).toBeInTheDocument();
+    expect(screen.getByText("Alex Morgan")).toBeInTheDocument();
     await submitCartRequest(user);
 
     await waitFor(() => expect(getRequestBody()).toBeDefined());
