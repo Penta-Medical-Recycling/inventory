@@ -20,7 +20,8 @@ it("resolves a cart item image from its SKU group", () => {
 });
 
 describe("cart unavailable state", () => {
-  it("summarizes and renders an unavailable item within its SKU group", () => {
+  it("summarizes and renders an unavailable item within its SKU group", async () => {
+    const user = userEvent.setup();
     seedCartItem(item);
 
     renderWithProviders(
@@ -32,7 +33,7 @@ describe("cart unavailable state", () => {
     );
 
     expect(screen.getByText(/1 unavailable/i)).toBeInTheDocument();
-  expect(screen.getByRole("button", { name: /collapse left foot shell/i })).toBeInTheDocument();
+    await user.click(screen.getByRole("button", { name: /expand left foot shell/i }));
 
     expect(screen.getByText("Unavailable")).toBeInTheDocument();
     expect(
@@ -42,7 +43,8 @@ describe("cart unavailable state", () => {
     expect(screen.queryByLabelText("IncrementQty")).not.toBeInTheDocument();
   });
 
-  it("renders the same item as an in-stock cart row when it is not flagged", () => {
+  it("renders the same item as an in-stock cart row when it is not flagged", async () => {
+    const user = userEvent.setup();
     seedCartItem({
       ...item,
       Image: [{ thumbnails: { small: { url: "https://example.com/item-small.png" } } }],
@@ -55,6 +57,8 @@ describe("cart unavailable state", () => {
         itemValidationStatus={{ [itemId]: "done" }}
       />
     );
+
+    await user.click(screen.getByRole("button", { name: /expand left foot shell/i }));
 
     // No unavailable state: the item shows the normal removable cart row instead.
     expect(screen.queryByText("Unavailable")).not.toBeInTheDocument();
@@ -79,6 +83,7 @@ describe("cart unavailable state", () => {
       />
     );
 
+    await user.click(screen.getByRole("button", { name: /expand left foot shell/i }));
     await user.click(
       screen.getByRole("button", { name: /remove left foot shell 22-1287 from cart/i })
     );
@@ -87,7 +92,8 @@ describe("cart unavailable state", () => {
     expect(screen.getByText("Your cart is empty.")).toBeInTheDocument();
   });
 
-  it("keeps an unverifiable item visible and removable", () => {
+  it("keeps an unverifiable item visible and removable", async () => {
+    const user = userEvent.setup();
     seedCartItem(item);
 
     renderWithProviders(
@@ -97,6 +103,8 @@ describe("cart unavailable state", () => {
         itemValidationStatus={{ [itemId]: "error" }}
       />
     );
+
+    await user.click(screen.getByRole("button", { name: /expand left foot shell/i }));
 
     expect(screen.getByText(/1 couldn't verify/i)).toBeInTheDocument();
     expect(screen.getByText("Couldn't verify")).toBeInTheDocument();
@@ -133,18 +141,14 @@ describe("cart unavailable state", () => {
 
     expect(
       screen
-        .getAllByRole("button", { name: /^collapse (?!all)/i })
+        .getAllByRole("button", { name: /^expand (?!all)/i })
         .map((button) => button.getAttribute("aria-label"))
-    ).toEqual(["Collapse Alpha Brace, 5 items", "Collapse Beta Foot, 1 item"]);
+    ).toEqual(["Expand Alpha Brace, 5 items", "Expand Beta Foot, 1 item"]);
     expect(screen.queryByText("Size 2 x 2 · Size 10 x 1")).not.toBeInTheDocument();
     expect(screen.queryByText("ALPHA")).not.toBeInTheDocument();
     expect(screen.queryByText(/no size/i)).not.toBeInTheDocument();
-    expect(
-      screen.getByRole("heading", { level: 3, name: "Universal size" })
-    ).toBeInTheDocument();
-
-    await user.click(screen.getByRole("button", { name: "Collapse all" }));
     expect(screen.queryByRole("heading", { level: 3 })).not.toBeInTheDocument();
+
     await user.click(screen.getByRole("button", { name: "Expand all" }));
 
     expect(

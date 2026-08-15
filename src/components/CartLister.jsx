@@ -124,9 +124,7 @@ const CartLister = ({ outOfStock, setOutOfStock, itemValidationStatus }) => {
     .filter(Boolean);
   const cartGroups = groupCartItems(cartItems);
   const [, setRevision] = useState(0);
-  const [expandedGroups, setExpandedGroups] = useState(
-    () => new Set(cartGroups.map((group) => group.key))
-  );
+  const [expandedGroups, setExpandedGroups] = useState(() => new Set());
   const unavailableIds = outOfStock || new Set();
   const allGroupsExpanded =
     cartGroups.length > 0 && cartGroups.every((group) => expandedGroups.has(group.key));
@@ -230,7 +228,6 @@ const CartLister = ({ outOfStock, setOutOfStock, itemValidationStatus }) => {
                 aria-label={`${expanded ? "Collapse" : "Expand"} ${group.name}, ${group.items.length} ${group.items.length === 1 ? "item" : "items"}`}
                 onClick={() => toggleGroup(group.key)}
               >
-                <ChevronDown className="cart-sku__chevron" size={20} aria-hidden="true" />
                 <CartItemImage item={group.items[0]} inventoryGroups={inventoryGroups} />
                 <span className="cart-sku__summary">
                   <span className="cart-sku__name">{group.name}</span>
@@ -248,8 +245,11 @@ const CartLister = ({ outOfStock, setOutOfStock, itemValidationStatus }) => {
                   )}
                 </span>
                 <span className="cart-sku__count">
-                  <strong>{group.items.length}</strong>
-                  {group.items.length === 1 ? "item" : "items"}
+                  <span className="cart-sku__count-label">
+                    <strong>{group.items.length}</strong>
+                    {group.items.length === 1 ? "item" : "items"}
+                  </span>
+                  <ChevronDown className="cart-sku__chevron" size={18} aria-hidden="true" />
                 </span>
               </button>
 

@@ -69,7 +69,12 @@ function App() {
           </Routes>
         </div>
       </main>
-      <Toaster position="top-center" richColors closeButton />
+      <Toaster
+        position="top-center"
+        mobileOffset={{ top: 16, right: 16, bottom: 24, left: 16 }}
+        richColors
+        closeButton
+      />
     </>
   );
 }

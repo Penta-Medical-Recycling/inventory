@@ -19,6 +19,9 @@ describe("CardBody", () => {
     expect(screen.getByText("Freedom Innovation")).toBeInTheDocument(); // Manufacturer
     expect(screen.getByText("Manufacturer")).toBeInTheDocument();
     expect(screen.getByText("Size")).toBeInTheDocument();
+    expect(screen.queryByText("Item ID")).not.toBeInTheDocument();
+    expect(document.querySelectorAll(".card-spec-row")).toHaveLength(3);
+    expect(screen.getByText("22-1287")).toHaveClass("card-item-id");
   });
 
   it("does not crash and omits optional blocks for a sparse record", () => {

@@ -86,7 +86,7 @@ const SideBar = () => {
       onOpenChange={setIsSideBarActive}
       swipeDirection="left"
     >
-      <DrawerContent className="w-[min(550px,92vw)] rounded-l-none border-white/40 bg-white/85 backdrop-blur-xl sm:w-[550px]">
+      <DrawerContent className="max-w-full overflow-x-hidden w-[min(550px,92vw)] rounded-l-none border-white/40 bg-white/85 backdrop-blur-xl sm:w-[550px]">
         <DrawerHeader className="relative flex flex-row items-center justify-center">
           <DrawerTitle className="text-center text-lg">
             Filters
@@ -99,8 +99,11 @@ const SideBar = () => {
           </DrawerClose>
         </DrawerHeader>
 
-        <ScrollArea className="min-h-0 flex-1">
-          <div className="flex flex-col gap-7 px-5 pb-8">
+        <ScrollArea
+          className="min-h-0 min-w-0 flex-1 overflow-x-hidden"
+          viewportClassName="!overflow-x-hidden"
+        >
+          <div className="flex min-w-0 max-w-full flex-col gap-7 px-5 pb-8">
             <AssistiveDevice
               assistiveDevice={assistiveDevice}
               setAssistiveDevice={setAssistiveDevice}
@@ -113,8 +116,8 @@ const SideBar = () => {
             {extremity && (
               <>
                 {extremity === "Lower" && (
-                  <div className="flex items-center gap-2">
-                    <div className="w-2/5 shrink-0">
+                  <div className="flex min-w-0 max-w-full items-center gap-2">
+                    <div className="min-w-0 w-2/5 shrink-0">
                       <Parts
                         description={selectedPart}
                         setDescription={setSelectedPart}

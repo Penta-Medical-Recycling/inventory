@@ -8,7 +8,7 @@ const Toast = ({ message, type }) => {
 
   switch (type) {
     case "is-success":
-      toast.success(message, options);
+      toast.success(message, { ...options, position: "bottom-center" });
       break;
     case "is-danger":
       toast.error(message, options);

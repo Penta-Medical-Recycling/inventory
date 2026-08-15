@@ -48,10 +48,18 @@ const choosePartner = async (user, partnerName) => {
 };
 
 const submitCartRequest = async (user) => {
-  const numberInputs = screen.getAllByPlaceholderText("Please input a number");
-  await user.type(numberInputs[0], "3");
-  await user.type(numberInputs[1], "1");
-  await user.type(screen.getByPlaceholderText("Additional Notes"), "Integration request");
+  await user.type(
+    screen.getByLabelText(/How many patients do you plan to help/i),
+    "3"
+  );
+  await user.type(
+    screen.getByLabelText(/How many of the patients are children/i),
+    "1"
+  );
+  await user.type(
+    screen.getByLabelText(/Additional notes/i),
+    "Integration request"
+  );
   await user.click(screen.getByRole("button", { name: "Confirm" }));
 };
 
@@ -70,7 +78,7 @@ describe("request flow integration", () => {
     await user.click(screen.getByRole("button", { name: "SubmitPartner" }));
 
     expect(
-      await screen.findByRole("heading", { name: "Request details" })
+      await screen.findByRole("heading", { name: "Request summary" })
     ).toBeInTheDocument();
     expect(screen.getByText("2ft Prosthetics")).toBeInTheDocument();
     await submitCartRequest(user);
@@ -103,7 +111,7 @@ describe("request flow integration", () => {
     await user.click(submitPartner);
 
     expect(
-      await screen.findByRole("heading", { name: "Request details" })
+      await screen.findByRole("heading", { name: "Request summary" })
     ).toBeInTheDocument();
     expect(screen.getByText("Stepping into Grace")).toBeInTheDocument();
     expect(screen.getByText("Alex Morgan")).toBeInTheDocument();

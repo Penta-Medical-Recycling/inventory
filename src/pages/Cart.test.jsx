@@ -228,6 +228,15 @@ describe("Requests payload", () => {
     );
 
     expect(screen.getByText("Alex Morgan")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "ResetCart" })).toHaveTextContent(
+      "Clear"
+    );
+    await user.click(screen.getByRole("button", { name: "ResetCart" }));
+    expect(
+      screen.getByText("Are you sure you want to clear your cart?")
+    ).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Clear" })).toBeInTheDocument();
+    await user.click(screen.getByRole("button", { name: "Cancel" }));
     await user.click(screen.getByRole("button", { name: "Confirm" }));
 
     await waitFor(() => expect(requestBody).toBeDefined());
@@ -312,10 +321,10 @@ describe("Cart request context", () => {
     );
 
     await user.click(
-      screen.getByRole("button", { name: "Edit request details" })
+      screen.getByRole("button", { name: "Change partner clinic" })
     );
     expect(
-      await screen.findByRole("heading", { name: "Edit request context" })
+      await screen.findByRole("heading", { name: "Select partner clinic" })
     ).toBeInTheDocument();
     expect(screen.getByLabelText("PartnerDropdown")).toHaveValue(
       "Stepping into Grace"
@@ -328,13 +337,13 @@ describe("Cart request context", () => {
     await user.click(await screen.findByText("2ft Prosthetics"));
     expect(screen.queryByLabelText("ClinicianDropdown")).not.toBeInTheDocument();
     await user.click(
-      screen.getByRole("button", { name: "Save request context" })
+      screen.getByRole("button", { name: "Save partner clinic" })
     );
 
     expect(
-      screen.queryByRole("heading", { name: "Edit request context" })
+      screen.queryByRole("heading", { name: "Select partner clinic" })
     ).not.toBeInTheDocument();
-    expect(screen.getByRole("heading", { name: "MY CART" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Cart" })).toBeInTheDocument();
     expect(screen.getByText("2ft Prosthetics")).toBeInTheDocument();
     expect(screen.queryByText("Alex Morgan")).not.toBeInTheDocument();
     expect(localStorage.getItem(item["Item ID"])).not.toBeNull();
@@ -345,5 +354,44 @@ describe("Cart request context", () => {
       clinicianId: null,
       clinicianName: null,
     });
+  });
+
+  it("shows a focused empty state instead of request controls", () => {
+    localStorage.setItem("partner", "Demo Clinic");
+    setRequestParty({
+      partnerId: "recDemoClinic",
+      partnerName: "Demo Clinic",
+      clinicianRequired: false,
+      clinicianId: null,
+      clinicianName: null,
+    });
+
+    render(
+      <MemoryRouter initialEntries={["/cart"]}>
+        <PentaContext.Provider
+          value={{
+            inventoryGroups: [],
+            selectedPartner: "Demo Clinic",
+            setSelectedPartner: vi.fn(),
+            setCartCount: vi.fn(),
+          }}
+        >
+          <Cart />
+        </PentaContext.Provider>
+      </MemoryRouter>,
+      { withProviders: false }
+    );
+
+    expect(
+      screen.getByRole("heading", { name: "Your cart is empty" })
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: "Browse inventory" })
+    ).toBeInTheDocument();
+    expect(
+      screen.queryByLabelText(/How many patients do you plan to help/i)
+    ).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "ResetCart" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Confirm" })).not.toBeInTheDocument();
   });
 });

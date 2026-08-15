@@ -1,5 +1,3 @@
-import React from "react";
-
 // CardBody renders the information display for an inventory item.
 // variant: "stock" (default) or "cart". The "cart" variant adds top spacing so the
 // content clears the "Unavailable" status pill in OutOfStockCard.
@@ -43,10 +41,10 @@ const CardBody = ({ item, variant = "stock" }) => {
       {specs.length > 0 && (
         <dl className="card-specs">
           {specs.map((spec) => (
-            <React.Fragment key={spec.label}>
+            <div className="card-spec-row" key={spec.label}>
               <dt className="card-spec-label">{spec.label}</dt>
               <dd className="card-spec-value">{spec.value}</dd>
-            </React.Fragment>
+            </div>
           ))}
         </dl>
       )}

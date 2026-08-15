@@ -200,7 +200,7 @@ const confirmResetCart = () => {
   clearRequestParty();
   setSelectedPartner("");
   setCartCount(0);
-  Toast({ message: "Cart has been reset.", type: "is-info" });
+  Toast({ message: "Cart has been cleared.", type: "is-info" });
   setShowResetModal(false); // close modal
   navigate("/"); // 🆕 redirect to homepage
 };
@@ -355,11 +355,14 @@ useEffect(() => {
         });
   };
 
+  const requestDisabled =
+    isCartEmpty || hasValidationErrors || hasUnavailableItems;
+
     return (
     <>
       <div id="text-section">
         <h1 className="mt-6 text-center text-3xl font-semibold">
-          MY CART
+          Cart
         </h1>
       </div>
 
@@ -367,31 +370,6 @@ useEffect(() => {
   <BigSpinner size={75} />
 ) : (
   <>
-    <div className="cart-request-context" aria-label="Request context">
-      <div className="cart-request-context__header">
-        <h2 className="cart-request-context__title">Request details</h2>
-        <Button
-          type="button"
-          variant="ghost"
-          size="icon-lg"
-          className="cart-action-button size-11 shrink-0 rounded-full text-[#4B5563] hover:bg-[#EEF8FD] hover:text-[#1679AD]"
-          aria-label="Edit request details"
-          title="Edit request details"
-          onClick={() => setShowPartyEditor(true)}
-        >
-          <Pencil className="size-4" aria-hidden="true" />
-        </Button>
-      </div>
-      <div className="cart-request-context__identity">
-        <h2 className="cart-request-context__partner">{selectedPartner}</h2>
-        {requestParty?.clinicianName && (
-          <p className="cart-request-context__clinician">
-            {requestParty.clinicianName}
-          </p>
-        )}
-      </div>
-    </div>
-
     <Drawer
       open={showPartyEditor}
       onOpenChange={setShowPartyEditor}
@@ -400,13 +378,13 @@ useEffect(() => {
       <DrawerContent className="w-[min(520px,94vw)] border-white/40 bg-white/95 backdrop-blur-xl sm:w-[520px]">
         <DrawerHeader className="relative border-b border-black/5 px-6 pb-4 pt-5">
           <DrawerTitle className="text-lg font-semibold">
-            Edit request context
+            Select partner clinic
           </DrawerTitle>
           <DrawerDescription>
-            Update who this inventory request is for. Your cart will stay intact.
+            Choose the partner clinic for this request. Some clinics also require a clinician.
           </DrawerDescription>
           <DrawerClose
-            aria-label="Close request context editor"
+            aria-label="Close partner clinic selector"
             className="absolute right-3 top-3 flex size-11 cursor-pointer items-center justify-center rounded-full transition-colors hover:bg-[#F3F4F6]"
           >
             <X className="size-5" aria-hidden="true" />
@@ -419,105 +397,158 @@ useEffect(() => {
               onSave={updateRequestParty}
               onCancel={() => setShowPartyEditor(false)}
               submitLabel="Save changes"
-              submitAriaLabel="Save request context"
+              submitAriaLabel="Save partner clinic"
             />
           )}
         </div>
       </DrawerContent>
     </Drawer>
 
-    <CartLister
-      outOfStock={outOfStock}
-      setOutOfStock={setOutOfStock}
-      itemValidationStatus={itemValidationStatus}
-    />
-
-    {hasValidationErrors && (
-      <div className="cart-validation-alert" role="alert">
-        <div>
-          <strong>Some items couldn't be verified.</strong>
-          <p>Check your connection, then retry before submitting your request.</p>
-        </div>
+    {isCartEmpty ? (
+      <section className="cart-empty-state" aria-labelledby="empty-cart-title">
+        <h2 id="empty-cart-title">Your cart is empty</h2>
+        <p>Browse available inventory and add the items you want to request.</p>
         <Button
           type="button"
-          variant="outline"
-          disabled={isRetryingAvailability}
-          onClick={retryAvailabilityCheck}
+          size="lg"
+          className="cart-action-button rounded-full bg-[#35b0fb] px-5 text-white hover:bg-[#159ee8]"
+          onClick={() => navigate("/")}
         >
-          {isRetryingAvailability ? "Checking..." : "Retry availability check"}
+          Browse inventory
         </Button>
-      </div>
-    )}
+      </section>
+    ) : (
+      <div className="cart-workspace">
+        <div className="cart-workspace__items">
+          <CartLister
+            outOfStock={outOfStock}
+            setOutOfStock={setOutOfStock}
+            itemValidationStatus={itemValidationStatus}
+          />
 
-          <div className="cart-request-form">
-            <p>How many patients do you plan to help with this request?</p>
+          {hasValidationErrors && (
+            <div className="cart-validation-alert" role="alert">
+              <div>
+                <strong>Some items couldn't be verified.</strong>
+                <p>Check your connection, then retry before submitting your request.</p>
+              </div>
+              <Button
+                type="button"
+                variant="outline"
+                disabled={isRetryingAvailability}
+                onClick={retryAvailabilityCheck}
+              >
+                {isRetryingAvailability ? "Checking..." : "Retry availability check"}
+              </Button>
+            </div>
+          )}
+        </div>
+
+        <aside className="cart-request-context" aria-label="Request summary">
+          <div className="cart-request-context__header">
+            <h2 className="cart-request-context__title">Request summary</h2>
+          </div>
+          <div className="cart-request-context__identity">
+            <div className="min-w-0">
+              <h3 className="cart-request-context__partner">{selectedPartner}</h3>
+              {requestParty?.clinicianName && (
+                <p className="cart-request-context__clinician">
+                  {requestParty.clinicianName}
+                </p>
+              )}
+            </div>
+            <Button
+              type="button"
+              variant="ghost"
+              size="icon-lg"
+              className="cart-action-button size-11 shrink-0 rounded-full text-[#4B5563] hover:bg-[#EEF8FD] hover:text-[#1679AD]"
+              aria-label="Change partner clinic"
+              title="Change partner clinic"
+              onClick={() => setShowPartyEditor(true)}
+            >
+              <Pencil className="size-4" aria-hidden="true" />
+            </Button>
+          </div>
+
+          <div className="cart-request-context__form">
+            <label htmlFor="patients-helped">
+              How many patients do you plan to help with this request?
+            </label>
             <Input
-              className="my-2 h-11"
+              id="patients-helped"
+              className="h-11"
               type="number"
-              placeholder="Please input a number"
+              min="0"
+              placeholder="Enter a number"
               value={numOfPatients}
               onChange={(e) => setNumOfPatients(e.target.value)}
             />
-            <p>How many of the patients are children (under 21 years old)?</p>
+            <label htmlFor="children-helped">
+              How many of the patients are children (under 21 years old)?
+            </label>
             <Input
-              className="my-2 h-11"
+              id="children-helped"
+              className="h-11"
               type="number"
-              placeholder="Please input a number"
+              min="0"
+              placeholder="Enter a number"
               value={numOfChildren}
               onChange={(e) => setNumOfChildren(e.target.value)}
             />
-          </div>
-
-          <div className="cart-request-form">
+            <label htmlFor="request-notes">
+              Additional notes <span>(optional)</span>
+            </label>
             <Textarea
-              className="my-4 min-h-40"
-              placeholder="Additional Notes"
+              id="request-notes"
+              className="min-h-28"
+              placeholder="Add any helpful context"
               value={notes}
               onChange={handleNotesChange}
             />
           </div>
 
-          <div
-            className="is-flex is-justify-content-center"
-          >
-            <Button
-              aria-label="Confirm"
-              type="button"
-              size="lg"
-              className="cart-action-button mb-4 w-[142px] rounded-full border-[#35b0fb] bg-[#35b0fb] text-white hover:border-[#159ee8] hover:bg-[#159ee8]"
-              disabled={isCartEmpty || hasValidationErrors || hasUnavailableItems}
-              onClick={handleConfirmOrder}
-            >
-              Request Items
-            </Button>
+          <div className="cart-submit-action" aria-label="Cart submission">
+            <span className="cart-submit-action__count">
+              {itemKeys.length} {itemKeys.length === 1 ? "item" : "items"}
+            </span>
+            <div className="cart-submit-action__buttons">
+              <Button
+                aria-label="ResetCart"
+                type="button"
+                variant="ghost"
+                className="cart-request-context__reset text-[#6B7280] hover:bg-transparent hover:text-[#B42318]"
+                onClick={handleResetCart}
+              >
+                Clear
+              </Button>
+              <Button
+                aria-label="Confirm"
+                type="button"
+                size="lg"
+                className="cart-action-button rounded-full border-[#35b0fb] bg-[#35b0fb] px-5 text-white hover:border-[#159ee8] hover:bg-[#159ee8]"
+                disabled={requestDisabled}
+                onClick={handleConfirmOrder}
+              >
+                Request items
+              </Button>
+            </div>
           </div>
-
-          <div
-            className="is-flex is-justify-content-center"
-          >
-            <Button
-              aria-label="ResetCart"
-              type="button"
-              size="lg"
-              className="cart-action-button mb-4 w-[142px] rounded-full border-[#ff5c48] bg-[#ff5c48] text-white hover:border-[#e94f3e] hover:bg-[#e94f3e]"
-              onClick={handleResetCart}
-            >
-              Reset Cart
-            </Button>
-          </div>
+        </aside>
+      </div>
+    )}
 
           {showResetModal && (
             <div className="modal-overlay">
               <div className="modal-box">
                 <p className="mb-3">
-                  Are you sure you want to reset your cart?
+                  Are you sure you want to clear your cart?
                 </p>
                 <div
                   className="is-flex is-justify-content-center"
                   style={{ gap: "1.5rem", marginTop: "1rem" }}
                 >
                   <Button className="cart-action-button" variant="destructive" onClick={confirmResetCart}>
-                    Reset
+                    Clear
                   </Button>
 
                   <Button
