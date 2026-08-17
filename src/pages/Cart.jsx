@@ -297,44 +297,46 @@ useEffect(() => {
       typecast: true,
     };
 
-    fetch(url, {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${AIRTABLE_API_KEY}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(data),
-    })
-      .then((response) => response.json())
-      .then((data) => {
-  if (data.error) {
-    console.error("Error:", data.error);
-  } else {
-    setNotes("");
-    setCartCount(0);
-    setNumOfChildren("");
-    setNumOfPatients("");
-    clearCartItems();
-    clearRequestParty();
-    setSelectedPartner("");
-    // Invalidate the cached master inventory list: the items just requested are
-    // no longer available, so the next Home visit must rebuild a fresh list
-    // instead of reusing the stale session cache.
-    sessionStorage.removeItem("allInventoryItems");
-    setIsLoading(false);
-    Toast({
-      message:
-        "Thank you for your time, we will get back to you as soon as possible!",
-      type: "is-info",
-    });
-    navigate("/"); // ✅ Redirect to main page
-  }
-})
-
-      .catch((error) => {
-        console.error("Error:", error);
-        setNotes("Error");
+    try {
+      const response = await fetch(url, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${AIRTABLE_API_KEY}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(data),
       });
+      const responseData = await response.json();
+      if (!response.ok || responseData.error) {
+        throw new Error(responseData.error?.type || `Request failed with ${response.status}`);
+      }
+
+      setNotes("");
+      setCartCount(0);
+      setNumOfChildren("");
+      setNumOfPatients("");
+      clearCartItems();
+      clearRequestParty();
+      setSelectedPartner("");
+      // Invalidate the cached master inventory list: the items just requested are
+      // no longer available, so the next Home visit must rebuild a fresh list
+      // instead of reusing the stale session cache.
+      sessionStorage.removeItem("allInventoryItems");
+      setIsLoading(false);
+      Toast({
+        message:
+          "Thank you for your time, we will get back to you as soon as possible!",
+        type: "is-info",
+      });
+      navigate("/");
+    } catch (error) {
+      console.error("Error submitting request:", error);
+      setIsLoading(false);
+      Toast({
+        message: "We couldn't submit your request. Your cart is saved; please try again.",
+        type: "is-danger",
+      });
+    }
   };
 
   const missingInfo = () => {

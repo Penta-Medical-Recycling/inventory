@@ -231,6 +231,15 @@ npm run test:watch  # re-run on file changes
 npm run coverage    # run with a coverage report
 ```
 
+Selective critical user journeys use Playwright. Install its Chromium browser once after `npm install`, then run the E2E suite:
+
+```bash
+npx playwright install chromium
+npm run test:e2e
+```
+
+Browser tests live under `e2e/` and intercept Airtable requests with deterministic responses; they do not read or write the live base.
+
 ### How It's Organized
 
 Test files live next to the code they cover as `*.test.jsx`. Shared testing infrastructure lives under `src/test/`:

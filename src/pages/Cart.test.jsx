@@ -249,6 +249,73 @@ describe("Requests payload", () => {
     confirmSpy.mockRestore();
   });
 
+  it("preserves checkout state when the Requests write fails", async () => {
+    const user = userEvent.setup();
+    localStorage.setItem("partner", "Demo Clinic");
+    setRequestParty({
+      partnerId: "recDemoClinic",
+      partnerName: "Demo Clinic",
+      clinicianRequired: false,
+      clinicianId: null,
+      clinicianName: null,
+    });
+    localStorage.setItem(
+      "22-1287",
+      JSON.stringify({
+        "Item ID": "22-1287",
+        "Description (from SKU)": ["Demo Item"],
+      })
+    );
+    const fetchSpy = vi.spyOn(globalThis, "fetch").mockImplementation(async (url) => {
+      if (String(url).includes("/Inventory?")) {
+        return {
+          ok: true,
+          json: async () => ({ records: [{ fields: { "Item ID": "22-1287" } }] }),
+        };
+      }
+      return {
+        ok: false,
+        status: 500,
+        json: async () => ({ error: { type: "SERVER_ERROR" } }),
+      };
+    });
+    const confirmSpy = vi.spyOn(window, "confirm").mockReturnValue(true);
+
+    render(
+      <MemoryRouter initialEntries={["/cart"]}>
+        <PentaContext.Provider
+          value={{
+            inventoryGroups: [],
+            selectedPartner: "Demo Clinic",
+            setSelectedPartner: vi.fn(),
+            setCartCount: vi.fn(),
+          }}
+        >
+          <Cart />
+        </PentaContext.Provider>
+      </MemoryRouter>,
+      { withProviders: false }
+    );
+
+    await user.type(
+      screen.getByLabelText(/How many patients do you plan to help/i),
+      "4"
+    );
+    await user.type(screen.getByLabelText(/Additional notes/i), "Keep this work");
+    await user.click(screen.getByRole("button", { name: "Confirm" }));
+
+    expect(
+      await screen.findByLabelText(/How many patients do you plan to help/i)
+    ).toHaveValue(4);
+    expect(screen.getByRole("heading", { name: "Cart" })).toBeInTheDocument();
+    expect(screen.getByLabelText(/Additional notes/i)).toHaveValue("Keep this work");
+    expect(localStorage.getItem("22-1287")).not.toBeNull();
+    expect(getRequestParty()).not.toBeNull();
+
+    fetchSpy.mockRestore();
+    confirmSpy.mockRestore();
+  });
+
   it("redirects a legacy partner-only session to Partner selection", async () => {
     localStorage.setItem("partner", "Stepping into Grace");
 
