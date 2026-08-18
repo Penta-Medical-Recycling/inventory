@@ -92,8 +92,17 @@ describe("request flow integration", () => {
     expect(fields["Number of children helped"]).toBe(1);
     expect(fields["Additional Notes"]).toBe("Integration request");
     expect(confirmSpy).toHaveBeenCalledOnce();
-    await waitFor(() => expect(getRequestParty()).toBeNull());
-    expect(localStorage.getItem(cartItem["Item ID"])).toBeNull();
+    await waitFor(() =>
+      expect(localStorage.getItem(cartItem["Item ID"])).toBeNull()
+    );
+    expect(getRequestParty()).toEqual({
+      partnerId: "recF5bBGGYd4Oezt4",
+      partnerName: "2ft Prosthetics",
+      clinicianRequired: false,
+      clinicianId: null,
+      clinicianName: null,
+    });
+    expect(localStorage.getItem("partner")).toBe("2ft Prosthetics");
   });
 
   it("requires and submits a mapped Clinician request flow", async () => {
@@ -124,7 +133,16 @@ describe("request flow integration", () => {
     expect(fields["Items You Would Like"]).toEqual(["22-1287"]);
     expect(fields["Additional Notes"]).toBe("Integration request");
     expect(confirmSpy).toHaveBeenCalledOnce();
-    await waitFor(() => expect(getRequestParty()).toBeNull());
-    expect(localStorage.getItem(cartItem["Item ID"])).toBeNull();
+    await waitFor(() =>
+      expect(localStorage.getItem(cartItem["Item ID"])).toBeNull()
+    );
+    expect(getRequestParty()).toEqual({
+      partnerId: "recSteppingIntoGrace",
+      partnerName: "Stepping into Grace",
+      clinicianRequired: true,
+      clinicianId: "recClinicianA",
+      clinicianName: "Alex Morgan",
+    });
+    expect(localStorage.getItem("partner")).toBe("Stepping into Grace");
   });
 });

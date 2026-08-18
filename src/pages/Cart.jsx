@@ -24,7 +24,6 @@ import {
 } from "../config/airtable";
 import {
   clearCartItems,
-  clearRequestParty,
   getCartItemKeys,
   getRequestParty,
   setRequestParty,
@@ -158,6 +157,13 @@ const itemIds = itemKeys.map((key) => {
 }).filter(Boolean);
 const hasValidationErrors = itemIds.some((id) => itemValidationStatus[id] === "error");
 const hasUnavailableItems = outOfStock?.size > 0;
+const hasRequiredPatientCounts =
+  numOfPatients !== "" &&
+  numOfChildren !== "" &&
+  Number.isFinite(Number(numOfPatients)) &&
+  Number.isFinite(Number(numOfChildren)) &&
+  Number(numOfPatients) >= 0 &&
+  Number(numOfChildren) >= 0;
 
 
   const handleQuantityChange = (id, value) => {
@@ -178,7 +184,7 @@ const hasUnavailableItems = outOfStock?.size > 0;
   };
 
   const handleConfirmOrder = async () => {
-    if (isCartEmpty) return;
+    if (isCartEmpty || !hasRequiredPatientCounts) return;
 
     const cartItems = Object.entries(quantities).map(([sku, quantity]) => ({
       sku,
@@ -197,8 +203,6 @@ const hasUnavailableItems = outOfStock?.size > 0;
 
 const confirmResetCart = () => {
   clearCartItems();
-  clearRequestParty();
-  setSelectedPartner("");
   setCartCount(0);
   Toast({ message: "Cart has been cleared.", type: "is-info" });
   setShowResetModal(false); // close modal
@@ -316,8 +320,6 @@ useEffect(() => {
       setNumOfChildren("");
       setNumOfPatients("");
       clearCartItems();
-      clearRequestParty();
-      setSelectedPartner("");
       // Invalidate the cached master inventory list: the items just requested are
       // no longer available, so the next Home visit must rebuild a fresh list
       // instead of reusing the stale session cache.
@@ -358,7 +360,10 @@ useEffect(() => {
   };
 
   const requestDisabled =
-    isCartEmpty || hasValidationErrors || hasUnavailableItems;
+    isCartEmpty ||
+    !hasRequiredPatientCounts ||
+    hasValidationErrors ||
+    hasUnavailableItems;
 
     return (
     <>
@@ -474,25 +479,27 @@ useEffect(() => {
 
           <div className="cart-request-context__form">
             <label htmlFor="patients-helped">
-              How many patients do you plan to help with this request?
+              How many patients do you plan to help with this request? <span>(required)</span>
             </label>
             <Input
               id="patients-helped"
               className="h-11"
               type="number"
               min="0"
+              required
               placeholder="Enter a number"
               value={numOfPatients}
               onChange={(e) => setNumOfPatients(e.target.value)}
             />
             <label htmlFor="children-helped">
-              How many of the patients are children (under 21 years old)?
+              How many of the patients are children (under 21 years old)? <span>(required)</span>
             </label>
             <Input
               id="children-helped"
               className="h-11"
               type="number"
               min="0"
+              required
               placeholder="Enter a number"
               value={numOfChildren}
               onChange={(e) => setNumOfChildren(e.target.value)}
