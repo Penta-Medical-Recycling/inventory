@@ -67,7 +67,7 @@ describe("Partner page", () => {
     expect(screen.queryByText("2ft Prosthetics")).not.toBeInTheDocument();
   });
 
-  it("requires a clinician when the selected partner has mapped clinicians", async () => {
+  it("requires clinicians linked through the production Partner field", async () => {
     const user = userEvent.setup();
     renderWithProviders(<Partner />);
 

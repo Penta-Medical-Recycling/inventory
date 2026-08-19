@@ -161,7 +161,7 @@ export const partnerRecords = [
 ];
 
 export const clinicianRecords = [
-  { id: "recClinicianA", fields: { Name: "Alex Morgan", Partners: ["recSteppingIntoGrace"], "Partner (from Partners)": ["Stepping into Grace"] } },
-  { id: "recClinicianB", fields: { Name: "Jordan Lee", Partners: ["recSteppingIntoGrace"], "Partner (from Partners)": ["Stepping into Grace"] } },
+  { id: "recClinicianA", fields: { Name: "Alex Morgan", Partner: ["recSteppingIntoGrace"], "Partner (from Partner)": ["Stepping into Grace"] } },
+  { id: "recClinicianB", fields: { Name: "Jordan Lee", Partner: ["recSteppingIntoGrace"], "Partner (from Partner)": ["Stepping into Grace"] } },
   { id: "recClinicianUnassigned", fields: { Name: "Unassigned Clinician" } },
 ];

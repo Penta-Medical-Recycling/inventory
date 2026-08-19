@@ -12,6 +12,9 @@ import {
   useComboboxAnchor,
 } from "@/components/ui/combobox";
 
+const linkedRecordIds = (value) =>
+  Array.isArray(value) ? value : value ? [value] : [];
+
 const RequestPartyPicker = ({
   initialParty = null,
   onSave,
@@ -59,7 +62,9 @@ const RequestPartyPicker = ({
           .map((record) => ({
             id: record.id,
             label: record.fields.Name.trim(),
-            partnerIds: record.fields.Partners || [],
+            partnerIds: linkedRecordIds(
+              record.fields.Partner ?? record.fields.Partners
+            ),
           }))
           .sort((left, right) => left.label.localeCompare(right.label));
         const initialPartner = nextPartners.find(
