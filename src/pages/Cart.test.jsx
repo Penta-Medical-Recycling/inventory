@@ -165,10 +165,11 @@ describe("Requests payload", () => {
     });
 
     expect(fields.Partner).toEqual(["recPartner"]);
-    expect(fields.Clinicians).toEqual(["recClinician"]);
+    expect(fields.Clinician).toEqual(["recClinician"]);
+    expect(fields).not.toHaveProperty("Clinicians");
   });
 
-  it("omits Clinicians for a partner without mappings", () => {
+  it("omits Clinician for a partner without mappings", () => {
     const fields = createRequestFields({
       ...baseInput,
       requestParty: {
@@ -181,6 +182,7 @@ describe("Requests payload", () => {
     });
 
     expect(fields.Partner).toEqual(["recPartner"]);
+  expect(fields).not.toHaveProperty("Clinician");
     expect(fields).not.toHaveProperty("Clinicians");
   });
 
@@ -257,7 +259,8 @@ describe("Requests payload", () => {
 
     await waitFor(() => expect(requestBody).toBeDefined());
     expect(requestBody.records[0].fields.Partner).toEqual(["recPartner"]);
-    expect(requestBody.records[0].fields.Clinicians).toEqual(["recClinician"]);
+    expect(requestBody.records[0].fields.Clinician).toEqual(["recClinician"]);
+    expect(requestBody.records[0].fields).not.toHaveProperty("Clinicians");
     await waitFor(() => expect(localStorage.getItem("22-1287")).toBeNull());
     expect(getRequestParty()).toEqual({
       partnerId: "recPartner",

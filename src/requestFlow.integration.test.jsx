@@ -86,6 +86,7 @@ describe("request flow integration", () => {
     await waitFor(() => expect(getRequestBody()).toBeDefined());
     const fields = getRequestBody().records[0].fields;
     expect(fields.Partner).toEqual(["recF5bBGGYd4Oezt4"]);
+    expect(fields).not.toHaveProperty("Clinician");
     expect(fields).not.toHaveProperty("Clinicians");
     expect(fields["Items You Would Like"]).toEqual(["22-1287"]);
     expect(fields["Number of patients helped"]).toBe(3);
@@ -129,7 +130,8 @@ describe("request flow integration", () => {
     await waitFor(() => expect(getRequestBody()).toBeDefined());
     const fields = getRequestBody().records[0].fields;
     expect(fields.Partner).toEqual(["recSteppingIntoGrace"]);
-    expect(fields.Clinicians).toEqual(["recClinicianA"]);
+    expect(fields.Clinician).toEqual(["recClinicianA"]);
+    expect(fields).not.toHaveProperty("Clinicians");
     expect(fields["Items You Would Like"]).toEqual(["22-1287"]);
     expect(fields["Additional Notes"]).toBe("Integration request");
     expect(confirmSpy).toHaveBeenCalledOnce();

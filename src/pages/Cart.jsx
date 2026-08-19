@@ -120,7 +120,7 @@ export const createRequestFields = ({
   "Number of patients helped": Number(numOfPatients) || 0,
   "Number of children helped": Number(numOfChildren) || 0,
   ...(requestParty.clinicianId
-    ? { Clinicians: [requestParty.clinicianId] }
+    ? { Clinician: [requestParty.clinicianId] }
     : {}),
 });
 
