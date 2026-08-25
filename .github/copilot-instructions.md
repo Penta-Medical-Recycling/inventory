@@ -113,12 +113,11 @@ Airtable API URL, base ID, and token. Production builds do not load `.env.develo
 
 ## CI / checks before check-in
 
-- **No GitHub Actions CI workflows exist** (`.github/` contains only `dependabot.yml` for the
-  `github-actions` ecosystem). Nothing runs build/lint/tests on push or PR automatically.
-- Because there is no CI gate, self-validate: `npm install` → `npm run build` must pass, and the
-  app must run via `npm run dev` without new console errors.
-- README documents a manual flow: commit → `git push origin master` → `npm run build` →
-  `npm run deploy`. The default branch is `master`.
+- `.github/workflows/pull-request.yml` runs two secret-free checks on every pull request:
+  `npm ci` followed by `npm run verify`, plus the mocked Chromium Playwright suite.
+- Failed Playwright runs upload `test-results/` traces and screenshots for seven days.
+- Lint is not a required PR check because of the existing lint-error baseline described above.
+- Deployment remains manual through `npm run deploy`; the default branch is `master`.
 
 ## Project layout
 

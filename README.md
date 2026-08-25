@@ -253,6 +253,15 @@ npm run test:e2e
 
 Browser tests live under `e2e/` and intercept Airtable requests with deterministic responses; they do not read or write the live base.
 
+### Pull Request Checks
+
+GitHub Actions runs two checks for every pull request:
+
+- **Unit tests and build** installs from `package-lock.json`, runs the Vitest suite, and creates a production build.
+- **Browser journeys** installs Chromium and runs the mocked Playwright E2E suite. Traces and screenshots are uploaded when this job fails.
+
+These checks do not use production Airtable credentials. Lint is not yet a required check because the repository has an existing lint-error baseline that must be reduced separately.
+
 ### How It's Organized
 
 Test files live next to the code they cover as `*.test.{js,jsx}`. Shared testing infrastructure lives under `src/test/`:
