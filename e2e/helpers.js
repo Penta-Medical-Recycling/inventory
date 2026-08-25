@@ -141,6 +141,12 @@ export async function choosePartner(page, partnerName, clinicianName) {
 }
 
 export async function submitRequest(page) {
+  const patientCount = page.getByLabel(/How many patients do you plan to help/i);
+  const childCount = page.getByLabel(/How many of the patients are children/i);
+
+  if (!(await patientCount.inputValue())) await patientCount.fill("1");
+  if (!(await childCount.inputValue())) await childCount.fill("0");
+
   page.once("dialog", (dialog) => dialog.accept());
   await page.getByRole("button", { name: "Confirm" }).click();
 }

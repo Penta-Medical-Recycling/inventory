@@ -8,8 +8,11 @@
 - [Getting Started](#getting-started)
   - [Prerequisites](#prerequisites)
   - [Installation](#installation)
-- [Managing SKU Group Cards](#managing-sku-group-cards-no-code-required)
-- [Committing Changes, Building, and Deploying](#committing-changes-building-and-deploying)
+- [Operations](#operations)
+   - [Production Configuration and Security](#production-configuration-and-security)
+   - [Managing SKU Group Cards](#managing-sku-group-cards)
+   - [Maintenance and Announcements](#maintenance-and-announcements)
+   - [Building and Deploying](#building-and-deploying)
 - [Code Documentation](#code-documentation)
   - [Project Structure](#project-structure)
   - [Main Components](#main-components)
@@ -61,27 +64,28 @@ Before you begin, ensure you have met the following requirements:
 
    ```dotenv
    VITE_REACT_APP_API_KEY=your-development-personal-access-token
-   VITE_AIRTABLE_BASE_ID=your-development-base-id
+   VITE_AIRTABLE_BASE_ID=appK4ByZCcahk46LM
    ```
 
-   `npm run dev` loads `.env.development.local` after `.env`, so local requests use the development Airtable base. `npm run build` runs in production mode and does not load this development override. Both files are ignored by Git; never commit a personal access token.
+   The shared development Airtable base is named **DEV ENVIRONMENT - INVENTORY** and has the base ID `appK4ByZCcahk46LM`. Use this base for local development. Files ending in `.local` are ignored by Git; never commit a personal access token.
 
-5. **Secrets in GitHub:** It's essential to keep your secrets safe. Avoid exposing your API keys or sensitive data in your GitHub repository. If you suspect that your API keys or any other sensitive information stored in GitHub Secrets has been compromised, it's essential to take immediate action to update and secure it. Revoke the current Personal Access Token in AirTable and create a new one.
-   In the GitHub repository, navigate to the "Settings" tab, typically located in the top right corner of the repository's main page and find "Secrets". Rename VITE_REACT_APP_API_KEY to the new personal access token, update your .env as well and redeploy these changes.
-
-6. **Start the Development Server:** Start the development server to run the application locally.
+4. **Start the Development Server:** Start the development server to run the application locally.
 
    ```bash
    npm run dev
    ```
 
-7. **Access the Application:** Open your web browser and access the application at localhost:5173/inventory/.
+5. **Access the Application:** Open your web browser and access the application at localhost:5173/inventory/.
 
-## Managing SKU Group Cards (No Code Required)
+## Operations
+
+### Managing SKU Group Cards
 
 Group cards are managed in the **SKU Groups** table in Airtable. Changes made there do not require a code change, build, or deployment. Refresh an already-open inventory browser tab to load the latest configuration.
 
-### Airtable Fields
+SKU groups are optional. Inventory whose SKU is not assigned to an active group appears directly in the main inventory list as individual item cards. Create a group only when those items should be represented by a shared group card.
+
+#### Airtable Fields
 
 | Field | Type | How it is used |
 | --- | --- | --- |
@@ -89,33 +93,33 @@ Group cards are managed in the **SKU Groups** table in Airtable. Changes made th
 | Key | Single line text | Stable URL identifier, such as `orthotics` or `adb-m`. |
 | SKUs | Linked records | The SKU records included in the group. One link creates a single-SKU card; multiple links create a category card. |
 | SKU Item Codes | Lookup | Read-only codes resolved from SKUs. The application uses these to query Inventory. This column may be hidden from the maintainer view, but must not be deleted. |
-| Image | Attachment | Optional card image. A neutral placeholder appears when blank or unavailable. |
+| Image | Attachment | Optional card image (remove background before uploading). A neutral placeholder appears when blank or unavailable. |
 | Active | Checkbox | The card can appear only when checked and matching inventory is available. |
 
-### Add a Single-SKU Card
+#### Adding an SKU Card
 
 1. Create a record in **SKU Groups**.
 2. Enter the user-facing **Name**.
 3. Enter a unique lowercase **Key** using letters, numbers, and hyphens only, for example `adb-m`.
-4. Link exactly one record in **SKUs**. Select the existing SKU; do not create a duplicate SKU record.
+4. Link one or more records in **SKUs**. Select the existing SKU; do not create a duplicate SKU record.
 5. Upload an **Image**, or leave it blank to use the placeholder.
 6. Check **Active**.
 7. Refresh the inventory site, locate the card, open it, and return with **All items**.
 
-### Add or Edit a Category
+#### Add or Edit a Category
 
-Create the record as above, but link every member in **SKUs**. To change membership later, add or remove linked SKU records in that field. A category appears only when at least one member has inventory matching the current search and filters.
+A category appears only when at least one member has inventory matching the current search and filters.
 
 Each SKU should belong to at most one active group. Do not also create a single-SKU group for a SKU owned by a category. If overlap occurs, the application assigns the SKU to the first group alphabetically and logs a diagnostic; correcting the Airtable links is the permanent fix.
 
-### Rename, Hide, or Replace an Image
+#### Rename, Hide, or Replace an Image
 
 - Change **Name** to update the card title. Cards are always ordered alphabetically by Name.
 - Do not change **Key** after publication unless breaking saved/shared group links is acceptable.
 - Clear **Active** to hide a card temporarily instead of deleting it.
 - Replace or remove the **Image** attachment at any time. A missing or broken image falls back to the placeholder.
 
-### Troubleshooting
+#### Troubleshooting
 
 | Problem | Check |
 | --- | --- |
@@ -128,15 +132,24 @@ Each SKU should belong to at most one active group. Do not also create a single-
 | Airtable returns 403 | Grant the application personal access token read permission for the SKU Groups table. Never place the token in documentation. |
 | A shared group URL no longer works | Restore the original Key or open the inventory overview; Name can be changed without affecting links. |
 
-### Maintainer Checklist
+#### Maintainer Checklist
 
 After changing a group: confirm its Name, Key, linked SKUs, Image, and Active value; refresh the site; verify the card and image; drill into the group; return with **All items** or browser Back; test relevant search/filters and mobile layout; and confirm adding an item still places a concrete inventory item in the cart.
 
-### Committing Changes, Building, and Deploying
+### Maintenance and Announcements
 
-After making changes to the Penta Inventory Request System, you'll need to commit those changes to the Git repository, build the static files, and deploy to GitHub Pages. Follow these steps:
+The Airtable **Site-Status** table contains two records that the application reads in their current order:
 
-1. **Commit Changes:** Once you've made your desired changes, commit them using Git. First, add the files you want to commit:
+1. **Announcement record:** Set **Status** to `Online` to show the notification control and display its **Message**. Set it to `Offline` to hide the announcement.
+2. **Platform record:** Set **Status** to `Offline` to replace the application with the maintenance page and display its **Message**. Set it to `Online` to make the application available.
+
+Do not delete or reorder these records without updating `src/context/PentaProvider.jsx`; the application currently identifies them by their position in the Airtable response. Refresh the deployed site after making a change to confirm the expected announcement or maintenance state.
+
+### Building and Deploying
+
+After making changes to the Penta Inventory Request System, commit them and deploy to GitHub Pages. Always use `npm run deploy` so the local test-and-build gate runs automatically.
+
+1. **Commit Changes:** Commit the changes using Git. First, add the files you want to commit:
 
    ```bash
    git add .
@@ -156,23 +169,15 @@ After making changes to the Penta Inventory Request System, you'll need to commi
 
    Replace 'master' with your preferred branch name if you're working on a different branch.
 
-3. **Build Static Files:** Before deploying, build the static files for production using the following command:
-
-   ```bash
-   npm run build
-   ```
-
-   This command will generate optimized and minified files in the dist directory.
-
-4. **Deploy to GitHub Pages:** The web app is configured to be deployed for GitHub Pages. Run the following command to deploy your changes:
+3. **Deploy to GitHub Pages:** The web app is configured to be deployed to GitHub Pages. Run:
 
    ```bash
    npm run deploy
    ```
 
-   This command will automatically push the contents of the dist directory to the gh-pages branch of your GitHub repository. It may take a few moments to complete.
+   Before deploying, provide `VITE_REACT_APP_API_KEY` and `VITE_AIRTABLE_BASE_ID` through the shell or a git-ignored `.env.production` file. npm automatically runs the `predeploy` script first, which rejects missing or placeholder production values, verifies read access to Airtable's `Site-Status` table and response shape, and then invokes `npm run verify`. Deployment stops if the environment check, Airtable contract check, Vitest suite, or production build fails. If verification passes, the command pushes the newly generated `dist` contents to the `gh-pages` branch. Invoking `gh-pages` directly bypasses this gate, so always deploy through `npm run deploy`.
 
-5. **Access the Deployed Application:** Once the deployment is complete, you can access your deployed application on GitHub Pages at the following URL:
+4. **Access the Deployed Application:** Once the deployment is complete, you can access your deployed application on GitHub Pages at the following URL:
 
    ```arduino
    https://penta-medical-recycling.github.io/inventory/
@@ -193,7 +198,14 @@ The codebase of the Penta Medical Recycling Inventory Request System is organize
   - **components**: Houses React components used throughout the application, such as cards, filters, and the shopping cart.
   - **context**: Contains the React context API setup for managing global states.
   - **pages**: Includes the main application pages, such as the home page and the cart page.
+   - **test**: Contains shared Vitest setup, React Testing Library helpers, and MSW fixtures and handlers.
+   - **`*.test.{js,jsx}`**: Unit and integration tests colocated with the source files they cover.
+- **e2e**: Contains Playwright tests for critical user journeys.
 - **dist**: Generated production build files.
+
+### UI Development
+
+Use Tailwind CSS and the shadcn/ui components in `src/components/ui/` for new or changed UI. Bulma remains only for legacy markup and is being phased out; do not add new Bulma classes. When modifying a legacy component, migrate the Bulma classes you touch to Tailwind or shadcn/ui where practical.
 
 ### Main Components
 
@@ -229,6 +241,7 @@ The project uses [Vitest](https://vitest.dev/) as the test runner with [React Te
 npm run test        # run the full suite once
 npm run test:watch  # re-run on file changes
 npm run coverage    # run with a coverage report
+npm run verify      # run tests, then create a production build
 ```
 
 Selective critical user journeys use Playwright. Install its Chromium browser once after `npm install`, then run the E2E suite:
@@ -242,7 +255,7 @@ Browser tests live under `e2e/` and intercept Airtable requests with determinist
 
 ### How It's Organized
 
-Test files live next to the code they cover as `*.test.jsx`. Shared testing infrastructure lives under `src/test/`:
+Test files live next to the code they cover as `*.test.{js,jsx}`. Shared testing infrastructure lives under `src/test/`:
 
 - **`setup.js`**: Global setup wired into Vitest. Starts/stops the MSW server, resets handlers and `localStorage`/`sessionStorage` between tests, and stubs the Airtable API key.
 - **`utils.jsx`**: A `renderWithProviders` helper that wraps components in the app's `HashRouter` and `PentaProvider`, plus re-exports of React Testing Library and `user-event`.
@@ -265,10 +278,13 @@ This user manual will guide you through each step of using our solution. Whether
 
 ### Using Item Cards
 
-1. **Google Search Button**: Each item card has a Google search button on its left. Clicking it will show images of what the item most likely looks like. The more details the card provides, the more accurate the search will be.
-2. **Add/Remove from Cart**: In each item card, you'll find a button on the right to add or remove items from your cart depending on if the item is already in your cart or not.
-3. **Cart Cards**: Cards can be removed from the cart from both the home page and the cart page.
-4. **Unavailable Cards**: In the case that an item in a cart becomes reserved or unavailable, it will display a banner showing its out of stock status. This card needs to be removed from the cart before you can checkout.
+1. **Browse a Group**: Group cards represent one or more related SKUs. Select a group to view its available inventory items, then use **All items** to return to the inventory overview.
+2. **Review Item Details**: Individual item cards show the available description, item ID, tags, manufacturer, model, and size.
+3. **Add or Remove an Item**: Select **Add to cart** to add that exact inventory item. Once added, the action changes to **Remove from cart**.
+4. **View Reference Images**: Select **View reference images** to open a Google Images search in a new tab using the item's available details.
+5. **Add Multiple Items**: A group containing one SKU may offer **Add multiple to cart**. Choose the requested size or range when available, then select a quantity; the application fills the request from currently available inventory.
+6. **Manage Cart Items**: The cart organizes items into expandable SKU and size groups. Expand a group to review or remove individual inventory items.
+7. **Resolve Availability Issues**: Cart rows are marked **Unavailable** when an item is no longer in stock, or **Couldn't verify** when its availability check fails. Remove unavailable items before submitting the request; retry a failed availability check before proceeding.
 
 ### Requesting Items
 
@@ -290,11 +306,3 @@ This user manual will guide you through each step of using our solution. Whether
 2. **Using the Search**: To find specific items, use the search feature located at the top of the page to narrow down your search. Enter keywords included in an item’s ID, manufacturer, SKU, description, and size.
 3. **Combining Search and Filters**: For even more precise results, combine the search and filters.
 4. **Downloading Inventory**: Partners can download inventory results in .csv or .xlsx formats for personal access to the data. If no filters are selected, the entire inventory is downloaded. Otherwise whatever filters, and/or search you have will be the criteria for what is downloaded.
-
-### Resources
-
-- [Project Delivery Document for Penta (Notion)](https://foggy-honeycrisp-28f.notion.site/Project-Delivery-Document-for-Penta-e480b7c031d24fe5a7e15e09c41a4d04)
-- [Project Delivery Document for Penta (Google Docs Copy)](https://docs.google.com/document/d/1brTvMb7pHvW61nMtSbklJTaqueX8QmUwFImlkaqEMaM/)
-- [Solution Sign-Off for Penta](https://foggy-honeycrisp-28f.notion.site/Solution-Sign-Off-for-Penta-a473ac4efe264a2fa6da1ae8b4a848da)
-- [GitHub Repository](https://github.com/Penta-Medical-Recycling/inventory)
-- [Deployed GitHub Pages](https://penta-medical-recycling.github.io/inventory/)

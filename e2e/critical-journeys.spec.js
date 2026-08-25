@@ -73,7 +73,7 @@ test("requires a clinician and persists checkout context across reload", async (
   await expect.poll(getRequestPayload).toBeTruthy();
   const fields = getRequestPayload().records[0].fields;
   expect(fields.Partner).toEqual(["recClinicianPartnerE2E"]);
-  expect(fields.Clinicians).toEqual(["recClinicianE2E"]);
+  expect(fields.Clinician).toEqual(["recClinicianE2E"]);
 });
 
 test("blocks unavailable inventory, lets the user remove it, then checks out", async ({

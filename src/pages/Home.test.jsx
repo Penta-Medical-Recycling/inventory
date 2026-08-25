@@ -4,7 +4,15 @@
 // The SKU Groups + inventory endpoints are served by MSW; setup.js clears storage between tests.
 import { describe, it, expect } from "vitest";
 import { MemoryRouter } from "react-router-dom";
-import { render, screen, userEvent } from "../test/utils";
+import {
+  fireEvent,
+  render,
+  renderWithProviders,
+  screen,
+  userEvent,
+  waitFor,
+} from "../test/utils";
+import App from "../App";
 import PentaProvider from "../context/PentaProvider";
 import Home from "./Home";
 
@@ -18,23 +26,13 @@ const renderHomeAtGroup = (groupKey) =>
     </MemoryRouter>
   );
 
-const renderHomeOverview = () =>
-  render(
-    <div className="app-scroll-region">
-      <MemoryRouter>
-        <PentaProvider>
-          <Home />
-        </PentaProvider>
-      </MemoryRouter>
-    </div>
-  );
+const renderHomeOverview = () => renderWithProviders(<App />);
 
 const seedMasterList = (fields) =>
   sessionStorage.setItem("allInventoryItems", JSON.stringify(fields));
 
 describe("Home group bulk order flow", () => {
   it("returns to the top when opening an inventory group", async () => {
-    const user = userEvent.setup();
     const scrollTo = vi.fn();
     seedMasterList([
       {
@@ -45,15 +43,25 @@ describe("Home group bulk order flow", () => {
     ]);
 
     renderHomeOverview();
-    document.querySelector(".app-scroll-region").scrollTo = scrollTo;
+    const querySelector = document.querySelector.bind(document);
+    const querySelectorSpy = vi
+      .spyOn(document, "querySelector")
+      .mockImplementation((selector) =>
+        selector === ".app-scroll-region" ? { scrollTo } : querySelector(selector)
+      );
 
-    await user.click(
-      await screen.findByRole("button", {
-        name: /Browse Double Adapter - Male/i,
-      })
-    );
-
-    expect(scrollTo).toHaveBeenCalledWith({ top: 0 });
+    try {
+      await waitFor(() => {
+        fireEvent.click(
+          screen.getByRole("button", {
+            name: /Browse Double Adapter - Male/i,
+          })
+        );
+        expect(scrollTo).toHaveBeenCalledWith({ top: 0 });
+      });
+    } finally {
+      querySelectorSpy.mockRestore();
+    }
   });
 
   it("shows an Add multiple to cart action for a single-SKU group", async () => {

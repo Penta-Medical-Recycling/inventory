@@ -479,7 +479,9 @@ useEffect(() => {
 
           <div className="cart-request-context__form">
             <label htmlFor="patients-helped">
-              How many patients do you plan to help with this request? <span>(required)</span>
+              How many patients do you plan to help with this request?{" "}
+              <span aria-hidden="true">*</span>
+              <span className="sr-only"> required</span>
             </label>
             <Input
               id="patients-helped"
@@ -492,7 +494,9 @@ useEffect(() => {
               onChange={(e) => setNumOfPatients(e.target.value)}
             />
             <label htmlFor="children-helped">
-              How many of the patients are children (under 21 years old)? <span>(required)</span>
+              How many of the patients are children (under 21 years old)?{" "}
+              <span aria-hidden="true">*</span>
+              <span className="sr-only"> required</span>
             </label>
             <Input
               id="children-helped"

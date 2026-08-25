@@ -12,6 +12,9 @@
     "test:watch": "vitest",
     "test:e2e": "playwright test",
     "coverage": "vitest run --coverage",
+    "check:production-env": "node scripts/check-production-env.mjs",
+    "verify": "npm run test && npm run build",
+    "predeploy": "npm run check:production-env && npm run verify",
     "deploy": "gh-pages -d dist"
   },
   "dependencies": {

@@ -245,10 +245,7 @@ const CartLister = ({ outOfStock, setOutOfStock, itemValidationStatus }) => {
                   )}
                 </span>
                 <span className="cart-sku__count">
-                  <span className="cart-sku__count-label">
-                    <strong>{group.items.length}</strong>
-                    {group.items.length === 1 ? "item" : "items"}
-                  </span>
+                  {group.items.length} {group.items.length === 1 ? "item" : "items"}
                   <ChevronDown className="cart-sku__chevron" size={18} aria-hidden="true" />
                 </span>
               </button>
