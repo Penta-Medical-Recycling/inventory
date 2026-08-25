@@ -1,5 +1,6 @@
 import process from "node:process";
 import { loadEnv } from "vite";
+import { parseSiteStatusRecords } from "../src/lib/siteStatus.js";
 
 const env = {
   ...loadEnv("production", process.cwd(), ""),
@@ -25,7 +26,7 @@ if (missingVariables.length > 0) {
 const statusUrl = new URL(
   `https://api.airtable.com/v0/${env.VITE_AIRTABLE_BASE_ID}/Site-Status`
 );
-statusUrl.searchParams.set("maxRecords", "1");
+statusUrl.searchParams.set("maxRecords", "100");
 
 try {
   const response = await fetch(statusUrl, {
@@ -39,9 +40,7 @@ try {
   }
 
   const data = await response.json();
-  if (!Array.isArray(data.records)) {
-    throw new Error("Airtable response did not contain a records array");
-  }
+  parseSiteStatusRecords(data.records);
 } catch (error) {
   console.error(`Production Airtable contract check failed: ${error.message}`);
   process.exit(1);

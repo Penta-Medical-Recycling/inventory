@@ -1,5 +1,10 @@
 import { expect, test } from "@playwright/test";
-import { bulkGroup, bulkItems } from "./airtable-fixtures";
+import {
+  bulkGroup,
+  bulkItems,
+  shellGroup,
+  siteStatusOffline,
+} from "./airtable-fixtures";
 import {
   addItem,
   captureSuccessfulRequest,
@@ -14,6 +19,51 @@ async function openHome(page) {
     page.getByRole("heading", { name: "Penta Medical Recycling Inventory" })
   ).toBeVisible();
 }
+
+test("shows maintenance mode when the platform status is offline", async ({ page }) => {
+  await installAirtableMocks(page, { statusRecords: [...siteStatusOffline].reverse() });
+  await page.goto("./#/");
+
+  await expect(page.getByText("E2E maintenance window")).toBeVisible();
+  await expect(
+    page.getByRole("heading", { name: "Penta Medical Recycling Inventory" })
+  ).toHaveCount(0);
+});
+
+test("preserves search while navigating a group and keeps ungrouped items direct", async ({
+  page,
+}) => {
+  await installAirtableMocks(page, { groups: [shellGroup] });
+  await openHome(page);
+
+  await expect(page.getByRole("button", { name: "Browse Test Shell Group" })).toBeVisible();
+  await expect(page.getByRole("button", { name: "Add Test Foot Shell to cart" })).toHaveCount(0);
+  await expect(page.getByRole("button", { name: "Add Test Knee to cart" })).toBeVisible();
+
+  await page.getByRole("button", { name: "Filters" }).click();
+  await page.getByRole("switch", { name: /Pediatric/ }).click();
+  await page.getByRole("button", { name: "Close filters" }).click();
+  await expect(page.getByRole("button", { name: "1 Filter" })).toBeVisible();
+
+  const search = page.getByPlaceholder("Search by keyword, matches all terms");
+  await search.fill("foot");
+  await expect(page.getByRole("button", { name: "Browse Test Shell Group" })).toBeVisible();
+  await expect(page.getByRole("button", { name: "Add Test Knee to cart" })).toHaveCount(0);
+
+  await page.getByRole("button", { name: "Browse Test Shell Group" }).click();
+  await expect(page).toHaveURL(/group=test-shell/);
+  await expect(page.getByRole("button", { name: "Add Test Foot Shell to cart" })).toBeVisible();
+  await page.goBack();
+  await expect(search).toHaveValue("foot");
+  await expect(page.getByRole("button", { name: "1 Filter" })).toBeVisible();
+  await expect(page.getByRole("button", { name: "Browse Test Shell Group" })).toBeVisible();
+
+  await page.getByRole("button", { name: "Browse Test Shell Group" }).click();
+  await page.getByRole("button", { name: "All items" }).click();
+  await expect(search).toHaveValue("foot");
+  await expect(page.getByRole("button", { name: "1 Filter" })).toBeVisible();
+  await expect(page.getByRole("button", { name: "Browse Test Shell Group" })).toBeVisible();
+});
 
 test("adds multiple items, removes items, selects a partner, and checks out", async ({
   page,
@@ -40,15 +90,63 @@ test("adds multiple items, removes items, selects a partner, and checks out", as
     .click();
   await expect(page.locator("#shopping-cart .badge")).toHaveText("1");
 
+  await page.getByLabel(/How many patients do you plan to help/i).fill("3");
+  await page.getByLabel(/How many of the patients are children/i).fill("1");
+  await page.getByLabel(/Additional notes/i).fill("E2E request notes");
+
   await submitRequest(page);
   await expect.poll(getRequestPayload).toBeTruthy();
 
-  const fields = getRequestPayload().records[0].fields;
+  const payload = getRequestPayload();
+  const fields = payload.records[0].fields;
+  expect(payload.typecast).toBe(true);
   expect(fields.Partner).toEqual(["recPartnerE2E"]);
   expect(fields["Items You Would Like"]).toEqual(["E2E-003"]);
-  expect(fields).not.toHaveProperty("Clinicians");
+  expect(fields["Additional Notes"]).toBe("E2E request notes");
+  expect(fields["Number of patients helped"]).toBe(3);
+  expect(fields["Number of children helped"]).toBe(1);
+  expect(fields).not.toHaveProperty("Clinician");
   await expect(page).toHaveURL(/#\/$/);
   await expect(page.locator("#shopping-cart .badge")).toHaveText("0");
+  const storage = await page.evaluate(() => ({
+    cartItem: localStorage.getItem("E2E-003"),
+    notes: localStorage.getItem("notes"),
+    partner: localStorage.getItem("partner"),
+    requestParty: localStorage.getItem("penta:request-party"),
+    inventoryCache: sessionStorage.getItem("allInventoryItems"),
+  }));
+  expect(storage.cartItem).toBeNull();
+  expect(storage.notes).toBeNull();
+  expect(storage.partner).toBe("E2E Partner");
+  expect(JSON.parse(storage.requestParty)).toMatchObject({
+    partnerId: "recPartnerE2E",
+    partnerName: "E2E Partner",
+  });
+  expect(storage.inventoryCache).toBeNull();
+});
+
+test("requires nonnegative patient counts and accepts zero values", async ({ page }) => {
+  await installAirtableMocks(page);
+  await openHome(page);
+  await addItem(page, "Test Foot Shell");
+  await page.locator("#shopping-cart").click();
+  await choosePartner(page, "E2E Partner");
+
+  const confirm = page.getByRole("button", { name: "Confirm" });
+  const patientCount = page.getByLabel(/How many patients do you plan to help/i);
+  const childCount = page.getByLabel(/How many of the patients are children/i);
+  await expect(confirm).toBeDisabled();
+
+  await patientCount.fill("1");
+  await expect(confirm).toBeDisabled();
+  await childCount.fill("-1");
+  await expect(confirm).toBeDisabled();
+  await patientCount.fill("-1");
+  await childCount.fill("0");
+  await expect(confirm).toBeDisabled();
+
+  await patientCount.fill("0");
+  await expect(confirm).toBeEnabled();
 });
 
 test("requires a clinician and persists checkout context across reload", async ({
@@ -76,6 +174,48 @@ test("requires a clinician and persists checkout context across reload", async (
   expect(fields.Clinician).toEqual(["recClinicianE2E"]);
 });
 
+test("changes partner and clinician from the cart without losing request work", async ({
+  page,
+}) => {
+  await installAirtableMocks(page);
+  const getRequestPayload = await captureSuccessfulRequest(page);
+  await openHome(page);
+
+  await addItem(page, "Test Foot Shell");
+  await page.locator("#shopping-cart").click();
+  await choosePartner(page, "E2E Partner");
+  const patientCount = page.getByLabel(/How many patients do you plan to help/i);
+  const childCount = page.getByLabel(/How many of the patients are children/i);
+  const notes = page.getByLabel(/Additional notes/i);
+  await patientCount.fill("5");
+  await childCount.fill("2");
+  await notes.fill("Preserve this request context");
+
+  await page.getByRole("button", { name: "Change partner clinic" }).click();
+  await page.getByLabel("PartnerDropdown").click();
+  await page.getByRole("option", { name: "E2E Clinician Partner" }).click();
+  await page.getByLabel("ClinicianDropdown").click();
+  await page.getByRole("option", { name: "E2E Clinician" }).click();
+  await page.getByRole("button", { name: "Save partner clinic" }).click();
+
+  await expect(page.getByRole("heading", { name: "E2E Clinician Partner" })).toBeVisible();
+  await expect(page.getByText("E2E Clinician", { exact: true })).toBeVisible();
+  await expect(page.locator("#shopping-cart .badge")).toHaveText("1");
+  await expect(patientCount).toHaveValue("5");
+  await expect(childCount).toHaveValue("2");
+  await expect(notes).toHaveValue("Preserve this request context");
+
+  await submitRequest(page);
+  await expect.poll(getRequestPayload).toBeTruthy();
+  const fields = getRequestPayload().records[0].fields;
+  expect(fields.Partner).toEqual(["recClinicianPartnerE2E"]);
+  expect(fields.Clinician).toEqual(["recClinicianE2E"]);
+  expect(fields["Items You Would Like"]).toEqual(["E2E-001"]);
+  expect(fields["Additional Notes"]).toBe("Preserve this request context");
+  expect(fields["Number of patients helped"]).toBe(5);
+  expect(fields["Number of children helped"]).toBe(2);
+});
+
 test("blocks unavailable inventory, lets the user remove it, then checks out", async ({
   page,
 }) => {
@@ -101,6 +241,44 @@ test("blocks unavailable inventory, lets the user remove it, then checks out", a
     .click();
   await submitRequest(page);
 
+  await expect.poll(getRequestPayload).toBeTruthy();
+  expect(getRequestPayload().records[0].fields["Items You Would Like"]).toEqual([
+    "E2E-001",
+  ]);
+});
+
+test("blocks checkout when availability fails and succeeds after retry", async ({ page }) => {
+  await installAirtableMocks(page);
+  const getRequestPayload = await captureSuccessfulRequest(page);
+  let failNextAvailabilityCheck = true;
+  await page.route("https://api.airtable.com/v0/**", async (route) => {
+    const url = new URL(route.request().url());
+    const formula = url.searchParams.get("filterByFormula") || "";
+    if (
+      failNextAvailabilityCheck &&
+      url.pathname.endsWith("/Inventory") &&
+      formula.includes("{Item ID}=")
+    ) {
+      failNextAvailabilityCheck = false;
+      await route.fulfill({ status: 500, json: { error: { type: "SERVER_ERROR" } } });
+      return;
+    }
+    await route.fallback();
+  });
+
+  await openHome(page);
+  await addItem(page, "Test Foot Shell");
+  await page.locator("#shopping-cart").click();
+  await choosePartner(page, "E2E Partner");
+
+  await submitRequest(page);
+  await expect(page.getByText("Some items couldn't be verified.")).toBeVisible();
+  await expect(page.getByRole("button", { name: "Retry availability check" })).toBeVisible();
+  expect(getRequestPayload()).toBeUndefined();
+
+  await page.getByRole("button", { name: "Retry availability check" }).click();
+  await expect(page.getByText("Some items couldn't be verified.")).toHaveCount(0);
+  await submitRequest(page);
   await expect.poll(getRequestPayload).toBeTruthy();
   expect(getRequestPayload().records[0].fields["Items You Would Like"]).toEqual([
     "E2E-001",
@@ -202,4 +380,29 @@ test("searches for inventory and adds the matching product to the cart", async (
   await expect(page.locator("#shopping-cart .badge")).toHaveText("1");
   await page.locator("#shopping-cart").click();
   await expect(page).toHaveURL(/#\/partner$/);
+});
+
+test("filters inventory from the sidebar and restores results when cleared", async ({ page }) => {
+  const state = await installAirtableMocks(page);
+  await openHome(page);
+
+  await page.getByRole("button", { name: "Filters" }).click();
+  await page.getByRole("switch", { name: /Pediatric/ }).click();
+  await page.getByRole("button", { name: "Close filters" }).click();
+
+  await expect(page.getByRole("button", { name: "Add Test Foot Shell to cart" })).toBeVisible();
+  await expect(page.getByRole("button", { name: "Add Test Knee to cart" })).toHaveCount(0);
+  await expect(page.getByRole("button", { name: "Add Test Pylon to cart" })).toHaveCount(0);
+  await expect
+    .poll(() =>
+      state.inventoryRequests.some((url) =>
+        decodeURIComponent(url).includes('FIND("Pediatric", ARRAYJOIN({Tag}))')
+      )
+    )
+    .toBe(true);
+
+  await page.getByRole("button", { name: "Clear all filters" }).click();
+  await expect(page.getByRole("button", { name: "Add Test Foot Shell to cart" })).toBeVisible();
+  await expect(page.getByRole("button", { name: "Add Test Knee to cart" })).toBeVisible();
+  await expect(page.getByRole("button", { name: "Add Test Pylon to cart" })).toBeVisible();
 });

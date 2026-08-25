@@ -10,6 +10,7 @@ import {
   AIRTABLE_BASE_ID,
 } from "../config/airtable";
 import { getCartItemKeys } from "../lib/storage";
+import { parseSiteStatusRecords } from "../lib/siteStatus";
 
 // Airtable's maximum page size. Used for the background master-list fetch so it
 // pulls the full inventory in as few requests as possible.
@@ -96,32 +97,56 @@ function PentaProvider({ children }) {
   };
 
   useEffect(() => {
+    let cancelled = false;
+    let requestInFlight = false;
+
     const fetchStatus = async () => {
+      if (requestInFlight) return;
+      requestInFlight = true;
       try {
         const data = await fetch(`${AIRTABLE_API_URL}/${AIRTABLE_BASE_ID}/Site-Status`, {
           method: "GET",
+          cache: "no-store",
           headers: {
             "Content-Type": "application/json",
             "authorization": `Bearer ${AIRTABLE_API_KEY}`
           }
         });
 
+        if (!data.ok) throw new Error(`Site-Status request failed with ${data.status}`);
         const response = await data.json();
-        setPopUpStatus(response.records[0].fields.Status);
-        setMessage(response.records[0].fields.Message);
-        setServerStatus(response.records[1].fields.Status);
-        setServerMessage(response.records[1].fields.Message);
+        const status = parseSiteStatusRecords(response.records);
+        if (cancelled) return;
+        setPopUpStatus(status.announcement.status);
+        setMessage(status.announcement.message);
+        setServerStatus(status.platform.status);
+        setServerMessage(status.platform.message);
+        setServerError(null);
       } catch (error) {
+        if (cancelled) return;
         // A failed status fetch is a host problem, not intentional maintenance -
         // surface an error message instead of the Maintenance screen.
         console.error("Error fetching site status:", error);
         setServerError(
           "We're having trouble reaching the inventory service. Please try again later."
         );
+      } finally {
+        requestInFlight = false;
       }
     };
 
+    const refreshVisibleStatus = () => {
+      if (document.visibilityState === "visible") fetchStatus();
+    };
+
     fetchStatus();
+    window.addEventListener("focus", fetchStatus);
+    document.addEventListener("visibilitychange", refreshVisibleStatus);
+    return () => {
+      cancelled = true;
+      window.removeEventListener("focus", fetchStatus);
+      document.removeEventListener("visibilitychange", refreshVisibleStatus);
+    };
   }, []);
 
   useEffect(() => {

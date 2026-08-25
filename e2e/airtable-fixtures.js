@@ -1,11 +1,33 @@
 export const siteStatus = [
   {
     id: "recPopup",
-    fields: { Message: "E2E announcement", Status: "Offline" },
+    fields: {
+      ID: "1",
+      Funciton: "Pop-Up Message",
+      Message: "E2E announcement",
+      Status: "Offline",
+    },
   },
   {
     id: "recPlatform",
-    fields: { Message: "", Status: "Online" },
+    fields: {
+      ID: "2",
+      Funciton: "Platform is Online or Offline",
+      Message: "",
+      Status: "Online",
+    },
+  },
+];
+
+export const siteStatusOffline = [
+  siteStatus[0],
+  {
+    ...siteStatus[1],
+    fields: {
+      ...siteStatus[1].fields,
+      Message: "E2E maintenance window",
+      Status: "Offline",
+    },
   },
 ];
 
@@ -42,7 +64,7 @@ export const inventoryItems = [
       "SKU Item Code": ["TEST-SHELL"],
       SKU: ["recSkuOne"],
       Size: 26,
-      Tag: ["Prosthesis"],
+      Tag: ["Prosthesis", "Pediatric"],
       "Qty.": 1,
       StringSearch: "test foot shell model one",
       "Date Added": "2024-01-01",
@@ -140,6 +162,17 @@ export const bulkGroup = {
     Key: "test-bulk",
     SKUs: ["recSkuBulk"],
     "SKU Item Codes": ["TEST-BULK"],
+    Active: true,
+  },
+};
+
+export const shellGroup = {
+  id: "recShellGroup",
+  fields: {
+    Name: "Test Shell Group",
+    Key: "test-shell",
+    SKUs: ["recSkuOne"],
+    "SKU Item Codes": ["TEST-SHELL"],
     Active: true,
   },
 };

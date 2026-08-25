@@ -3,7 +3,7 @@
 // reports "Offline", otherwise the normal Home UI.
 import { describe, it, expect } from "vitest";
 import { http, HttpResponse } from "msw";
-import { renderWithProviders, screen } from "./test/utils";
+import { fireEvent, renderWithProviders, screen } from "./test/utils";
 import App from "./App";
 import { AIRTABLE_API_URL, AIRTABLE_BASE_ID } from "./config/airtable";
 import { server } from "./test/mocks/server";
@@ -30,6 +30,23 @@ describe("App status gate", () => {
     );
 
     renderWithProviders(<App />);
+
+    expect(
+      await screen.findByText("Under repairs. Thanks for your patience!")
+    ).toBeInTheDocument();
+    expect(screen.queryByAltText("logo")).not.toBeInTheDocument();
+  });
+
+  it("refreshes status on focus and identifies records independently of order", async () => {
+    renderWithProviders(<App />);
+    expect(await screen.findByAltText("logo")).toBeInTheDocument();
+
+    server.use(
+      http.get(SITE_STATUS_URL, () =>
+        HttpResponse.json({ records: [...siteStatusOfflineRecords].reverse() })
+      )
+    );
+    fireEvent.focus(window);
 
     expect(
       await screen.findByText("Under repairs. Thanks for your patience!")

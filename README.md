@@ -67,7 +67,7 @@ Before you begin, ensure you have met the following requirements:
    VITE_AIRTABLE_BASE_ID=appK4ByZCcahk46LM
    ```
 
-   The shared development Airtable base is named **DEV ENVIRONMENT - INVENTORY** and has the base ID `appK4ByZCcahk46LM`. Use this base for local development. Files ending in `.local` are ignored by Git; never commit a personal access token.
+   The shared development Airtable base is named **DEV ENVIRONMENT - INVENTORY** and has the base ID `appK4ByZCcahk46LM`. Use this base for local development. The personal access token must include this base as an allowed resource with `data.records:read` and `data.records:write` scopes; otherwise Airtable returns 403. Files ending in `.local` are ignored by Git; never commit a personal access token.
 
 4. **Start the Development Server:** Start the development server to run the application locally.
 
@@ -138,12 +138,12 @@ After changing a group: confirm its Name, Key, linked SKUs, Image, and Active va
 
 ### Maintenance and Announcements
 
-The Airtable **Site-Status** table contains two records that the application reads in their current order:
+The Airtable **Site-Status** table contains two records. The application identifies them by the **ID** field, with the **Funciton** field retained as a fallback:
 
-1. **Announcement record:** Set **Status** to `Online` to show the notification control and display its **Message**. Set it to `Offline` to hide the announcement.
-2. **Platform record:** Set **Status** to `Offline` to replace the application with the maintenance page and display its **Message**. Set it to `Online` to make the application available.
+1. **Announcement record (`ID` = `1`):** Set **Status** to `Online` to show the notification control and display its **Message**. Set it to `Offline` to hide the announcement.
+2. **Platform record (`ID` = `2`):** Set **Status** to `Offline` to replace the application with the maintenance page and display its **Message**. Set it to `Online` to make the application available.
 
-Do not delete or reorder these records without updating `src/context/PentaProvider.jsx`; the application currently identifies them by their position in the Airtable response. Refresh the deployed site after making a change to confirm the expected announcement or maintenance state.
+Record order does not matter. Do not delete these records or change their **ID** values. The application checks status when it loads and again when an open tab regains focus or becomes visible. Return to or refresh the deployed site after making a change to confirm the expected announcement or maintenance state.
 
 ### Building and Deploying
 

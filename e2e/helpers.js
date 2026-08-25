@@ -16,6 +16,7 @@ export async function installAirtableMocks(
     partnerRecords = partners,
     clinicianRecords = clinicians,
     availableItemIds,
+    statusRecords = siteStatus,
   } = {}
 ) {
   const state = {
@@ -36,7 +37,7 @@ export async function installAirtableMocks(
     }
 
     if (table === "Site-Status") {
-      await route.fulfill({ json: { records: siteStatus } });
+      await route.fulfill({ json: { records: statusRecords } });
       return;
     }
 
@@ -68,11 +69,53 @@ export async function installAirtableMocks(
             state.availableItemIds.has(item.fields["Item ID"])
         );
       } else {
+        const excludedBlocks = [...formula.matchAll(/NOT\(OR\(([^)]*)\)\)/g)];
+        const excludedSkuCodes = new Set(
+          excludedBlocks.flatMap(([, block]) =>
+            [...block.matchAll(/\{SKU Item Code\}="([^"]+)"/g)].map(
+              (match) => match[1]
+            )
+          )
+        );
+        const formulaWithoutExclusions = excludedBlocks.reduce(
+          (remaining, [block]) => remaining.replace(block, ""),
+          formula
+        );
+        const includedSkuCodes = new Set(
+          [...formulaWithoutExclusions.matchAll(/\{SKU Item Code\}="([^"]+)"/g)].map(
+            (match) => match[1]
+          )
+        );
+        if (includedSkuCodes.size > 0) {
+          records = records.filter((item) =>
+            (item.fields["SKU Item Code"] || []).some((code) =>
+              includedSkuCodes.has(String(code))
+            )
+          );
+        }
+        if (excludedSkuCodes.size > 0) {
+          records = records.filter((item) =>
+            !(item.fields["SKU Item Code"] || []).some((code) =>
+              excludedSkuCodes.has(String(code))
+            )
+          );
+        }
+        const requiredTags = [
+          ...formula.matchAll(/FIND\("([^"]+)", ARRAYJOIN\(\{Tag\}\)\)/g),
+        ].map((match) => match[1]);
+        if (requiredTags.length > 0) {
+          records = records.filter((item) => {
+            const tags = Array.isArray(item.fields.Tag)
+              ? item.fields.Tag.map(String)
+              : [String(item.fields.Tag || "")];
+            return requiredTags.every((tag) => tags.includes(tag));
+          });
+        }
         const searchTerms = [...formula.matchAll(/SEARCH\("([^"]+)"/g)].map(
           (match) => match[1].toLowerCase()
         );
         if (searchTerms.length > 0) {
-          records = inventory.filter((item) =>
+          records = records.filter((item) =>
             searchTerms.every((term) =>
               String(item.fields.StringSearch || "")
                 .toLowerCase()
