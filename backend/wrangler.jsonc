@@ -1,0 +1,11 @@
+{
+  "name": "inventory-backend",
+  "main": "src/index.js",
+  "compatibility_date": "2025-01-01",
+  "vars": {
+    "AIRTABLE_API_URL": "https://api.airtable.com/v0",
+    "AIRTABLE_BASE_ID": "PON_AQUI_TU_BASE_ID",
+    // Orígenes permitidos para CORS, separados por coma
+    "ALLOWED_ORIGINS": "https://tu-dominio.com"
+  }
+}
