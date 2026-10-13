@@ -12,6 +12,8 @@ import {
 import { getCartItemKeys } from "../lib/storage";
 import { parseSiteStatusRecords } from "../lib/siteStatus";
 
+import { getSiteStatus } from "../lib/api";
+
 // Airtable's maximum page size. Used for the background master-list fetch so it
 // pulls the full inventory in as few requests as possible.
 const AIRTABLE_MAX_PAGE_SIZE = 100;
@@ -104,19 +106,12 @@ function PentaProvider({ children }) {
       if (requestInFlight) return;
       requestInFlight = true;
       try {
-        const data = await fetch(`${AIRTABLE_API_URL}/${AIRTABLE_BASE_ID}/Site-Status`, {
-          method: "GET",
-          cache: "no-store",
-          headers: {
-            "Content-Type": "application/json",
-            "authorization": `Bearer ${AIRTABLE_API_KEY}`
-          }
-        });
+        const status = await getSiteStatus();
 
-        if (!data.ok) throw new Error(`Site-Status request failed with ${data.status}`);
-        const response = await data.json();
-        const status = parseSiteStatusRecords(response.records);
+        if (status === null) throw new Error(`Site-Status request failed`);
+
         if (cancelled) return;
+        console.log("Fetched site status:", status);
         setPopUpStatus(status.announcement.status);
         setMessage(status.announcement.message);
         setServerStatus(status.platform.status);
@@ -126,7 +121,6 @@ function PentaProvider({ children }) {
         if (cancelled) return;
         // A failed status fetch is a host problem, not intentional maintenance -
         // surface an error message instead of the Maintenance screen.
-        console.error("Error fetching site status:", error);
         setServerError(
           "We're having trouble reaching the inventory service. Please try again later."
         );
