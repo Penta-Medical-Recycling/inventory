@@ -10,9 +10,10 @@ import {
   AIRTABLE_BASE_ID,
 } from "../config/airtable";
 import { getCartItemKeys } from "../lib/storage";
-import { parseSiteStatusRecords } from "../lib/siteStatus";
-
-import { getSiteStatus } from "../lib/api";
+import { 
+  getSiteStatus,
+  getSKUGroups
+} from "../lib/api";
 
 // Airtable's maximum page size. Used for the background master-list fetch so it
 // pulls the full inventory in as few requests as possible.
@@ -111,7 +112,6 @@ function PentaProvider({ children }) {
         if (status === null) throw new Error(`Site-Status request failed`);
 
         if (cancelled) return;
-        console.log("Fetched site status:", status);
         setPopUpStatus(status.announcement.status);
         setMessage(status.announcement.message);
         setServerStatus(status.platform.status);
@@ -143,26 +143,27 @@ function PentaProvider({ children }) {
     };
   }, []);
 
-  useEffect(() => {
-    let cancelled = false;
+useEffect(() => {
+  let cancelled = false;
 
-    async function loadInventoryGroups() {
-      try {
-        const records = await fetchTableRecordsWithOffset(SKU_GROUPS_TABLE);
-        if (!cancelled) setInventoryGroups(normalizeInventoryGroups(records));
-      } catch (error) {
-        console.error("Error fetching SKU Groups:", error);
-        if (!cancelled) setInventoryGroups([]);
-      } finally {
-        if (!cancelled) setAreInventoryGroupsLoading(false);
-      }
+  async function loadInventoryGroups() {
+    try {
+      const groups = await getSKUGroups();
+      if (!Array.isArray(groups)) throw new Error("Invalid SKU groups response");
+      if (!cancelled) setInventoryGroups(groups);
+    } catch (error) {
+      console.error("Error fetching SKU Groups:", error);
+      if (!cancelled) setInventoryGroups([]);
+    } finally {
+      if (!cancelled) setAreInventoryGroupsLoading(false);
     }
+  }
 
-    loadInventoryGroups();
-    return () => {
-      cancelled = true;
-    };
-  }, []);
+  loadInventoryGroups();
+  return () => {
+    cancelled = true;
+  };
+}, []);
 
   // Background fetch of the full inventory (all pages, filter-independent).
   // Reuses the sessionStorage cache across in-app navigation; only re-fetches
@@ -400,6 +401,7 @@ if (selectedSKU.length > 0) {
       allRecords = allRecords.concat(records);
       offset = newOffset;
     } while (offset);
+    console.log(allRecords)
     return allRecords;
   }
 

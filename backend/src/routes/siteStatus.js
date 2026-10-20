@@ -3,7 +3,6 @@ import { json } from "../lib/responses.js";
  
 const VALID_STATUSES = new Set(["Online", "Offline"]);
 
-// Pega aquí tu función tal cual la tienes en el frontend.
 const normalizeRecord = (record, role) => {
   if (!record) throw new Error(`Site-Status is missing the ${role} record`);
 

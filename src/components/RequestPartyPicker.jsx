@@ -1,6 +1,5 @@
 /* eslint-disable react/prop-types */
-import { useContext, useEffect, useState } from "react";
-import PentaContext from "../context/PentaContext";
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Combobox,
@@ -11,9 +10,7 @@ import {
   ComboboxItem,
   useComboboxAnchor,
 } from "@/components/ui/combobox";
-
-const linkedRecordIds = (value) =>
-  Array.isArray(value) ? value : value ? [value] : [];
+import { getRequestParties } from "../lib/api"; // <- ajusta a la ruta real de tu archivo de conexión
 
 const RequestPartyPicker = ({
   initialParty = null,
@@ -22,13 +19,11 @@ const RequestPartyPicker = ({
   submitLabel = "Continue",
   submitAriaLabel = "SubmitPartner",
 }) => {
-  const { fetchTableRecordsWithOffset } = useContext(PentaContext);
   const [partner, setPartner] = useState(null);
   const [partnerInput, setPartnerInput] = useState("");
   const [partners, setPartners] = useState([]);
   const [clinician, setClinician] = useState(null);
   const [clinicianInput, setClinicianInput] = useState("");
-  const [clinicians, setClinicians] = useState([]);
   const [partnerOpen, setPartnerOpen] = useState(false);
   const [clinicianOpen, setClinicianOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
@@ -44,38 +39,19 @@ const RequestPartyPicker = ({
       setIsLoading(true);
       setLoadError(false);
       try {
-        const [partnerRecords, clinicianRecords] = await Promise.all([
-          fetchTableRecordsWithOffset("Partners"),
-          fetchTableRecordsWithOffset("Clinicians"),
-        ]);
+        // Ya viene filtrado, ordenado y con los clínicos de cada partner
+        const nextPartners = await getRequestParties("partners");
+        if (!nextPartners) throw new Error("Could not load partners");
         if (cancelled) return;
 
-        const nextPartners = partnerRecords
-          .filter((record) => typeof record.fields.Partner === "string")
-          .map((record) => ({
-            id: record.id,
-            label: record.fields.Partner.trimStart(),
-          }))
-          .sort((left, right) => left.label.localeCompare(right.label));
-        const nextClinicians = clinicianRecords
-          .filter((record) => typeof record.fields.Name === "string")
-          .map((record) => ({
-            id: record.id,
-            label: record.fields.Name.trim(),
-            partnerIds: linkedRecordIds(
-              record.fields.Partner ?? record.fields.Partners
-            ),
-          }))
-          .sort((left, right) => left.label.localeCompare(right.label));
         const initialPartner = nextPartners.find(
           (option) => option.id === initialParty?.partnerId
         );
-        const initialClinician = nextClinicians.find(
+        const initialClinician = initialPartner?.clinicians.find(
           (option) => option.id === initialParty?.clinicianId
         );
 
         setPartners(nextPartners);
-        setClinicians(nextClinicians);
         setPartner(initialPartner || null);
         setPartnerInput(initialPartner?.label || "");
         setClinician(initialClinician || null);
@@ -84,7 +60,6 @@ const RequestPartyPicker = ({
         console.error("Error loading partners and clinicians:", error);
         if (!cancelled) {
           setPartners([]);
-          setClinicians([]);
           setLoadError(true);
         }
       } finally {
@@ -96,13 +71,9 @@ const RequestPartyPicker = ({
     return () => {
       cancelled = true;
     };
-    // `fetchTableRecordsWithOffset` is recreated by the provider on render.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [reloadKey]);
 
-  const partnerClinicians = partner
-    ? clinicians.filter((option) => option.partnerIds.includes(partner.id))
-    : [];
+  const partnerClinicians = partner?.clinicians ?? [];
   const clinicianRequired = partnerClinicians.length > 0;
 
   const submit = () => {
@@ -114,6 +85,7 @@ const RequestPartyPicker = ({
       clinicianName: clinician?.label || null,
     });
   };
+
 
   return (
     <div className="flex w-full flex-col gap-5">

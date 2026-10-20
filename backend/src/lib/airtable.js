@@ -40,6 +40,5 @@ export async function listRecords(env, table, query = {}) {
     records.push(...page.records);
     offset = page.offset;
   } while (offset);
- 
   return records;
 }
