@@ -3,11 +3,22 @@ import { errorResponse } from "./lib/responses.js";
 import { handleSiteStatus } from "./routes/siteStatus.js";
 import { handleSkuGroups } from "./routes/skuGroups.js";
 import { listRoutes } from "./routes/lists.js";
+import { handleInventory } from "./routes/inventory.js";
+import { handleMaxSize } from "./routes/maxSize.js";
+import { handleAvailability } from "./routes/availability.js";
+import { handleRequests } from "./routes/requests.js";
 
 const routes = {
+  // GET ENDPOINTS
   "GET /api/site-status": handleSiteStatus,
   "GET /api/sku-groups": handleSkuGroups,
   ...listRoutes,
+  "GET /api/inventory": handleInventory,
+  "GET /api/inventory/max-size": handleMaxSize,
+
+  // POST ENDPOINTS
+  "POST /api/inventory/availability": handleAvailability,
+  "POST /api/requests": handleRequests
 };
 
 export default {

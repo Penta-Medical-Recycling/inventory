@@ -6,6 +6,7 @@ import InStockCard from "../cards/InStockCard";
 import InventoryGroupCard from "../cards/InventoryGroupCard";
 import { getInventoryPagePlan } from "../../lib/inventoryPagination";
 import { getAvailableSkuCodes } from "../../lib/inventoryAvailability";
+import { getInventoryPage } from "../../lib/api";
 
 // HomeLister lists the cards for the home page.
 
@@ -29,8 +30,7 @@ const HomeLister = ({ onRemove, setOnRemove, activeGroup, onSelectGroup }) => {
     extremity,
     setIsLoading,
     setPage,
-    urlCreator,
-    fetchAPI,
+    buildInventoryParams,
     setData,
     inventoryGroups,
     areInventoryGroupsLoading,
@@ -59,7 +59,7 @@ const HomeLister = ({ onRemove, setOnRemove, activeGroup, onSelectGroup }) => {
   const [pageError, setPageError] = useState(false);
   // Bumping this re-runs the page-load effect for the retry affordance.
   const [pageReloadKey, setPageReloadKey] = useState(0);
-  const currentFilterSignature = urlCreator({ pageSize: 1, maxRecords: 1 });
+  const currentFilterSignature = JSON.stringify(buildInventoryParams({ pageSize: 1 }));
 
   useEffect(() => {
     if (activeGroup || areInventoryGroupsLoading || !isInventoryReady) {
@@ -155,24 +155,18 @@ const HomeLister = ({ onRemove, setOnRemove, activeGroup, onSelectGroup }) => {
       let requestFailed = false;
 
       if (pageSize > 0) {
-        const baseUrl = urlCreator({
-          pageSize,
-          includeSkuCodes: activeGroup?.skuCodes,
-          excludeSkuCodes: activeGroup ? undefined : groupedCodes,
+        response = await getInventoryPage({
+          ...buildInventoryParams({
+            pageSize,
+            includeSkuCodes: activeGroup?.skuCodes,
+            excludeSkuCodes: activeGroup ? undefined : groupedCodes,
+          }),
+          offset: offsetArray[offset],
         });
-        const pageOffset = offsetArray[offset];
-        response = await fetchAPI(
-          baseUrl + (pageOffset ? `&offset=${encodeURIComponent(pageOffset)}` : "")
-        );
         requestFailed = response === null;
       } else if (!pagePlan.hasMoreGroups) {
-        response = await fetchAPI(
-          urlCreator({
-            pageSize: 1,
-            maxRecords: 1,
-            fields: ["Item ID"],
-            excludeSkuCodes: groupedCodes,
-          })
+        response = await getInventoryPage(
+          buildInventoryParams({ pageSize: 1, excludeSkuCodes: groupedCodes })
         );
         requestFailed = response === null;
       }

@@ -19,12 +19,12 @@ import Description from "./sidebar-filters/Description";
 import Manufacturer from "./sidebar-filters/Manufacturer";
 import Size from "./sidebar-filters/Size";
 import ResetFilters from "./sidebar-filters/ResetFilters";
+import { getMaxSize } from "../lib/api";
 
 const SideBar = () => {
   const {
     setIsSideBarActive,
     isSideBarActive,
-    fetchMaxSize,
     setLargestSize,
     setMaxValue,
     selectedFilter,
@@ -56,15 +56,11 @@ const SideBar = () => {
   // Fetch max size once
   useEffect(() => {
     const fetchMax = async () => {
-      const max = await fetchMaxSize();
+      const max = await getMaxSize();
       setLargestSize(max);
       setMaxValue(max);
     };
     fetchMax();
-    // Only run on mount. `fetchMaxSize` is recreated every render, so including
-    // it here would re-run this effect and reset `maxValue` on every render,
-    // fighting the size slider's user-selected max.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // The Parts filter (and leg diagram) is only shown for the Lower extremity.

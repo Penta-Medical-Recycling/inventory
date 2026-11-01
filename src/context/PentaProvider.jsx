@@ -10,9 +10,10 @@ import {
   AIRTABLE_BASE_ID,
 } from "../config/airtable";
 import { getCartItemKeys } from "../lib/storage";
-import { 
+import {
   getSiteStatus,
-  getSKUGroups
+  getSKUGroups,
+  getAllInventory
 } from "../lib/api";
 
 // Airtable's maximum page size. Used for the background master-list fetch so it
@@ -51,7 +52,7 @@ function PentaProvider({ children }) {
   });
   const [selectedManufacturer, setSelectedManufacturer] = useState([]);
   const [selectedSKU, setSelectedSKU] = useState([]);
-  const [selectedDescriptions, setSelectedDescriptions] = useState([]); 
+  const [selectedDescriptions, setSelectedDescriptions] = useState([]);
   const [selectedPart, setSelectedPart] = useState("");
   const [extremity, setExtremity] = useState("All");
 
@@ -143,27 +144,27 @@ function PentaProvider({ children }) {
     };
   }, []);
 
-useEffect(() => {
-  let cancelled = false;
+  useEffect(() => {
+    let cancelled = false;
 
-  async function loadInventoryGroups() {
-    try {
-      const groups = await getSKUGroups();
-      if (!Array.isArray(groups)) throw new Error("Invalid SKU groups response");
-      if (!cancelled) setInventoryGroups(groups);
-    } catch (error) {
-      console.error("Error fetching SKU Groups:", error);
-      if (!cancelled) setInventoryGroups([]);
-    } finally {
-      if (!cancelled) setAreInventoryGroupsLoading(false);
+    async function loadInventoryGroups() {
+      try {
+        const groups = await getSKUGroups();
+        if (!Array.isArray(groups)) throw new Error("Invalid SKU groups response");
+        if (!cancelled) setInventoryGroups(groups);
+      } catch (error) {
+        console.error("Error fetching SKU Groups:", error);
+        if (!cancelled) setInventoryGroups([]);
+      } finally {
+        if (!cancelled) setAreInventoryGroupsLoading(false);
+      }
     }
-  }
 
-  loadInventoryGroups();
-  return () => {
-    cancelled = true;
-  };
-}, []);
+    loadInventoryGroups();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   // Background fetch of the full inventory (all pages, filter-independent).
   // Reuses the sessionStorage cache across in-app navigation; only re-fetches
@@ -187,40 +188,19 @@ useEffect(() => {
     }
 
     async function fetchAllInventory() {
-      let allRecords = [];
-      let nextOffset = "";
-      let pageCounter = 0;
-      // Safety bound only - the loop exits on the missing offset once Airtable
-      // runs out of pages. 100 (the Airtable max) cuts the request count.
-      const maxPages = 1000;
-      // The master list must represent the full sellable inventory regardless of
-      // the active filters, so availability is derived from a complete set.
-      const baseUrl = urlCreator({
-        pageSize: AIRTABLE_MAX_PAGE_SIZE,
-        includeUserFilters: false,
-      }).split("&offset=")[0];
+      // Every page of available inventory, with no user filters.
+      const records = await getAllInventory(buildInventoryParams({ includeUserFilters: false }));
+      if (cancelled) return;
 
-      while (pageCounter < maxPages && !cancelled) {
-        const url = baseUrl + nextOffset;
-        const res = await fetchAPI(url);
-        if (cancelled) return;
-        // fetchAPI returns null on a failed request. Treat that as an error
-        // rather than an empty page, so we don't cache/expose a partial list
-        // that would wrongly hide every group.
-        if (!res) {
-          setMasterInventoryError(true);
-          setIsInventoryReady(true);
-          return;
-        }
-        if (res.records) {
-          allRecords.push(...res.records.map((r) => r.fields));
-        }
-        if (!res.offset) break;
-        nextOffset = `&offset=${res.offset}`;
-        pageCounter++;
+      // getAllInventory returns null if any page fails. Treat that as an error and
+      // never cache a partial inventory.
+      if (records === null) {
+        setMasterInventoryError(true);
+        setIsInventoryReady(true);
+        return;
       }
 
-      if (cancelled) return;
+      const allRecords = records.map((record) => record.fields);
       sessionStorage.setItem("allInventoryItems", JSON.stringify(allRecords));
       setMasterInventoryItems(allRecords);
       setMasterInventoryError(false);
@@ -234,139 +214,41 @@ useEffect(() => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [masterInventoryReloadKey]);
 
-  function urlCreator(pageSizeOrOptions = 36) {
-    const options =
-      typeof pageSizeOrOptions === "number"
-        ? { pageSize: pageSizeOrOptions }
-        : pageSizeOrOptions || {};
-    const pageSizeValue = options.pageSize ?? 36;
-    // When false, only the base availability filters (and any include/exclude SKU
-    // codes) are applied - the user-selected filters/search are skipped. Used to
-    // build the full inventory master list regardless of the active filter state.
-    const includeUserFilters = options.includeUserFilters !== false;
-    const baseUrl = `${AIRTABLE_API_URL}/${AIRTABLE_BASE_ID}/Inventory?`;
-    const sort = `sort[0][field]=Item ID&sort[0][direction]=asc`;
-    const pageSize = `pageSize=${pageSizeValue}`;
-    let filterFunction = "filterByFormula=";
+  // REEMPLACE URL CREATOR
 
-    const filters = [
-      "{Requests}=BLANK()",
-      "{Shipment Status}=BLANK()",
-      'NOT({SKU}="")',
-    ];
+  function buildInventoryParams(options = {}) {
+    const params = { pageSize: options.pageSize ?? 36 };
 
-    const codeCondition = (code) =>
-      `{SKU Item Code}="${String(code).replace(/\\/g, "\\\\").replace(/"/g, '\\"')}"`;
-    if (options.includeSkuCodes?.length) {
-      filters.push(`OR(${options.includeSkuCodes.map(codeCondition).join(",")})`);
-    }
-    if (options.excludeSkuCodes?.length) {
-      filters.push(`NOT(OR(${options.excludeSkuCodes.map(codeCondition).join(",")}))`);
-    }
+    if (options.includeSkuCodes?.length) params.includeSku = options.includeSkuCodes;
+    if (options.excludeSkuCodes?.length) params.excludeSku = options.excludeSkuCodes;
 
-    if (includeUserFilters) {
-    const skus = selectedSKU.map((option) => option.value);
-    if (selectedSKU.length > 0) {
-  filters.push(
-    `OR(${selectedSKU.map((sku) => `{SKU}='${decodeURIComponent(sku)}'`).join(",")})`
-        );
-      }
+    // When false, only the base availability filters apply (the backend always
+    // adds them). Used for the full master list.
+    if (options.includeUserFilters === false) return params;
 
     if (selectedDescriptions.length > 0) {
-  const descTerms = selectedDescriptions
-    .map((option) =>
-      option.label.toLowerCase().replace(/[^a-z0-9\s]/gi, "")
-    )
-    .filter(Boolean);
-
-  const descConditions = descTerms.map(
-    (term) => `SEARCH("${term}", {StringSearch})`
-  );
-
-  if (descConditions.length > 0) {
-    filters.push(`OR(${descConditions.join(",")})`);
-  }
-}
-
-    const manufacturers = selectedManufacturer.map((option) => option.value);
-    if (manufacturers.length > 0) {
-      filters.push(
-        `OR(${manufacturers.map((m) => `{Manufacturer}='${decodeURIComponent(m)}'`).join(",")})`
-      );
+      params.descriptions = selectedDescriptions.map((option) => option.label);
+    }
+    if (selectedManufacturer.length > 0) {
+      // Send the plain name: URLSearchParams does the encoding, so decode the
+      // stored value to avoid encoding it twice.
+      params.manufacturers = selectedManufacturer.map((option) => decodeURIComponent(option.value));
     }
 
-    
-    const selectedTags = Object.keys(selectedFilter).filter((key) => selectedFilter[key]);
-    // Tag is a multi-value field. Match membership within its joined values and
-    // require every selected tag (e.g. "Prosthesis" AND "Pediatric").
-    selectedTags.forEach((tag) => {
-      filters.push(`FIND("${tag}", ARRAYJOIN({Tag}))`);
-    });
+    const tags = Object.keys(selectedFilter).filter((key) => selectedFilter[key]);
+    if (tags.length > 0) params.tags = tags;
 
     if (isRangeOn) {
-      filters.push(`AND({Size} >= ${minValue}, {Size} <= ${maxValue})`);
+      params.minSize = minValue;
+      params.maxSize = maxValue;
     }
+    if (searchInput) params.search = searchInput;
+    if (selectedPart) params.part = selectedPart;
+    if (extremity && extremity !== "All") params.extremity = extremity;
 
-    if (searchInput) {
-      const searchTerms = searchInput
-        .toLowerCase()
-        .split(" ")
-        .filter((term) => term !== "size");
-      const searchConditions = searchTerms.map(
-        (term) => `SEARCH("${term}", {StringSearch})`
-      );
-      filters.push(`AND(${searchConditions.join(",")})`);
-    }
-
-if (selectedSKU.length > 0) {
-  const descTerms = selectedSKU
-    .map((option) => option.label.toLowerCase().replace(/[^a-z0-9\s]/gi, ""))
-    .filter(Boolean);
-
-  const descConditions = descTerms.map(
-    (term) => `SEARCH("${term}", {StringSearch})`
-  );
-
-  if (descConditions.length > 0) {
-    filters.push(`OR(${descConditions.join(",")})`);
-  }
-}
-
-
-    // Filter by prosthetic part via the Airtable "Limb Guide" field. The Parts
-    // filter options don't map 1:1 to the field values, so translate them here.
-    // "All" (and no selection) has no mapping and applies no filter.
-    const limbGuide = {
-      Liners: "Liners",
-      Adapters: "Adapters",
-      "Knees/Hips": "Knees/ Hips",
-      Pylons: "Pylons",
-      Feet: "Feet",
-      Accessories: "Accessory/ Misc.",
-    }[selectedPart];
-    if (limbGuide) {
-      // Limb Guide is a multi-value field; match within its joined values.
-      filters.push(`FIND("${limbGuide}", ARRAYJOIN({Limb Guide}))`);
-    }
-
-    // Filter by extremity via the "Arms/ Hands" Limb Guide value: Upper keeps
-    // only those items, Lower excludes them.
-    if (extremity === "Upper") {
-      filters.push(`FIND("Arms/ Hands", ARRAYJOIN({Limb Guide}))`);
-    } else if (extremity === "Lower") {
-      filters.push(`NOT(FIND("Arms/ Hands", ARRAYJOIN({Limb Guide})))`);
-    }
-    }
-
-    filterFunction += encodeURIComponent(`AND(${filters.join(",")})`);
-    const params = [pageSize, sort, filterFunction];
-    if (options.maxRecords) params.push(`maxRecords=${options.maxRecords}`);
-    options.fields?.forEach((field) => {
-      params.push(`fields%5B%5D=${encodeURIComponent(field)}`);
-    });
-    return baseUrl + params.join("&");
-
-    
+    // NOTE: selectedSKU is not included on purpose. Before adding a "skus"
+    // parameter, check whether setSelectedSKU is called anywhere (git grep).
+    return params;
   }
 
   async function fetchAPI(url) {
@@ -386,9 +268,8 @@ if (selectedSKU.length > 0) {
   }
 
   async function fetchTableRecords(tableName, offset = null) {
-    const url = `${AIRTABLE_API_URL}/${AIRTABLE_BASE_ID}/${encodeURIComponent(tableName)}?${
-      offset ? `offset=${offset}` : ""
-    }`;
+    const url = `${AIRTABLE_API_URL}/${AIRTABLE_BASE_ID}/${encodeURIComponent(tableName)}?${offset ? `offset=${offset}` : ""
+      }`;
     return fetchAPI(url);
   }
 
@@ -401,43 +282,36 @@ if (selectedSKU.length > 0) {
       allRecords = allRecords.concat(records);
       offset = newOffset;
     } while (offset);
-    console.log(allRecords)
+    console.trace("table:", tableName, allRecords.length);
     return allRecords;
   }
 
-  async function fetchMaxSize() {
-    const url = `${AIRTABLE_API_URL}/${AIRTABLE_BASE_ID}/Inventory?pageSize=1&sort[0][field]=Size&sort[0][direction]=desc&filterByFormula=AND(AND({Requests}="",{Shipment Status}=""),NOT({SKU}=""))`;
-    const data = await fetchAPI(url);
-    if (data?.records?.length > 0) return data.records[0].fields.Size;
-    return null;
-  }
-
   const fetchSelectOptions = async (fieldToMap) => {
-  const records = await fetchTableRecordsWithOffset(fieldToMap);
+    const records = await fetchTableRecordsWithOffset(fieldToMap);
 
-  if (fieldToMap === "Manufacturers") {
-    return records
-      .map((e) => ({
-        label: e.fields.Name.trimStart(),
-        value: encodeURIComponent(e.fields.Name.trimStart()),
-      }))
-      .sort((a, b) => a.label.localeCompare(b.label));
-  } else if (fieldToMap === "SKUs") {
-    const skuList = records.map((e) => e.fields.SKU);
-    const mappedData = skuList
-      .filter((item) => typeof item === "string" && item.trim() !== "")
-      .map((item) => ({
-        label: item.trimStart().replace(/["]/g, ""),
-        value: item,
-      }));
+    if (fieldToMap === "Manufacturers") {
+      return records
+        .map((e) => ({
+          label: e.fields.Name.trimStart(),
+          value: encodeURIComponent(e.fields.Name.trimStart()),
+        }))
+        .sort((a, b) => a.label.localeCompare(b.label));
+    } else if (fieldToMap === "SKUs") {
+      const skuList = records.map((e) => e.fields.SKU);
+      const mappedData = skuList
+        .filter((item) => typeof item === "string" && item.trim() !== "")
+        .map((item) => ({
+          label: item.trimStart().replace(/["]/g, ""),
+          value: item,
+        }));
 
-    return mappedData.sort((a, b) => a.label.localeCompare(b.label));
-  } else {
-    return records
-      .map((e) => e.fields.Partner.trimStart())
-      .sort((a, b) => a.localeCompare(b));
-  }
-};
+      return mappedData.sort((a, b) => a.label.localeCompare(b.label));
+    } else {
+      return records
+        .map((e) => e.fields.Partner.trimStart())
+        .sort((a, b) => a.localeCompare(b));
+    }
+  };
 
   const getCartItemsSortedFIFO = async () => {
     const url = `${AIRTABLE_API_URL}/${AIRTABLE_BASE_ID}/Inventory?sort[0][field]=Date Added&sort[0][direction]=asc&filterByFormula=AND(NOT({Requests}!=""), {Quantity In Stock}>0)`;
@@ -445,33 +319,6 @@ if (selectedSKU.length > 0) {
     return data?.records || [];
   };
 
-  const fulfillCartItems = async (cartItems) => {
-    for (let item of cartItems) {
-      let quantityToFulfill = item.quantity;
-      const inventory = await getCartItemsSortedFIFO();
-      for (let record of inventory) {
-        if (record.fields.SKU === item.sku && quantityToFulfill > 0) {
-          const availableQty = record.fields["Quantity In Stock"] || 0;
-          const fulfillQty = Math.min(availableQty, quantityToFulfill);
-          await fetch(`${AIRTABLE_API_URL}/${AIRTABLE_BASE_ID}/Inventory/${record.id}`, {
-            method: "PATCH",
-            headers: {
-              Authorization: `Bearer ${AIRTABLE_API_KEY}`,
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-              fields: {
-                "Quantity In Stock": availableQty - fulfillQty,
-                "Quantity Fulfilled": (record.fields["Quantity Fulfilled"] || 0) + fulfillQty,
-                Requests: selectedPartner,
-              },
-            }),
-          });
-          quantityToFulfill -= fulfillQty;
-        }
-      }
-    }
-  };
 
   const getTotalInStockBySKU = async (sku) => {
     const url = `${AIRTABLE_API_URL}/${AIRTABLE_BASE_ID}/Inventory?filterByFormula=AND({SKU} = '${sku}', {Requests} = BLANK(), {Shipment Status} = BLANK())`;
@@ -529,17 +376,15 @@ if (selectedSKU.length > 0) {
         setPopUpStatus,
         message,
         setMessage,
-        urlCreator,
+        buildInventoryParams,
         fetchAPI,
         fetchTableRecords,
         fetchTableRecordsWithOffset,
         fetchSelectOptions,
-        fetchMaxSize,
         getCartItemsSortedFIFO,
-        fulfillCartItems,
         getTotalInStockBySKU,
         selectedDescriptions,
-       setSelectedDescriptions,
+        setSelectedDescriptions,
         selectedPart,
         setSelectedPart,
         extremity,

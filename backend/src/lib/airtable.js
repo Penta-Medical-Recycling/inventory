@@ -42,3 +42,22 @@ export async function listRecords(env, table, query = {}) {
   } while (offset);
   return records;
 }
+
+export async function listPage(env, table, query = {}) {
+  return airtableFetch(env, encodeURIComponent(table), { query });
+}
+
+// Reads one record by its Airtable record ID. Throws AirtableError (status 404)
+// if it does not exist. Validate the ID format BEFORE calling this.
+export async function getRecord(env, table, recordId) {
+  return airtableFetch(env, `${encodeURIComponent(table)}/${recordId}`);
+}
+ 
+// Creates one record. fields is a plain object keyed by Airtable field names;
+// link fields take arrays of Airtable record IDs. There is no typecast.
+export async function createRecord(env, table, fields) {
+  return airtableFetch(env, encodeURIComponent(table), {
+    method: "POST",
+    body: { records: [{ fields }] },
+  });
+}

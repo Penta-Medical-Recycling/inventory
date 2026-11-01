@@ -29,7 +29,11 @@ import {
   setRequestParty,
 } from "../lib/storage";
 
+import { checkAvailability, createRequest } from "../lib/api";
+
 export { getCartItemKeys } from "../lib/storage";
+
+
 
 // You should implement or import this method properly
 const getTotalInStockBySKU = async (sku) => {
@@ -52,50 +56,23 @@ const createAvailabilityFormula = (itemIds) => {
   return `AND({Requests}=BLANK(),{Shipment Status}=BLANK(),NOT({SKU}=""),${itemFilter})`;
 };
 
-export const checkCartItemAvailability = async (itemIds, fetchImpl = fetch) => {
+export const checkCartItemAvailability = async (itemIds) => {
   const uniqueItemIds = [...new Set(itemIds.filter(Boolean).map(String))];
   const statuses = Object.fromEntries(uniqueItemIds.map((id) => [id, "pending"]));
-  const availableIds = new Set();
-
+  const unavailableIds = [];
+ 
   try {
     for (let start = 0; start < uniqueItemIds.length; start += AVAILABILITY_BATCH_SIZE) {
       const batch = uniqueItemIds.slice(start, start + AVAILABILITY_BATCH_SIZE);
-      let offset = null;
-
-      do {
-        const params = new URLSearchParams({
-          filterByFormula: createAvailabilityFormula(batch),
-          pageSize: String(AVAILABILITY_BATCH_SIZE),
-        });
-        params.append("fields[]", "Item ID");
-        if (offset) params.set("offset", offset);
-
-        const url = `${AIRTABLE_API_URL}/${AIRTABLE_BASE_ID}/Inventory?${params}`;
-        const response = await fetchImpl(url, {
-          headers: { Authorization: `Bearer ${AIRTABLE_API_KEY}` },
-        });
-        if (!response.ok) throw new Error(`Inventory check failed with ${response.status}`);
-
-        const data = await response.json();
-        if (!Array.isArray(data.records)) throw new Error("Invalid inventory response");
-        data.records.forEach((record) => {
-          const itemId = Array.isArray(record?.fields?.["Item ID"])
-            ? record.fields["Item ID"][0]
-            : record?.fields?.["Item ID"];
-          if (itemId != null && itemId !== "") availableIds.add(String(itemId));
-        });
-        offset = data.offset || null;
-      } while (offset);
+      const unavailable = await checkAvailability(batch);
+      if (unavailable === null) throw new Error("Inventory check failed");
+      unavailableIds.push(...unavailable);
     }
-
+ 
     uniqueItemIds.forEach((id) => {
       statuses[id] = "done";
     });
-    return {
-      statuses,
-      unavailableIds: uniqueItemIds.filter((id) => !availableIds.has(id)),
-      failedIds: [],
-    };
+    return { statuses, unavailableIds, failedIds: [] };
   } catch (error) {
     console.error("Error checking cart inventory availability:", error);
     uniqueItemIds.forEach((id) => {
@@ -126,7 +103,6 @@ export const createRequestFields = ({
 
 function Cart() {
   const {
-    fulfillCartItems,
     selectedPartner,
     setSelectedPartner,
     setCartCount,
@@ -192,13 +168,13 @@ const hasRequiredPatientCounts =
     }));
 
     if (await validateCartQuantities() && window.confirm("Are you sure you want to place this order?")) {
-  await requestButton(); // ✅ submit and redirect
+  await requestButton(); // submit and redirect
 }
 
   };
 
   const handleResetCart = () => {
-  setShowResetModal(true); // 🆕 trigger confirmation modal
+  setShowResetModal(true); // trigger confirmation modal
 };
 
 const confirmResetCart = () => {
@@ -283,37 +259,30 @@ useEffect(() => {
       return;
     }
 
-    const tableName = "Requests";
-    const url = `${AIRTABLE_API_URL}/${AIRTABLE_BASE_ID}/${tableName}`;
-    const data = {
-      records: [
-        {
-          fields: createRequestFields({
-            requestName: generateRandomHexadecimal(),
-            requestParty,
-            itemIds,
-            notes,
-            numOfPatients,
-            numOfChildren,
-          }),
-        },
-      ],
-      typecast: true,
-    };
+    
 
     try {
-      const response = await fetch(url, {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${AIRTABLE_API_KEY}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(data),
-      });
-      const responseData = await response.json();
-      if (!response.ok || responseData.error) {
-        throw new Error(responseData.error?.type || `Request failed with ${response.status}`);
-      }
+  const result = await createRequest({
+    partnerId: requestParty.partnerId,
+    clinicianId: requestParty.clinicianId || null,
+    itemIds,
+    notes,
+    numOfPatients: Number(numOfPatients) || 0,
+    numOfChildren: Number(numOfChildren) || 0,
+  });
+ 
+  // The items were available a moment ago but someone else got them first.
+  if (result.status === 409) {
+    Toast({
+      message: "Sorry but one or more of your items are unavailable, please remove to checkout.",
+      type: "is-danger",
+    });
+    setIsLoading(false);
+    return;
+  }
+  if (!result.ok) {
+    throw new Error(`Request failed with ${result.status}`);
+  }
 
       setNotes("");
       setCartCount(0);

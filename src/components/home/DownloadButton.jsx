@@ -13,11 +13,13 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
 } from "@/components/ui/dropdown-menu";
+import { getAllInventory } from "../../lib/api";
+import Toast from "../Toast";
 
 // DownloadButton component is used for downloading the current inventory
 
 const DownloadButton = () => {
-  const { isDownloading, setIsDownloading, urlCreator, fetchAPI, inventoryGroups } =
+  const { isDownloading, setIsDownloading, buildInventoryParams, inventoryGroups } =
     useContext(PentaContext);
   const [searchParams] = useSearchParams();
   // Scope the export to the currently opened inventory group (if any) so it
@@ -40,24 +42,15 @@ const DownloadButton = () => {
       // If there are no active search or filters, the base URL will fetch the entire inventory.
       // Otherwise, the base URL will retrieve items that match the applied search and filters criteria.
       // When a group is open, restrict the export to that group's SKU codes.
-      const base = urlCreator({ includeSkuCodes: activeGroup?.skuCodes }).replace(
-        "pageSize=36&",
-        ""
-      ); // Removes the page size limit to reduce the number of fetch requests.
-      let url = base;
-      let allRecords = [];
-      let shouldContinue = true;
+      const allRecords = await getAllInventory(
+        buildInventoryParams({ includeSkuCodes: activeGroup?.skuCodes })
+      );
 
-      // Retrieve all records from AirTable, paginating if necessary.
-      while (shouldContinue) {
-        const { records, offset } = await fetchAPI(url);
-        allRecords = allRecords.concat(records);
-
-        if (offset) {
-          url = `${base}&offset=${offset}`;
-        } else {
-          shouldContinue = false;
-        }
+      // If any page failed, tell the user and stop the "downloading" state.
+      if (allRecords === null) {
+        Toast({ message: "We couldn't download the inventory. Please try again.", type: "is-danger" });
+        setIsDownloading(false);
+        return;
       }
 
       // Fills the data for empty values.
